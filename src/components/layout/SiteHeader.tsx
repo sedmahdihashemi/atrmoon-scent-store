@@ -1,11 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
+import { useCart } from "@/hooks/useCart";
 import { Moon, Search, ShoppingBag, User, LogOut, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 
 export function SiteHeader() {
   const { user, role, profile, signOut, storeStatus } = useAuth();
+  const { count } = useCart();
 
   const dashLink =
     role === "super_admin" ? "/admin"
@@ -31,8 +33,13 @@ export function SiteHeader() {
           <Link to="/search" aria-label="جستجو" className="p-2 rounded-md hover:bg-ink/5">
             <Search className="w-5 h-5" />
           </Link>
-          <Link to="/cart" aria-label="سبد" className="p-2 rounded-md hover:bg-ink/5">
+          <Link to="/cart" aria-label="سبد" className="relative p-2 rounded-md hover:bg-ink/5">
             <ShoppingBag className="w-5 h-5" />
+            {count > 0 && (
+              <span className="absolute -top-0.5 -left-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--gold)] text-[10px] font-serif text-[var(--paper)] flex items-center justify-center">
+                {count.toLocaleString("fa-IR")}
+              </span>
+            )}
           </Link>
           {user ? (
             <DropdownMenu>

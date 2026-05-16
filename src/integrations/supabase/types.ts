@@ -959,6 +959,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      gen_order_number: { Args: never; Returns: string }
       get_primary_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -969,6 +970,23 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      place_order: {
+        Args: {
+          p_cart_id: string
+          p_city: string
+          p_customer_email: string
+          p_customer_name: string
+          p_customer_note: string
+          p_customer_phone: string
+          p_postal_code: string
+          p_session_id: string
+          p_shipping_address: string
+        }
+        Returns: {
+          order_id: string
+          order_number: string
+        }[]
       }
     }
     Enums: {
