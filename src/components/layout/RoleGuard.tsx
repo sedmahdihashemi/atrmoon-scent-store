@@ -1,7 +1,8 @@
 import { ReactNode } from "react";
-import { Link } from "@tanstack/react-router";
 import { useAuth, type AppRole } from "@/hooks/useAuth";
 import { LoadingState } from "@/components/ui/loading-state";
+import { Button } from "@/components/ui/button";
+import { Link } from "@tanstack/react-router";
 
 export function RoleGuard({
   allow,
@@ -20,7 +21,7 @@ export function RoleGuard({
     return <CenteredCard
       title="ورود لازم است"
       message="برای دسترسی به این بخش ابتدا وارد شوید."
-      action={<Link to="/login" className="btn-ink">ورود</Link>}
+      action={<Link to="/login"><Button>ورود</Button></Link>}
     />;
   }
 
@@ -32,7 +33,7 @@ export function RoleGuard({
     return <CenteredCard
       title="دسترسی غیرمجاز"
       message="این بخش برای نقش شما در دسترس نیست."
-      action={<Link to="/" className="btn-ink">بازگشت به خانه</Link>}
+      action={<Link to="/"><Button variant="outline">بازگشت به خانه</Button></Link>}
     />;
   }
 
@@ -46,7 +47,7 @@ export function RoleGuard({
           ? "فروشگاه شما غیرفعال شده است."
           : "فروشگاه شما در انتظار تأیید است."
       }
-      action={<Link to="/seller/pending" className="btn-ink">مشاهده وضعیت</Link>}
+      action={<Link to="/seller/pending"><Button>مشاهده وضعیت</Button></Link>}
     />;
   }
 
