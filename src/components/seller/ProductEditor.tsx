@@ -52,7 +52,7 @@ export function ProductEditor({ productId }: { productId?: string }) {
             price: Number(v.price), discount_price: v.discount_price ? Number(v.discount_price) : null, status: v.status,
           })));
           setSelectedNotes(new Set((p.product_scent_notes ?? []).map((x: any) => x.scent_note_id)));
-          const inv = p.product_inventory?.[0];
+          const inv = (p.product_inventory as any)?.[0] ?? (p.product_inventory as any);
           if (inv) { setStockMl(inv.total_stock_ml); setLowAlertMl(inv.low_stock_alert_ml); }
         }
       }

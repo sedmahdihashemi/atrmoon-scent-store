@@ -33,7 +33,7 @@ function OrderDetail() {
 
   const save = async () => {
     setSaving(true);
-    const { error } = await supabase.from("orders").update({ status, seller_note: note || null }).eq("id", id);
+    const { error } = await supabase.from("orders").update({ status: status as any, seller_note: note || null }).eq("id", id);
     setSaving(false);
     if (error) { toast.error(error.message); return; }
     toast.success("به‌روزرسانی شد");

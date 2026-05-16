@@ -23,10 +23,17 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SellerIndexRouteImport } from './routes/seller.index'
+import { Route as SellerSettingsRouteImport } from './routes/seller.settings'
+import { Route as SellerProductsRouteImport } from './routes/seller.products'
 import { Route as SellerPendingRouteImport } from './routes/seller.pending'
+import { Route as SellerOrdersRouteImport } from './routes/seller.orders'
 import { Route as RegisterSellerRouteImport } from './routes/register.seller'
 import { Route as RegisterCustomerRouteImport } from './routes/register.customer'
 import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
+import { Route as SellerProductsNewRouteImport } from './routes/seller.products.new'
+import { Route as SellerProductsIdRouteImport } from './routes/seller.products.$id'
+import { Route as SellerOrdersIdRouteImport } from './routes/seller.orders.$id'
 
 const StoresRoute = StoresRouteImport.update({
   id: '/stores',
@@ -98,9 +105,29 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SellerIndexRoute = SellerIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SellerRoute,
+} as any)
+const SellerSettingsRoute = SellerSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => SellerRoute,
+} as any)
+const SellerProductsRoute = SellerProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => SellerRoute,
+} as any)
 const SellerPendingRoute = SellerPendingRouteImport.update({
   id: '/pending',
   path: '/pending',
+  getParentRoute: () => SellerRoute,
+} as any)
+const SellerOrdersRoute = SellerOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
   getParentRoute: () => SellerRoute,
 } as any)
 const RegisterSellerRoute = RegisterSellerRouteImport.update({
@@ -117,6 +144,21 @@ const ProductsSlugRoute = ProductsSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => ProductsRoute,
+} as any)
+const SellerProductsNewRoute = SellerProductsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => SellerProductsRoute,
+} as any)
+const SellerProductsIdRoute = SellerProductsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => SellerProductsRoute,
+} as any)
+const SellerOrdersIdRoute = SellerOrdersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => SellerOrdersRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -137,7 +179,14 @@ export interface FileRoutesByFullPath {
   '/products/$slug': typeof ProductsSlugRoute
   '/register/customer': typeof RegisterCustomerRoute
   '/register/seller': typeof RegisterSellerRoute
+  '/seller/orders': typeof SellerOrdersRouteWithChildren
   '/seller/pending': typeof SellerPendingRoute
+  '/seller/products': typeof SellerProductsRouteWithChildren
+  '/seller/settings': typeof SellerSettingsRoute
+  '/seller/': typeof SellerIndexRoute
+  '/seller/orders/$id': typeof SellerOrdersIdRoute
+  '/seller/products/$id': typeof SellerProductsIdRoute
+  '/seller/products/new': typeof SellerProductsNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -152,12 +201,18 @@ export interface FileRoutesByTo {
   '/products': typeof ProductsRouteWithChildren
   '/register': typeof RegisterRouteWithChildren
   '/search': typeof SearchRoute
-  '/seller': typeof SellerRouteWithChildren
   '/stores': typeof StoresRoute
   '/products/$slug': typeof ProductsSlugRoute
   '/register/customer': typeof RegisterCustomerRoute
   '/register/seller': typeof RegisterSellerRoute
+  '/seller/orders': typeof SellerOrdersRouteWithChildren
   '/seller/pending': typeof SellerPendingRoute
+  '/seller/products': typeof SellerProductsRouteWithChildren
+  '/seller/settings': typeof SellerSettingsRoute
+  '/seller': typeof SellerIndexRoute
+  '/seller/orders/$id': typeof SellerOrdersIdRoute
+  '/seller/products/$id': typeof SellerProductsIdRoute
+  '/seller/products/new': typeof SellerProductsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -178,7 +233,14 @@ export interface FileRoutesById {
   '/products/$slug': typeof ProductsSlugRoute
   '/register/customer': typeof RegisterCustomerRoute
   '/register/seller': typeof RegisterSellerRoute
+  '/seller/orders': typeof SellerOrdersRouteWithChildren
   '/seller/pending': typeof SellerPendingRoute
+  '/seller/products': typeof SellerProductsRouteWithChildren
+  '/seller/settings': typeof SellerSettingsRoute
+  '/seller/': typeof SellerIndexRoute
+  '/seller/orders/$id': typeof SellerOrdersIdRoute
+  '/seller/products/$id': typeof SellerProductsIdRoute
+  '/seller/products/new': typeof SellerProductsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -200,7 +262,14 @@ export interface FileRouteTypes {
     | '/products/$slug'
     | '/register/customer'
     | '/register/seller'
+    | '/seller/orders'
     | '/seller/pending'
+    | '/seller/products'
+    | '/seller/settings'
+    | '/seller/'
+    | '/seller/orders/$id'
+    | '/seller/products/$id'
+    | '/seller/products/new'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -215,12 +284,18 @@ export interface FileRouteTypes {
     | '/products'
     | '/register'
     | '/search'
-    | '/seller'
     | '/stores'
     | '/products/$slug'
     | '/register/customer'
     | '/register/seller'
+    | '/seller/orders'
     | '/seller/pending'
+    | '/seller/products'
+    | '/seller/settings'
+    | '/seller'
+    | '/seller/orders/$id'
+    | '/seller/products/$id'
+    | '/seller/products/new'
   id:
     | '__root__'
     | '/'
@@ -240,7 +315,14 @@ export interface FileRouteTypes {
     | '/products/$slug'
     | '/register/customer'
     | '/register/seller'
+    | '/seller/orders'
     | '/seller/pending'
+    | '/seller/products'
+    | '/seller/settings'
+    | '/seller/'
+    | '/seller/orders/$id'
+    | '/seller/products/$id'
+    | '/seller/products/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -360,11 +442,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/seller/': {
+      id: '/seller/'
+      path: '/'
+      fullPath: '/seller/'
+      preLoaderRoute: typeof SellerIndexRouteImport
+      parentRoute: typeof SellerRoute
+    }
+    '/seller/settings': {
+      id: '/seller/settings'
+      path: '/settings'
+      fullPath: '/seller/settings'
+      preLoaderRoute: typeof SellerSettingsRouteImport
+      parentRoute: typeof SellerRoute
+    }
+    '/seller/products': {
+      id: '/seller/products'
+      path: '/products'
+      fullPath: '/seller/products'
+      preLoaderRoute: typeof SellerProductsRouteImport
+      parentRoute: typeof SellerRoute
+    }
     '/seller/pending': {
       id: '/seller/pending'
       path: '/pending'
       fullPath: '/seller/pending'
       preLoaderRoute: typeof SellerPendingRouteImport
+      parentRoute: typeof SellerRoute
+    }
+    '/seller/orders': {
+      id: '/seller/orders'
+      path: '/orders'
+      fullPath: '/seller/orders'
+      preLoaderRoute: typeof SellerOrdersRouteImport
       parentRoute: typeof SellerRoute
     }
     '/register/seller': {
@@ -387,6 +497,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/products/$slug'
       preLoaderRoute: typeof ProductsSlugRouteImport
       parentRoute: typeof ProductsRoute
+    }
+    '/seller/products/new': {
+      id: '/seller/products/new'
+      path: '/new'
+      fullPath: '/seller/products/new'
+      preLoaderRoute: typeof SellerProductsNewRouteImport
+      parentRoute: typeof SellerProductsRoute
+    }
+    '/seller/products/$id': {
+      id: '/seller/products/$id'
+      path: '/$id'
+      fullPath: '/seller/products/$id'
+      preLoaderRoute: typeof SellerProductsIdRouteImport
+      parentRoute: typeof SellerProductsRoute
+    }
+    '/seller/orders/$id': {
+      id: '/seller/orders/$id'
+      path: '/$id'
+      fullPath: '/seller/orders/$id'
+      preLoaderRoute: typeof SellerOrdersIdRouteImport
+      parentRoute: typeof SellerOrdersRoute
     }
   }
 }
@@ -417,12 +548,46 @@ const RegisterRouteWithChildren = RegisterRoute._addFileChildren(
   RegisterRouteChildren,
 )
 
+interface SellerOrdersRouteChildren {
+  SellerOrdersIdRoute: typeof SellerOrdersIdRoute
+}
+
+const SellerOrdersRouteChildren: SellerOrdersRouteChildren = {
+  SellerOrdersIdRoute: SellerOrdersIdRoute,
+}
+
+const SellerOrdersRouteWithChildren = SellerOrdersRoute._addFileChildren(
+  SellerOrdersRouteChildren,
+)
+
+interface SellerProductsRouteChildren {
+  SellerProductsIdRoute: typeof SellerProductsIdRoute
+  SellerProductsNewRoute: typeof SellerProductsNewRoute
+}
+
+const SellerProductsRouteChildren: SellerProductsRouteChildren = {
+  SellerProductsIdRoute: SellerProductsIdRoute,
+  SellerProductsNewRoute: SellerProductsNewRoute,
+}
+
+const SellerProductsRouteWithChildren = SellerProductsRoute._addFileChildren(
+  SellerProductsRouteChildren,
+)
+
 interface SellerRouteChildren {
+  SellerOrdersRoute: typeof SellerOrdersRouteWithChildren
   SellerPendingRoute: typeof SellerPendingRoute
+  SellerProductsRoute: typeof SellerProductsRouteWithChildren
+  SellerSettingsRoute: typeof SellerSettingsRoute
+  SellerIndexRoute: typeof SellerIndexRoute
 }
 
 const SellerRouteChildren: SellerRouteChildren = {
+  SellerOrdersRoute: SellerOrdersRouteWithChildren,
   SellerPendingRoute: SellerPendingRoute,
+  SellerProductsRoute: SellerProductsRouteWithChildren,
+  SellerSettingsRoute: SellerSettingsRoute,
+  SellerIndexRoute: SellerIndexRoute,
 }
 
 const SellerRouteWithChildren =

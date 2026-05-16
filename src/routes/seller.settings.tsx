@@ -31,6 +31,7 @@ function SellerSettings() {
   const save = async () => {
     setSaving(true);
     // editable subset (status changes are admin-only)
+    if (!storeId) return;
     const { error } = await supabase.from("stores").update({
       store_name: s.store_name, description: s.description, logo_url: s.logo_url,
       city: s.city, address: s.address, support_phone: s.support_phone,
