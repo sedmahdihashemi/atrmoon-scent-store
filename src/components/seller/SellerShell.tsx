@@ -3,12 +3,13 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { LayoutDashboard, Package, ShoppingBag, Settings, Store } from "lucide-react";
 
-const nav = [
+type NavItem = { to: string; label: string; Icon: typeof LayoutDashboard; exact?: boolean };
+const nav: NavItem[] = [
   { to: "/seller", label: "نمای کلی", Icon: LayoutDashboard, exact: true },
   { to: "/seller/products", label: "محصولات", Icon: Package },
   { to: "/seller/orders", label: "سفارش‌ها", Icon: ShoppingBag },
   { to: "/seller/settings", label: "تنظیمات فروشگاه", Icon: Settings },
-] as const;
+];
 
 export function SellerShell({ children }: { children: ReactNode }) {
   const { profile } = useAuth();
