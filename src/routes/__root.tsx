@@ -79,10 +79,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "عطرمون؛ بازار آنلاین عطرفروشان ایرانی. کشف رایحه‌ها، انتخاب حجم و بطری، خرید مستقیم از فروشنده." },
       { name: "author", content: "Atrmoon" },
       { name: "theme-color", content: "#f5efe2" },
-      { property: "og:title", content: "عطرمون" },
-      { property: "og:description", content: "بازار آنلاین عطرفروشان ایرانی" },
+      { property: "og:title", content: "عطرمون | بازار عطر و رایحه" },
+      { property: "og:description", content: "عطرمون؛ بازار آنلاین عطرفروشان ایرانی. کشف رایحه‌ها، انتخاب حجم و بطری، خرید مستقیم از فروشنده." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "عطرمون | بازار عطر و رایحه" },
+      { name: "twitter:description", content: "عطرمون؛ بازار آنلاین عطرفروشان ایرانی. کشف رایحه‌ها، انتخاب حجم و بطری، خرید مستقیم از فروشنده." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/d57af083-ea7e-4b25-bdb9-fbcefcb7380c/id-preview-2257e83f--7e6e3cc5-0015-4ea3-8952-8c564bbf3167.lovable.app-1778958264263.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/d57af083-ea7e-4b25-bdb9-fbcefcb7380c/id-preview-2257e83f--7e6e3cc5-0015-4ea3-8952-8c564bbf3167.lovable.app-1778958264263.png" },
     ],
     links: [
       {
