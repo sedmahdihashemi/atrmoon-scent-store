@@ -3,14 +3,9 @@ import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { PersianArch, Crescent, Flourish, ScentTrail } from "@/components/visual/PersianOrnament";
 import { AtrmoonLoader } from "@/components/visual/AtrmoonLoader";
-import { lazy, Suspense } from "react";
 import heroImg from "@/assets/hero-perfume-2.jpg";
 import bannerBottle from "@/assets/banner-bottle.jpg";
 import bannerArch from "@/assets/banner-arch.jpg";
-
-const PerfumeBottle3D = lazy(() =>
-  import("@/components/visual/PerfumeBottle3D").then((m) => ({ default: m.PerfumeBottle3D })),
-);
 
 export const Route = createFileRoute("/")({ component: Index });
 
@@ -49,19 +44,13 @@ function Index() {
               <div className="vlabel absolute right-[-2rem] top-2 hidden md:block">EDITION I · ATRMOON</div>
               <div className="relative animate-drift">
                 <div className="arch-frame paper-grain shadow-elevated relative">
-                  <div className="relative w-full h-[520px] md:h-[620px] overflow-hidden">
-                    {/* poster fallback while the 3D scene mounts */}
-                    <img
-                      src={heroImg}
-                      alt="بطری عطر در مهتاب"
-                      width={960}
-                      height={1280}
-                      className="absolute inset-0 w-full h-full object-cover opacity-70"
-                    />
-                    <Suspense fallback={null}>
-                      <PerfumeBottle3D className="absolute inset-0 w-full h-full" />
-                    </Suspense>
-                  </div>
+                  <img
+                    src={heroImg}
+                    alt="بطری عطر در مهتاب"
+                    width={960}
+                    height={1280}
+                    className="w-full h-[520px] md:h-[620px] object-cover"
+                  />
                 </div>
                 <Crescent className="absolute -top-6 -left-6 w-14 h-14 text-gold/80 animate-moon-rise delay-400" />
                 <div className="absolute -bottom-6 right-4 paper-card bg-paper px-5 py-3 paper-grain">
