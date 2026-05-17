@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { LoadingState } from "@/components/ui/loading-state";
 import { toast } from "sonner";
 import { Trash2, Plus, Save } from "lucide-react";
-import { persianSlug } from "@/lib/seller-utils";
+import { slugify } from "@/lib/seller-utils";
 
 export type Field = {
   key: string;
@@ -45,7 +45,7 @@ export function RefDataManager({
     }
     setSaving(true);
     const payload: any = { ...form };
-    if (autoSlugFrom && payload[autoSlugFrom] && !payload.slug) payload.slug = persianSlug(payload[autoSlugFrom]);
+    if (autoSlugFrom && payload[autoSlugFrom] && !payload.slug) payload.slug = slugify(payload[autoSlugFrom]);
     if (payload.volume_ml) payload.volume_ml = Number(payload.volume_ml);
     const { error } = await supabase.from(table).insert(payload);
     setSaving(false);
