@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { PersianArch, Crescent, Flourish, ScentTrail } from "@/components/visual/PersianOrnament";
+import { AtrmoonLoader } from "@/components/visual/AtrmoonLoader";
 import heroImg from "@/assets/hero-perfume-2.jpg";
 
 export const Route = createFileRoute("/")({ component: Index });
@@ -9,6 +10,7 @@ export const Route = createFileRoute("/")({ component: Index });
 function Index() {
   return (
     <PublicLayout>
+      <AtrmoonLoader />
       {/* ── Hero — a single bottle in moonlight ───────────────────────── */}
       <section className="relative overflow-hidden">
         <div className="container mx-auto px-4 pt-16 md:pt-24 pb-24 md:pb-32">
@@ -17,7 +19,7 @@ function Index() {
             <div className="md:col-span-7 md:order-1 relative">
               <div className="eyebrow animate-moon-rise">شماره‌ی نخست · پاییز ۱۴۰۳</div>
               <h1 className="heading-display mt-6 text-[20vw] md:text-[8rem] lg:text-[9rem] leading-[0.95] text-ink animate-ink-bloom break-words">
-                عطر<span className="text-gold-deep">مون</span>
+                عطرمون
               </h1>
               <div className="mt-6 animate-scent-trail origin-right">
                 <ScentTrail className="w-48 text-gold" />
