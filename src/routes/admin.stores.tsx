@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { LoadingState } from "@/components/ui/loading-state";
 import { toast } from "sonner";
 
@@ -13,8 +12,15 @@ export const Route = createFileRoute("/admin/stores")({ component: StoresList })
 function StoresList() {
   const [rows, setRows] = useState<any[] | null>(null);
   const load = async () => {
-    const { data } = await supabase.from("stores").select("*, profiles:seller_id(full_name, email)").order("created_at", { ascending: false });
-    setRows(data ?? []);
+    const { data: stores, error } = await supabase.from("stores").select("*").order("created_at", { ascending: false });
+    if (error) { toast.error(error.message); setRows([]); return; }
+    const ids = Array.from(new Set((stores ?? []).map((s: any) => s.seller_id).filter(Boolean)));
+    const map = new Map<string, any>();
+    if (ids.length) {
+      const { data: profs } = await supabase.from("profiles").select("id, full_name, email").in("id", ids);
+      (profs ?? []).forEach((p: any) => map.set(p.id, p));
+    }
+    setRows((stores ?? []).map((s: any) => ({ ...s, profile: map.get(s.seller_id) })));
   };
   useEffect(() => { load(); }, []);
   const change = async (id: string, status: string) => {
@@ -33,7 +39,7 @@ function StoresList() {
           {rows.map((s: any) => (
             <tr key={s.id} className="border-b border-ink/5">
               <td className="p-3"><div className="font-serif text-ink">{s.store_name}</div><div className="text-xs text-muted-foreground">{s.slug}</div></td>
-              <td className="p-3"><div>{s.profiles?.full_name}</div><div className="text-xs text-muted-foreground" dir="ltr">{s.profiles?.email}</div></td>
+              <td className="p-3"><div>{s.profile?.full_name || "—"}</div><div className="text-xs text-muted-foreground" dir="ltr">{s.profile?.email || ""}</div></td>
               <td className="p-3"><Badge variant="outline">{statusLabels[s.status]}</Badge></td>
               <td className="p-3">
                 <select className="text-xs border border-ink/20 bg-transparent rounded-sm px-2 py-1 font-serif" value={s.status} onChange={(e) => change(s.id, e.target.value)}>
