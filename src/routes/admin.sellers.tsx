@@ -14,8 +14,16 @@ function SellerApproval() {
   const [busy, setBusy] = useState<string | null>(null);
 
   const load = async () => {
-    const { data } = await supabase.from("stores").select("*, profiles:seller_id(full_name, email, phone)").eq("status", "pending").order("created_at", { ascending: true });
-    setRows(data ?? []);
+    const { data: stores, error } = await supabase
+      .from("stores").select("*").eq("status", "pending").order("created_at", { ascending: true });
+    if (error) { toast.error(error.message); setRows([]); return; }
+    const ids = Array.from(new Set((stores ?? []).map((s: any) => s.seller_id).filter(Boolean)));
+    const profileMap = new Map<string, any>();
+    if (ids.length) {
+      const { data: profs } = await supabase.from("profiles").select("id, full_name, email, phone").in("id", ids);
+      (profs ?? []).forEach((p: any) => profileMap.set(p.id, p));
+    }
+    setRows((stores ?? []).map((s: any) => ({ ...s, profile: profileMap.get(s.seller_id) })));
   };
   useEffect(() => { load(); }, []);
 
@@ -38,8 +46,11 @@ function SellerApproval() {
           <div className="flex items-start justify-between gap-3 flex-wrap">
             <div className="min-w-0">
               <h3 className="font-serif text-lg text-ink">{s.store_name} <Badge variant="outline" className="ms-2">{s.slug}</Badge></h3>
-              <p className="text-xs text-muted-foreground mt-1">{s.profiles?.full_name} — {s.profiles?.email} {s.profiles?.phone ? `— ${s.profiles.phone}` : ""}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {s.profile?.full_name || "—"} {s.profile?.email ? `— ${s.profile.email}` : ""} {s.profile?.phone ? `— ${s.profile.phone}` : ""}
+              </p>
               {s.city && <p className="text-xs text-ink/70 mt-1">شهر: {s.city}</p>}
+              {s.support_email && <p className="text-xs text-ink/70 mt-1" dir="ltr">ایمیل پشتیبانی: {s.support_email}</p>}
               {s.description && <p className="text-sm text-ink/80 leading-loose mt-2">{s.description}</p>}
             </div>
             <div className="flex gap-2 shrink-0">
