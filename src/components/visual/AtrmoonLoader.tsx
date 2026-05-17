@@ -4,11 +4,13 @@ import { Crescent } from "./PersianOrnament";
 const KEY = "atrmoon:welcomed";
 
 export function AtrmoonLoader() {
-  const [show, setShow] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return sessionStorage.getItem(KEY) !== "1";
-  });
+  const [show, setShow] = useState(false);
   const [fading, setFading] = useState(false);
+
+  useEffect(() => {
+    if (sessionStorage.getItem(KEY) === "1") return;
+    setShow(true);
+  }, []);
 
   useEffect(() => {
     if (!show) return;
