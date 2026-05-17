@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { LayoutDashboard, Store, Users, ShoppingBag, Tag, Layers, Sparkles, Beaker, ShieldCheck } from "lucide-react";
 
-const nav = [
+const nav: Array<{ to: string; label: string; Icon: any; exact?: boolean }> = [
   { to: "/admin", label: "نمای کلی", Icon: LayoutDashboard, exact: true },
   { to: "/admin/sellers", label: "تأیید فروشندگان", Icon: ShieldCheck },
   { to: "/admin/stores", label: "فروشگاه‌ها", Icon: Store },
@@ -12,7 +12,7 @@ const nav = [
   { to: "/admin/categories", label: "دسته‌ها", Icon: Layers },
   { to: "/admin/scent-notes", label: "نُت‌ها", Icon: Sparkles },
   { to: "/admin/bottle-types", label: "بطری‌ها", Icon: Beaker },
-] as const;
+];
 
 export function AdminShell({ children }: { children: ReactNode }) {
   const loc = useLocation();
