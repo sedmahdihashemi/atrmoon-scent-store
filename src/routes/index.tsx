@@ -16,13 +16,13 @@ function Index() {
             {/* Left — editorial text column */}
             <div className="md:col-span-7 md:order-1 relative">
               <div className="eyebrow animate-moon-rise">شماره‌ی نخست · پاییز ۱۴۰۳</div>
-              <h1 className="heading-display mt-6 text-[15vw] md:text-[9.5rem] leading-[0.95] text-ink animate-ink-bloom">
+              <h1 className="heading-display mt-6 text-[20vw] md:text-[8rem] lg:text-[9rem] leading-[0.95] text-ink animate-ink-bloom break-words">
                 عطر<span className="text-gold-deep">مون</span>
               </h1>
               <div className="mt-6 animate-scent-trail origin-right">
                 <ScentTrail className="w-48 text-gold" />
               </div>
-              <p className="pull-quote mt-8 max-w-xl animate-moon-rise delay-400">
+              <p className="pull-quote mt-8 max-w-lg animate-moon-rise delay-400">
                 «هر رایحه‌ای، خاطره‌ایست که هنوز نوشته نشده.»
               </p>
               <p className="mt-6 max-w-lg text-ink-soft leading-[2.1] text-[15px] animate-moon-rise delay-600">
