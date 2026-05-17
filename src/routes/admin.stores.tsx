@@ -24,7 +24,7 @@ function StoresList() {
   };
   useEffect(() => { load(); }, []);
   const change = async (id: string, status: string) => {
-    const { error } = await supabase.from("stores").update({ status }).eq("id", id);
+    const { error } = await supabase.from("stores").update({ status: status as any }).eq("id", id);
     if (error) { toast.error(error.message); return; }
     toast.success("به‌روزرسانی شد"); load();
   };

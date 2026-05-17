@@ -26,7 +26,7 @@ function UsersList() {
   useEffect(() => { load(); }, []);
 
   const setStatus = async (id: string, status: string) => {
-    const { error } = await supabase.from("profiles").update({ status }).eq("id", id);
+    const { error } = await supabase.from("profiles").update({ status: status as any }).eq("id", id);
     if (error) { toast.error(error.message); return; }
     toast.success("وضعیت به‌روزرسانی شد"); load();
   };
@@ -35,8 +35,8 @@ function UsersList() {
     if (current.includes(newRole)) return;
     // remove other primary roles, set newRole
     const removable = current.filter((r) => ["customer", "seller"].includes(r));
-    if (removable.length) await supabase.from("user_roles").delete().eq("user_id", userId).in("role", removable);
-    const { error } = await supabase.from("user_roles").insert({ user_id: userId, role: newRole });
+    if (removable.length) await supabase.from("user_roles").delete().eq("user_id", userId).in("role", removable as any);
+    const { error } = await supabase.from("user_roles").insert({ user_id: userId, role: newRole as any });
     if (error) { toast.error(error.message); return; }
     toast.success("نقش به‌روزرسانی شد"); load();
   };
