@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { PersianArch, Crescent, Flourish, ScentTrail } from "@/components/visual/PersianOrnament";
 import { AtrmoonLoader } from "@/components/visual/AtrmoonLoader";
 import heroImg from "@/assets/hero-perfume-2.jpg";
+import bannerBottle from "@/assets/banner-bottle.jpg";
+import bannerArch from "@/assets/banner-arch.jpg";
 
 export const Route = createFileRoute("/")({ component: Index });
 
@@ -145,6 +147,31 @@ function Index() {
         <div className="dotted-divider max-w-md mx-auto mt-16" />
       </section>
 
+      {/* ── Cinematic banner — bottle on aged paper ───────────────────── */}
+      <section className="container mx-auto px-4 pb-24">
+        <div className="relative arch-frame overflow-hidden paper-grain shadow-elevated group">
+          <img
+            src={bannerBottle}
+            alt="بطری عطر بر کاغذ کهنه"
+            loading="lazy"
+            width={1920}
+            height={1080}
+            className="w-full h-[280px] md:h-[460px] object-cover transition-transform duration-[2000ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-l from-paper/90 via-paper/30 to-transparent" />
+          <div className="absolute inset-0 flex items-center">
+            <div className="px-8 md:px-16 max-w-md text-right ml-auto">
+              <div className="eyebrow mb-4">شبی برای یک رایحه</div>
+              <h3 className="heading-display text-2xl md:text-4xl text-ink leading-tight">
+                هر شیشه، صفحه‌ای‌ست<br/>
+                <span className="italic text-gold-deep">از کتابی نانوشته.</span>
+              </h3>
+              <div className="gold-divider w-16 mt-5 mr-0 ml-auto" />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── Three pillars ──────────────────────────────────────────────── */}
       <section className="container mx-auto px-4 py-16">
         <div className="grid md:grid-cols-3 gap-8">
@@ -159,6 +186,29 @@ function Index() {
               <p className="text-ink-soft text-sm leading-[2]">{p.d}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ── Full-bleed arch & crescent banner ─────────────────────────── */}
+      <section className="relative py-24">
+        <div className="container mx-auto px-4">
+          <div className="relative rounded-md overflow-hidden paper-grain">
+            <img
+              src={bannerArch}
+              alt="طاق و هلال ماه"
+              loading="lazy"
+              width={1920}
+              height={1080}
+              className="w-full h-[320px] md:h-[520px] object-cover animate-drift"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-paper via-paper/10 to-transparent" />
+            <div className="absolute bottom-0 inset-x-0 p-8 md:p-14 text-center">
+              <div className="eyebrow mb-3 text-ink-soft">طاقِ خاطره</div>
+              <p className="font-serif italic text-ink text-lg md:text-2xl max-w-xl mx-auto leading-[1.9]">
+                «زیر هر طاقی، ماهی‌ست؛ زیر هر ماهی، عطری.»
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
