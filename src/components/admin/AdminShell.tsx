@@ -24,7 +24,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <ShieldCheck className="w-5 h-5 text-[var(--gold)]" />
           <h1 className="font-serif text-2xl md:text-3xl text-ink">پیشخوان مدیریت</h1>
         </div>
-        <p className="text-muted-foreground font-serif italic text-sm mt-1">دفتر کل عطرمون.</p>
+        <p className="text-muted-foreground font-serif italic text-sm mt-1">عطاری کل عطرمون.</p>
       </header>
       <div className="grid md:grid-cols-[220px_1fr] gap-6 md:gap-8">
         <aside className="paper-card rounded-md p-3 h-fit md:sticky md:top-24">

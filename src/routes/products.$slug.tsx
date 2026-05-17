@@ -48,7 +48,7 @@ function ProductDetail() {
     })();
   }, [slug]);
 
-  if (loading) return <PublicLayout><LoadingState label="گشودن دفتر این رایحه…" /></PublicLayout>;
+  if (loading) return <PublicLayout><LoadingState label="گشودن عطاری این رایحه…" /></PublicLayout>;
   if (!product) return <PublicLayout><div className="container mx-auto px-4 py-16"><EmptyState title="این رایحه یافت نشد" /></div></PublicLayout>;
 
   const sel = variants.find((v) => v.id === selectedVariantId);
@@ -76,7 +76,7 @@ function ProductDetail() {
             <p className="text-xs font-serif text-[var(--gold)] tracking-widest uppercase mb-2">{product.brands?.name ?? "—"}</p>
             <h1 className="font-serif text-4xl text-ink leading-tight mb-3">{product.name}</h1>
             <Link to="/stores" className="text-sm text-muted-foreground hover:text-[var(--gold)]">
-              از دفتر <span className="font-serif text-ink">{product.stores?.store_name}</span>
+              از عطاری <span className="font-serif text-ink">{product.stores?.store_name}</span>
             </Link>
             {product.description && (
               <p className="mt-6 text-ink/80 leading-loose font-serif text-[15px] whitespace-pre-line">{product.description}</p>

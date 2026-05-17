@@ -51,7 +51,7 @@ function LoginPage() {
       <div className="container mx-auto px-4 py-16 max-w-md">
         <div className="paper-card rounded-md p-8">
           <h1 className="font-serif text-3xl text-ink text-center mb-1">بازگشت به عطرمون</h1>
-          <p className="text-center text-muted-foreground text-sm mb-8 font-serif italic">دفتر شما منتظر بازگشت‌تان است.</p>
+          <p className="text-center text-muted-foreground text-sm mb-8 font-serif italic">عطاری شما منتظر بازگشت‌تان است.</p>
           <form onSubmit={onSubmit} className="space-y-4">
             <div>
               <Label htmlFor="email">ایمیل</Label>

@@ -40,11 +40,11 @@ function ProductsList() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-serif text-xl text-ink">رایحه‌های دفتر شما</h2>
+        <h2 className="font-serif text-xl text-ink">رایحه‌های عطاری شما</h2>
         <Link to="/seller/products/new"><Button size="sm"><Plus className="w-4 h-4 ml-1" /> رایحه‌ی تازه</Button></Link>
       </div>
       {items === null ? <LoadingState /> :
-        items.length === 0 ? <EmptyState title="هنوز رایحه‌ای ثبت نشده" message="نخستین رایحه‌ی دفتر خود را بیفزایید." icon={<Sparkles className="w-7 h-7" />} /> :
+        items.length === 0 ? <EmptyState title="هنوز رایحه‌ای ثبت نشده" message="نخستین رایحه‌ی عطاری خود را بیفزایید." icon={<Sparkles className="w-7 h-7" />} /> :
         <div className="paper-card rounded-md divide-y divide-ink/5 overflow-hidden">
           {items.map((p: any) => {
             const prices = (p.product_variants ?? []).filter((v: any) => v.status === "active").map((v: any) => Number(v.price)).filter(Boolean);

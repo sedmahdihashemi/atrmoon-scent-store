@@ -26,12 +26,12 @@ function PendingScreen() {
           {isApproved ? "فروشگاه شما تأیید شده است" : isRejected ? "درخواست شما تأیید نشد" : isDisabled ? "فروشگاه شما غیرفعال شده" : "فروشگاه شما در انتظار تأیید است"}
         </h1>
         <p className="text-muted-foreground leading-loose font-serif italic">
-          {isApproved ? "اکنون می‌توانید وارد دفتر فروشنده شوید." :
-           "تیم عطرمون به‌زودی درخواست شما را بررسی می‌کند. دفتر شما، چون فانوسی، آماده‌ی روشن‌شدن است."}
+          {isApproved ? "اکنون می‌توانید وارد عطاری فروشنده شوید." :
+           "تیم عطرمون به‌زودی درخواست شما را بررسی می‌کند. عطاری شما، چون فانوسی، آماده‌ی روشن‌شدن است."}
         </p>
         <div className="mt-6">
           {isApproved
-            ? <Link to="/seller"><Button>ورود به دفتر</Button></Link>
+            ? <Link to="/seller"><Button>ورود به عطاری</Button></Link>
             : <Link to="/"><Button variant="outline">بازگشت به خانه</Button></Link>}
         </div>
       </div>

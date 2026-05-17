@@ -53,7 +53,7 @@ function CustomerRegister() {
       <div className="container mx-auto px-4 py-16 max-w-md">
         <div className="paper-card rounded-md p-8">
           <h1 className="font-serif text-3xl text-ink text-center mb-1">ثبت‌نام مشتری</h1>
-          <p className="text-center text-muted-foreground text-sm mb-8 font-serif italic">با ما به پاساژ رایحه‌ها وارد شوید.</p>
+          <p className="text-center text-muted-foreground text-sm mb-8 font-serif italic">با ما به بازار رایحه‌ها وارد شوید.</p>
           <form onSubmit={onSubmit} className="space-y-4">
             <Field name="full_name" label="نام و نام خانوادگی" err={errors.full_name} />
             <Field name="email" label="ایمیل" type="email" err={errors.email} />

@@ -17,7 +17,7 @@ export function SiteFooter() {
               </div>
             </Link>
             <p className="mt-6 text-sm leading-[2.1] text-ink-soft max-w-md font-serif italic">
-              بازاری از عطرفروشان ایرانی. شبیه پرسه در پاساژی قدیمی که هر مغازه‌اش رایحه‌ای دارد و هر رایحه، خاطره‌ای.
+              بازاری از عطرفروشان ایرانی. شبیه پرسه در بازاری قدیمی که هر مغازه‌اش رایحه‌ای دارد و هر رایحه، خاطره‌ای.
             </p>
           </div>
           <div className="md:col-span-3">
@@ -29,10 +29,10 @@ export function SiteFooter() {
             </ul>
           </div>
           <div className="md:col-span-4">
-            <h4 className="eyebrow mb-5">دفتر عطرمون</h4>
+            <h4 className="eyebrow mb-5">عطاری عطرمون</h4>
             <ul className="space-y-3 text-sm font-serif text-ink-soft">
               <li><Link to="/about" className="hover:text-gold-deep transition-colors duration-700">یادداشت‌ها</Link></li>
-              <li><Link to="/register/seller" className="hover:text-gold-deep transition-colors duration-700">گشودنِ دفتری از آنِ تو</Link></li>
+              <li><Link to="/register/seller" className="hover:text-gold-deep transition-colors duration-700">گشودنِ عطاریی از آنِ تو</Link></li>
               <li><Link to="/contact" className="hover:text-gold-deep transition-colors duration-700">گفت‌وگو</Link></li>
             </ul>
           </div>
