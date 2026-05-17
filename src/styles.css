@@ -56,6 +56,9 @@
   --color-ink: var(--ink);
   --color-moon: var(--moon);
   --color-gold: var(--gold);
+  --color-gold-deep: var(--gold-deep);
+  --color-gold-soft: var(--gold-soft);
+  --color-rose: var(--rose);
   --font-sans: "Vazirmatn", "Inter", system-ui, -apple-system, sans-serif;
   --font-serif: "Gentium Plus", "Vazirmatn", serif;
 }
@@ -67,6 +70,16 @@
   --ink: oklch(0.22 0.018 60);
   --moon: oklch(0.92 0.012 90);
   --gold: oklch(0.68 0.118 78);
+  --gold-deep: oklch(0.52 0.13 65);
+  --gold-soft: oklch(0.86 0.07 82);
+  --rose: oklch(0.62 0.13 25);
+  --gradient-gold: linear-gradient(135deg, oklch(0.78 0.13 82), oklch(0.58 0.14 65));
+  --gradient-paper: linear-gradient(180deg, oklch(0.97 0.014 85), oklch(0.94 0.022 80));
+  --gradient-ink: linear-gradient(135deg, oklch(0.26 0.02 60), oklch(0.18 0.018 60));
+  --shadow-paper: 0 1px 0 oklch(0.22 0.018 60 / 0.04), 0 8px 24px -16px oklch(0.22 0.018 60 / 0.14);
+  --shadow-elevated: 0 1px 0 oklch(0.22 0.018 60 / 0.05), 0 20px 50px -24px oklch(0.22 0.018 60 / 0.28);
+  --shadow-gold: 0 8px 24px -10px oklch(0.68 0.118 78 / 0.5);
+  --shadow-inset-paper: inset 0 1px 0 oklch(1 0 0 / 0.6), inset 0 -1px 0 oklch(0.22 0.018 60 / 0.04);
   --background: oklch(0.965 0.018 85);
   --foreground: oklch(0.22 0.018 60);
   --card: oklch(0.98 0.012 85);
@@ -107,6 +120,16 @@
   --ink: oklch(0.92 0.014 85);
   --moon: oklch(0.85 0.018 85);
   --gold: oklch(0.72 0.12 78);
+  --gold-deep: oklch(0.55 0.13 65);
+  --gold-soft: oklch(0.82 0.09 82);
+  --rose: oklch(0.68 0.14 25);
+  --gradient-gold: linear-gradient(135deg, oklch(0.82 0.13 82), oklch(0.6 0.14 65));
+  --gradient-paper: linear-gradient(180deg, oklch(0.22 0.014 70), oklch(0.18 0.012 70));
+  --gradient-ink: linear-gradient(135deg, oklch(0.32 0.018 70), oklch(0.2 0.014 70));
+  --shadow-paper: 0 1px 0 oklch(0 0 0 / 0.4), 0 10px 30px -16px oklch(0 0 0 / 0.6);
+  --shadow-elevated: 0 1px 0 oklch(0 0 0 / 0.5), 0 24px 60px -24px oklch(0 0 0 / 0.7);
+  --shadow-gold: 0 8px 28px -10px oklch(0.72 0.12 78 / 0.45);
+  --shadow-inset-paper: inset 0 1px 0 oklch(1 0 0 / 0.06), inset 0 -1px 0 oklch(0 0 0 / 0.3);
   --background: oklch(0.18 0.012 70);
   --foreground: oklch(0.92 0.014 85);
   --card: oklch(0.22 0.014 70);
@@ -167,15 +190,57 @@
 @layer utilities {
   .font-serif { font-family: var(--font-serif); }
   .text-gold { color: var(--gold); }
+  .text-gold-deep { color: var(--gold-deep); }
   .bg-paper { background-color: var(--paper); }
+  .bg-gradient-gold { background-image: var(--gradient-gold); }
+  .bg-gradient-paper { background-image: var(--gradient-paper); }
+  .bg-gradient-ink { background-image: var(--gradient-ink); }
+  .shadow-paper { box-shadow: var(--shadow-paper); }
+  .shadow-elevated { box-shadow: var(--shadow-elevated); }
+  .shadow-gold { box-shadow: var(--shadow-gold); }
   .border-ink\/10 { border-color: oklch(0.22 0.018 60 / 0.1); }
   .paper-card {
     background-color: var(--card);
     border: 1px solid oklch(0.22 0.018 60 / 0.08);
-    box-shadow: 0 1px 0 oklch(0.22 0.018 60 / 0.04), 0 8px 24px -16px oklch(0.22 0.018 60 / 0.12);
+    box-shadow: var(--shadow-paper);
+    border-radius: calc(var(--radius) + 4px);
+    transition: box-shadow 200ms ease, transform 200ms ease, border-color 200ms ease;
+  }
+  .paper-card-hover:hover {
+    box-shadow: var(--shadow-elevated);
+    transform: translateY(-2px);
+    border-color: oklch(0.68 0.118 78 / 0.35);
   }
   .ink-divider {
     height: 1px;
     background: linear-gradient(to left, transparent, oklch(0.22 0.018 60 / 0.2), transparent);
+  }
+  .gold-divider {
+    height: 1px;
+    background: linear-gradient(to left, transparent, var(--gold) 30%, var(--gold) 70%, transparent);
+    opacity: 0.6;
+  }
+  .heading-display {
+    font-family: var(--font-serif);
+    letter-spacing: -0.015em;
+    line-height: 1.1;
+  }
+  .eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    font-weight: 600;
+  }
+  .ornament::before,
+  .ornament::after {
+    content: "";
+    display: inline-block;
+    width: 1.5rem;
+    height: 1px;
+    background: var(--gold);
+    vertical-align: middle;
+    margin: 0 0.75rem;
+    opacity: 0.7;
   }
 }
