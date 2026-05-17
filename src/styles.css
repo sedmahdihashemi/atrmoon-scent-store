@@ -5,10 +5,10 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Atrmoon design system
- * Inspired by old Iranian newspapers, aged paper, moonlight, perfume shops.
- * Paper-warm background, deep ink foreground, restrained gold accent.
- * RTL-first, Vazirmatn typography.
+ * Atrmoon — A slow Persian perfume experience.
+ * Aged paper. Faded ink. Mosque-tile turquoise.
+ * Editorial rhythm. Cinematic motion. Quiet luxury.
+ * RTL-first. Vazirmatn body, Gentium serif headings.
  */
 
 @theme inline {
@@ -59,59 +59,76 @@
   --color-gold-deep: var(--gold-deep);
   --color-gold-soft: var(--gold-soft);
   --color-rose: var(--rose);
+  --color-tile: var(--tile);
+  --color-tile-soft: var(--tile-soft);
+  --color-dust: var(--dust);
+  --color-ink-soft: var(--ink-soft);
   --font-sans: "Vazirmatn", "Inter", system-ui, -apple-system, sans-serif;
   --font-serif: "Gentium Plus", "Vazirmatn", serif;
+  --font-display: "Gentium Plus", "Vazirmatn", serif;
 }
 
 :root {
-  --radius: 0.375rem;
-  /* Aged paper, warm cream */
-  --paper: oklch(0.965 0.018 85);
-  --ink: oklch(0.22 0.018 60);
-  --moon: oklch(0.92 0.012 90);
-  --gold: oklch(0.68 0.118 78);
+  --radius: 0.5rem;
+  /* Aged paper, dusty cream, faded brown ink */
+  --paper: oklch(0.945 0.028 82);          /* #F4E8D0 base */
+  --paper-deep: oklch(0.905 0.038 80);     /* #E9D7B8 */
+  --dust: oklch(0.84 0.04 78);             /* #D8C3A5 */
+  --dust-deep: oklch(0.76 0.05 75);        /* #C8AE88 */
+  --ink: oklch(0.28 0.028 55);             /* #3A2E24 faded brown */
+  --ink-soft: oklch(0.38 0.025 58);
+  --ink-deep: oklch(0.22 0.022 50);        /* #2B2118 */
+  --moon: oklch(0.93 0.018 85);
+  --gold: oklch(0.66 0.10 70);             /* faded brass */
   --gold-deep: oklch(0.52 0.13 65);
   --gold-soft: oklch(0.86 0.07 82);
   --rose: oklch(0.62 0.13 25);
-  --gradient-gold: linear-gradient(135deg, oklch(0.78 0.13 82), oklch(0.58 0.14 65));
-  --gradient-paper: linear-gradient(180deg, oklch(0.97 0.014 85), oklch(0.94 0.022 80));
-  --gradient-ink: linear-gradient(135deg, oklch(0.26 0.02 60), oklch(0.18 0.018 60));
-  --shadow-paper: 0 1px 0 oklch(0.22 0.018 60 / 0.04), 0 8px 24px -16px oklch(0.22 0.018 60 / 0.14);
-  --shadow-elevated: 0 1px 0 oklch(0.22 0.018 60 / 0.05), 0 20px 50px -24px oklch(0.22 0.018 60 / 0.28);
-  --shadow-gold: 0 8px 24px -10px oklch(0.68 0.118 78 / 0.5);
-  --shadow-inset-paper: inset 0 1px 0 oklch(1 0 0 / 0.6), inset 0 -1px 0 oklch(0.22 0.018 60 / 0.04);
-  --background: oklch(0.965 0.018 85);
-  --foreground: oklch(0.22 0.018 60);
-  --card: oklch(0.98 0.012 85);
-  --card-foreground: oklch(0.22 0.018 60);
-  --popover: oklch(0.98 0.012 85);
-  --popover-foreground: oklch(0.22 0.018 60);
-  --primary: oklch(0.22 0.018 60);
-  --primary-foreground: oklch(0.965 0.018 85);
-  --secondary: oklch(0.92 0.018 80);
-  --secondary-foreground: oklch(0.28 0.02 60);
-  --muted: oklch(0.92 0.014 82);
-  --muted-foreground: oklch(0.46 0.022 70);
-  --accent: oklch(0.68 0.118 78);
-  --accent-foreground: oklch(0.18 0.018 60);
+  /* Persian mosque tile — dusty turquoise */
+  --tile: oklch(0.52 0.06 200);            /* #3E7C81 */
+  --tile-deep: oklch(0.46 0.07 200);       /* #2F6F73 */
+  --tile-soft: oklch(0.68 0.045 200);      /* #6FA5A9 */
+  --gradient-gold: linear-gradient(135deg, oklch(0.78 0.10 78), oklch(0.55 0.12 65));
+  --gradient-paper: linear-gradient(180deg, oklch(0.96 0.02 85), oklch(0.90 0.038 80));
+  --gradient-ink: linear-gradient(135deg, oklch(0.32 0.028 58), oklch(0.22 0.022 50));
+  --gradient-tile: linear-gradient(135deg, var(--tile-deep), var(--tile-soft));
+  --shadow-paper: 0 1px 0 oklch(0.28 0.028 55 / 0.04), 0 12px 30px -18px oklch(0.28 0.028 55 / 0.16);
+  --shadow-elevated: 0 1px 0 oklch(0.28 0.028 55 / 0.05), 0 28px 60px -28px oklch(0.28 0.028 55 / 0.28);
+  --shadow-gold: 0 10px 28px -12px oklch(0.66 0.10 70 / 0.45);
+  --shadow-inset-paper: inset 0 1px 0 oklch(1 0 0 / 0.5), inset 0 -1px 0 oklch(0.28 0.028 55 / 0.05);
+  --ease-ink: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-moon: cubic-bezier(0.16, 1, 0.3, 1);
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: oklch(0.97 0.022 84);
+  --card-foreground: var(--ink);
+  --popover: oklch(0.97 0.022 84);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink-deep);
+  --primary-foreground: var(--paper);
+  --secondary: oklch(0.91 0.032 80);
+  --secondary-foreground: var(--ink);
+  --muted: oklch(0.91 0.026 80);
+  --muted-foreground: oklch(0.48 0.026 65);
+  --accent: var(--tile);
+  --accent-foreground: var(--paper);
   --destructive: oklch(0.5 0.16 25);
   --destructive-foreground: oklch(0.98 0.01 85);
-  --border: oklch(0.85 0.022 75);
-  --input: oklch(0.88 0.018 78);
-  --ring: oklch(0.68 0.118 78);
+  --border: oklch(0.82 0.034 76);
+  --input: oklch(0.86 0.028 78);
+  --ring: var(--tile);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.94 0.018 82);
-  --sidebar-foreground: oklch(0.22 0.018 60);
-  --sidebar-primary: oklch(0.22 0.018 60);
-  --sidebar-primary-foreground: oklch(0.965 0.018 85);
-  --sidebar-accent: oklch(0.88 0.022 78);
-  --sidebar-accent-foreground: oklch(0.22 0.018 60);
-  --sidebar-border: oklch(0.85 0.022 75);
-  --sidebar-ring: oklch(0.68 0.118 78);
+  --sidebar: oklch(0.92 0.032 80);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--ink-deep);
+  --sidebar-primary-foreground: var(--paper);
+  --sidebar-accent: oklch(0.86 0.034 78);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: oklch(0.82 0.034 76);
+  --sidebar-ring: var(--tile);
 }
 
 .dark {
@@ -174,73 +191,174 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     font-feature-settings: "ss01", "ss02";
-    /* subtle paper grain via radial gradient */
+    /* Layered paper: grain + warm light + faded edges */
     background-image:
-      radial-gradient(circle at 20% 0%, oklch(0.92 0.018 80 / 0.3), transparent 40%),
-      radial-gradient(circle at 80% 100%, oklch(0.88 0.024 75 / 0.25), transparent 45%);
+      radial-gradient(ellipse at 15% 0%, oklch(0.96 0.028 85 / 0.7), transparent 55%),
+      radial-gradient(ellipse at 85% 100%, oklch(0.82 0.05 70 / 0.35), transparent 60%),
+      radial-gradient(circle at 50% 50%, transparent 60%, oklch(0.28 0.028 55 / 0.05) 100%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='4'/><feColorMatrix values='0 0 0 0 0.22  0 0 0 0 0.18  0 0 0 0 0.14  0 0 0 0.045 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
     background-attachment: fixed;
+    background-size: auto, auto, auto, 220px 220px;
   }
   html { direction: rtl; }
   h1, h2, h3, h4, h5 {
     font-family: var(--font-serif);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.012em;
+    font-weight: 400;
   }
+  ::selection { background: oklch(0.66 0.10 70 / 0.3); color: var(--ink-deep); }
 }
 
 @layer utilities {
   .font-serif { font-family: var(--font-serif); }
   .text-gold { color: var(--gold); }
   .text-gold-deep { color: var(--gold-deep); }
+  .text-tile { color: var(--tile); }
+  .text-ink-soft { color: var(--ink-soft); }
   .bg-paper { background-color: var(--paper); }
+  .bg-paper-deep { background-color: var(--paper-deep); }
+  .bg-tile { background-color: var(--tile); }
   .bg-gradient-gold { background-image: var(--gradient-gold); }
   .bg-gradient-paper { background-image: var(--gradient-paper); }
   .bg-gradient-ink { background-image: var(--gradient-ink); }
+  .bg-gradient-tile { background-image: var(--gradient-tile); }
   .shadow-paper { box-shadow: var(--shadow-paper); }
   .shadow-elevated { box-shadow: var(--shadow-elevated); }
   .shadow-gold { box-shadow: var(--shadow-gold); }
-  .border-ink\/10 { border-color: oklch(0.22 0.018 60 / 0.1); }
+  .border-ink\/10 { border-color: oklch(0.28 0.028 55 / 0.1); }
+
+  /* Paper grain overlay for cards / sections */
+  .paper-grain {
+    position: relative;
+  }
+  .paper-grain::after {
+    content: "";
+    position: absolute; inset: 0;
+    pointer-events: none;
+    opacity: 0.4;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='7'/><feColorMatrix values='0 0 0 0 0.22  0 0 0 0 0.18  0 0 0 0 0.14  0 0 0 0.05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    border-radius: inherit;
+  }
+
   .paper-card {
     background-color: var(--card);
-    border: 1px solid oklch(0.22 0.018 60 / 0.08);
+    border: 1px solid oklch(0.28 0.028 55 / 0.08);
     box-shadow: var(--shadow-paper);
     border-radius: calc(var(--radius) + 4px);
-    transition: box-shadow 200ms ease, transform 200ms ease, border-color 200ms ease;
+    transition: box-shadow 700ms var(--ease-moon), transform 700ms var(--ease-moon), border-color 500ms var(--ease-ink);
+    position: relative;
   }
   .paper-card-hover:hover {
     box-shadow: var(--shadow-elevated);
-    transform: translateY(-2px);
-    border-color: oklch(0.68 0.118 78 / 0.35);
+    transform: translateY(-3px);
+    border-color: oklch(0.66 0.10 70 / 0.35);
   }
+
+  /* Persian arch (mihrab) — applied as clip-path on a wrapper */
+  .arch-top {
+    clip-path: path("M 0 100% L 0 28% C 0 12%, 18% 0, 50% 0 C 82% 0, 100% 12%, 100% 28% L 100% 100% Z");
+  }
+  .arch-frame {
+    border-radius: 200px 200px 8px 8px;
+    overflow: hidden;
+  }
+
+  /* Dividers and ornaments */
   .ink-divider {
     height: 1px;
-    background: linear-gradient(to left, transparent, oklch(0.22 0.018 60 / 0.2), transparent);
+    background: linear-gradient(to left, transparent, oklch(0.28 0.028 55 / 0.22), transparent);
   }
   .gold-divider {
     height: 1px;
     background: linear-gradient(to left, transparent, var(--gold) 30%, var(--gold) 70%, transparent);
-    opacity: 0.6;
+    opacity: 0.55;
   }
+  .dotted-divider {
+    height: 6px;
+    background-image: radial-gradient(circle, var(--ink) 1px, transparent 1.4px);
+    background-size: 14px 6px;
+    background-repeat: repeat-x;
+    background-position: center;
+    opacity: 0.25;
+  }
+
   .heading-display {
-    font-family: var(--font-serif);
+    font-family: var(--font-display);
     letter-spacing: -0.015em;
-    line-height: 1.1;
+    line-height: 1.08;
+    font-weight: 400;
   }
   .eyebrow {
-    font-size: 0.7rem;
-    letter-spacing: 0.22em;
+    font-size: 0.68rem;
+    letter-spacing: 0.28em;
     text-transform: uppercase;
-    color: var(--gold-deep);
-    font-weight: 600;
+    color: var(--ink-soft);
+    font-weight: 500;
+    font-family: var(--font-sans);
   }
   .ornament::before,
   .ornament::after {
     content: "";
     display: inline-block;
-    width: 1.5rem;
+    width: 1.75rem;
     height: 1px;
     background: var(--gold);
     vertical-align: middle;
-    margin: 0 0.75rem;
+    margin: 0 0.85rem;
     opacity: 0.7;
+  }
+
+  /* Pull-quote in editorial style */
+  .pull-quote {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    line-height: 1.7;
+    color: var(--ink);
+  }
+  .drop-cap::first-letter {
+    font-family: var(--font-display);
+    float: right;
+    font-size: 4.2em;
+    line-height: 0.85;
+    padding: 0.1em 0 0 0.15em;
+    color: var(--gold-deep);
+    font-weight: 700;
+  }
+
+  /* Slow cinematic animations */
+  @keyframes ink-bloom {
+    0% { opacity: 0; transform: translateY(8px); filter: blur(6px); }
+    100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+  }
+  @keyframes moon-rise {
+    0% { opacity: 0; transform: translateY(24px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes drift {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-6px) rotate(-0.5deg); }
+  }
+  @keyframes scent-trail {
+    0% { opacity: 0; transform: scaleX(0); transform-origin: right; }
+    100% { opacity: 0.55; transform: scaleX(1); }
+  }
+  .animate-ink-bloom { animation: ink-bloom 1200ms var(--ease-moon) both; }
+  .animate-moon-rise { animation: moon-rise 1000ms var(--ease-moon) both; }
+  .animate-drift { animation: drift 9s var(--ease-moon) infinite; }
+  .animate-scent-trail { animation: scent-trail 1400ms var(--ease-moon) 400ms both; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-400 { animation-delay: 400ms; }
+  .delay-600 { animation-delay: 600ms; }
+  .delay-800 { animation-delay: 800ms; }
+
+  /* Vertical Persian label */
+  .vlabel {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    letter-spacing: 0.3em;
+    font-size: 0.7rem;
+    color: var(--ink-soft);
   }
 }

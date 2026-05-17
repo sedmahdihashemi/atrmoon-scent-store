@@ -16,28 +16,31 @@ export function SiteHeader() {
     : "/account";
 
   return (
-    <header className="sticky top-0 z-40 backdrop-blur-md bg-[var(--paper)]/80 border-b border-ink/10">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
-        <Link to="/" className="flex items-center gap-2.5 group">
-          <img src={logoMark} alt="عطرمون" width={32} height={32} className="w-8 h-8 group-hover:rotate-[8deg] transition-transform duration-300" />
-          <span className="font-serif text-2xl text-ink tracking-tight">عطرمون</span>
+    <header className="sticky top-0 z-40 backdrop-blur-md bg-[var(--paper)]/85 border-b border-ink/10">
+      <div className="container mx-auto px-4 h-20 flex items-center justify-between gap-4">
+        <Link to="/" className="flex items-center gap-3 group">
+          <img src={logoMark} alt="عطرمون" width={36} height={36} className="w-9 h-9 transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-[6deg]" />
+          <div className="flex flex-col leading-none">
+            <span className="font-serif text-2xl text-ink tracking-tight">عطرمون</span>
+            <span className="eyebrow text-[0.55rem] mt-1 tracking-[0.32em]">Atrmoon</span>
+          </div>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-7 text-sm text-ink/80">
-          <Link to="/products" className="hover:text-[var(--gold)] transition">رایحه‌ها</Link>
-          <Link to="/stores" className="hover:text-[var(--gold)] transition">عطرفروشی‌ها</Link>
-          <Link to="/about" className="hover:text-[var(--gold)] transition">درباره</Link>
-          <Link to="/contact" className="hover:text-[var(--gold)] transition">گفت‌وگو</Link>
+        <nav className="hidden md:flex items-center gap-9 text-sm font-serif text-ink-soft">
+          <Link to="/products" className="hover:text-gold-deep transition-colors duration-700">رایحه‌ها</Link>
+          <Link to="/stores" className="hover:text-gold-deep transition-colors duration-700">عطرفروشی‌ها</Link>
+          <Link to="/about" className="hover:text-gold-deep transition-colors duration-700">یادداشت‌ها</Link>
+          <Link to="/contact" className="hover:text-gold-deep transition-colors duration-700">گفت‌وگو</Link>
         </nav>
 
         <div className="flex items-center gap-1">
           <Link to="/search" aria-label="جستجو" className="p-2 rounded-md hover:bg-ink/5">
             <Search className="w-5 h-5" />
           </Link>
-          <Link to="/cart" aria-label="سبد" className="relative p-2 rounded-md hover:bg-ink/5">
+          <Link to="/cart" aria-label="رایحه‌های امشب" className="relative p-2 rounded-md hover:bg-ink/5 transition-colors duration-500">
             <ShoppingBag className="w-5 h-5" />
             {count > 0 && (
-              <span className="absolute -top-0.5 -left-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--gold)] text-[10px] font-serif text-[var(--paper)] flex items-center justify-center">
+              <span className="absolute -top-0.5 -left-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--tile)] text-[10px] font-serif text-[var(--paper)] flex items-center justify-center">
                 {count.toLocaleString("fa-IR")}
               </span>
             )}

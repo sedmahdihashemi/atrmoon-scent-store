@@ -1,99 +1,194 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
-import { Moon, Sparkles, Store, BookOpen } from "lucide-react";
-import heroImg from "@/assets/hero-perfume.jpg";
+import { PersianArch, Crescent, Flourish, ScentTrail } from "@/components/visual/PersianOrnament";
+import heroImg from "@/assets/hero-perfume-2.jpg";
 
-export const Route = createFileRoute("/")({
-  component: Index,
-});
+export const Route = createFileRoute("/")({ component: Index });
 
 function Index() {
   return (
     <PublicLayout>
-      {/* Hero */}
+      {/* ── Hero — a single bottle in moonlight ───────────────────────── */}
       <section className="relative overflow-hidden">
-        <div
-          aria-hidden
-          className="absolute inset-0 -z-10 opacity-[0.18] bg-cover bg-center"
-          style={{ backgroundImage: `url(${heroImg})` }}
-        />
-        <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-[var(--paper)]/40 to-[var(--paper)]" />
-        <div className="container mx-auto px-4 pt-24 pb-28 md:pt-32 md:pb-36 grid md:grid-cols-2 gap-10 items-center">
-          <div className="text-center md:text-right">
-            <div className="eyebrow ornament inline-flex items-center justify-center mb-6">
-              <Moon className="w-3.5 h-3.5 ml-2" /> بازار رایحه و خاطره
+        <div className="container mx-auto px-4 pt-16 md:pt-24 pb-24 md:pb-32">
+          <div className="grid md:grid-cols-12 gap-10 md:gap-16 items-end">
+            {/* Left — editorial text column */}
+            <div className="md:col-span-7 md:order-1 relative">
+              <div className="eyebrow animate-moon-rise">شماره‌ی نخست · پاییز ۱۴۰۳</div>
+              <h1 className="heading-display mt-6 text-[20vw] md:text-[8rem] lg:text-[9rem] leading-[0.95] text-ink animate-ink-bloom break-words">
+                عطر<span className="text-gold-deep">مون</span>
+              </h1>
+              <div className="mt-6 animate-scent-trail origin-right">
+                <ScentTrail className="w-48 text-gold" />
+              </div>
+              <p className="pull-quote mt-8 max-w-lg animate-moon-rise delay-400">
+                «هر رایحه‌ای، خاطره‌ایست که هنوز نوشته نشده.»
+              </p>
+              <p className="mt-6 max-w-lg text-ink-soft leading-[2.1] text-[15px] animate-moon-rise delay-600">
+                در عطرمون، آرام پرسه می‌زنیم میان عطرفروشی‌های مستقل ایران. بطری به بطری، حجم به حجم،
+                خاطره به خاطره. این‌جا خرید نیست؛ گفت‌وگوست.
+              </p>
+              <div className="mt-12 flex flex-wrap gap-3 animate-moon-rise delay-800">
+                <Link to="/products"><Button variant="default" size="xl">پرسه میان رایحه‌ها</Button></Link>
+                <Link to="/stores"><Button variant="outline" size="xl">دفتر عطرفروشان</Button></Link>
+              </div>
             </div>
-            <h1 className="heading-display text-6xl md:text-8xl text-ink">
-              عطر<span className="text-[var(--gold-deep)]">مون</span>
-            </h1>
-            <div className="gold-divider w-32 my-6 mx-auto md:mr-0" />
-            <p className="text-lg md:text-xl text-muted-foreground max-w-lg mx-auto md:mx-0 leading-loose font-serif italic">
-              پاساژی آرام از عطرفروشان ایرانی؛ جایی برای پرسه، انتخاب حجم و بطری، و خریدِ بی‌شتاب.
-            </p>
-            <div className="mt-10 flex flex-wrap gap-3 justify-center md:justify-start">
-              <Link to="/products"><Button variant="gold" size="xl" className="font-serif">کشف رایحه‌ها</Button></Link>
-              <Link to="/register/seller"><Button variant="outline" size="xl" className="font-serif">فروشنده شوید</Button></Link>
-            </div>
-          </div>
-          <div className="relative hidden md:block">
-            <div className="paper-card overflow-hidden rounded-2xl">
-              <img src={heroImg} alt="بطری‌های عطر در مهتاب" width={1920} height={1080} className="w-full h-[460px] object-cover" />
-            </div>
-            <div className="absolute -bottom-6 -right-6 paper-card rounded-xl px-5 py-3 bg-paper">
-              <div className="eyebrow">از ۱۴۰۳</div>
-              <div className="font-serif text-ink text-sm mt-0.5">دفتر عطرفروشان مستقل</div>
+
+            {/* Right — arch-framed perfume in moonlight */}
+            <div className="md:col-span-5 md:order-2 relative">
+              <div className="vlabel absolute right-[-2rem] top-2 hidden md:block">EDITION I · ATRMOON</div>
+              <div className="relative animate-drift">
+                <div className="arch-frame paper-grain shadow-elevated relative">
+                  <img
+                    src={heroImg}
+                    alt="بطری عطر در مهتاب"
+                    width={960} height={1280}
+                    className="w-full h-[520px] md:h-[620px] object-cover"
+                  />
+                </div>
+                <Crescent className="absolute -top-6 -left-6 w-14 h-14 text-gold/80 animate-moon-rise delay-400" />
+                <div className="absolute -bottom-6 right-4 paper-card bg-paper px-5 py-3 paper-grain">
+                  <div className="eyebrow">یادداشت سرسخن</div>
+                  <div className="font-serif text-ink text-sm mt-1 italic">شبی برای یک عطر.</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        <div className="gold-divider container mx-auto" />
+        <div className="container mx-auto px-4">
+          <Flourish className="w-full max-w-md mx-auto text-ink/40" />
+        </div>
       </section>
 
-      {/* Featured categories */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="text-center mb-10">
-          <div className="eyebrow mb-3">فهرست رایحه‌ها</div>
-          <h2 className="heading-display text-3xl md:text-4xl text-ink">دسته‌بندی‌ها</h2>
+      {/* ── Editorial intro — a slow paragraph ─────────────────────────── */}
+      <section className="container mx-auto px-4 py-24 md:py-32">
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="eyebrow ornament mb-6">سرآغاز</div>
+          <h2 className="heading-display text-3xl md:text-5xl text-ink">
+            پاساژی آرام، بی‌شتاب، انسانی.
+          </h2>
+          <div className="gold-divider w-24 mx-auto my-8" />
+          <p className="drop-cap text-ink-soft leading-[2.2] text-[16px] text-justify">
+            عطرمون مجموعه‌ای از عطرفروشان مستقل ایرانی است. هر فروشنده، دفتر خودش را دارد؛ رایحه‌ها را خودش معرفی می‌کند،
+            با خریدار خودش گفت‌وگو می‌کند، و سفارش را با دست‌های خودش می‌بندد. این‌جا تخفیف فریاد نمی‌زند، و آگهی چشمک نمی‌زند.
+            این‌جا فقط رایحه‌هاست و کسانی که آن‌ها را دوست می‌دارند.
+          </p>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {["مردانه","زنانه","یونیسکس","نیش","اقتصادی","لوکس"].map((c) => (
-            <Link key={c} to="/products" className="paper-card paper-card-hover p-6 text-center group">
-              <Sparkles className="w-6 h-6 mx-auto mb-2 text-[var(--gold)] opacity-60 group-hover:opacity-100 transition" />
-              <div className="font-serif text-ink">{c}</div>
+      </section>
+
+      {/* ── Fragrance families — arch cards ────────────────────────────── */}
+      <section className="container mx-auto px-4 py-16 md:py-20">
+        <div className="flex items-end justify-between mb-12 gap-4">
+          <div>
+            <div className="eyebrow">فصلِ یکم</div>
+            <h2 className="heading-display text-3xl md:text-4xl text-ink mt-2">خانواده‌های رایحه</h2>
+          </div>
+          <Link to="/products" className="hidden md:inline-block text-sm text-ink-soft hover:text-gold-deep transition-colors duration-700 border-b border-ink/20 pb-0.5">
+            همه‌ی رایحه‌ها ←
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5 md:gap-6">
+          {[
+            { fa: "مردانه", en: "Boisé" },
+            { fa: "زنانه", en: "Floral" },
+            { fa: "یونیسکس", en: "Unisex" },
+            { fa: "نیش", en: "Niche" },
+            { fa: "اقتصادی", en: "Daily" },
+            { fa: "لوکس", en: "Maison" },
+          ].map((c, i) => (
+            <Link
+              key={c.fa}
+              to="/products"
+              className="group block"
+              style={{ animationDelay: `${i * 80}ms` }}
+            >
+              <div className="paper-card paper-card-hover paper-grain arch-frame h-44 flex flex-col items-center justify-end pb-5 text-center px-3 relative">
+                <PersianArch className="absolute inset-x-0 top-3 mx-auto w-12 text-gold/40 group-hover:text-gold transition-colors duration-700" />
+                <div className="absolute top-16 left-0 right-0 text-center">
+                  <ScentTrail className="w-16 mx-auto text-gold/60 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+                </div>
+                <div className="font-serif text-ink text-lg">{c.fa}</div>
+                <div className="eyebrow text-[0.6rem] mt-1 text-ink-soft/70">{c.en}</div>
+              </div>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* Editorial */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="paper-card p-10 md:p-16 max-w-3xl mx-auto text-center">
-          <BookOpen className="w-8 h-8 mx-auto text-[var(--gold)] mb-4" />
-          <p className="font-serif italic text-xl md:text-2xl text-ink leading-loose">
-            «هر رایحه‌ای، خاطره‌ایست که هنوز نوشته نشده.»
-          </p>
-          <div className="gold-divider w-24 mx-auto my-6" />
-          <p className="text-sm text-muted-foreground leading-7">
-            عطرمون مجموعه‌ای از عطرفروشان مستقل ایرانی است. هر فروشنده، دفتر خودش را دارد و رایحه‌هایش را به دست خودش معرفی می‌کند. خرید در عطرمون، گفت‌وگوی مستقیم با فروشنده است؛ بی‌واسطه، آرام، و انسانی.
-          </p>
+      {/* ── Editorial split — two columns like an old newspaper ────────── */}
+      <section className="container mx-auto px-4 py-24">
+        <div className="dotted-divider max-w-md mx-auto mb-16" />
+        <div className="grid md:grid-cols-12 gap-10 md:gap-16">
+          <div className="md:col-span-5">
+            <div className="vlabel hidden md:inline-block float-left mr-4 mt-2">SECTION · II</div>
+            <div className="eyebrow mb-3">یادداشتِ ماه</div>
+            <h3 className="heading-display text-3xl md:text-4xl text-ink leading-tight">
+              عطر، تنها بویی نیست؛
+              <br/>
+              <span className="italic text-gold-deep">صدایی‌ست از روزی دیگر.</span>
+            </h3>
+          </div>
+          <div className="md:col-span-7 text-ink-soft leading-[2.2] text-[15px] columns-1 md:columns-2 gap-10">
+            <p>
+              در عطرمون، رایحه را کالا نمی‌بینیم. آن را یک یادداشت کوتاه می‌دانیم؛ چند کلمه‌ای که از پشت سال‌ها برمی‌گردد و
+              کنار گوشت می‌نشیند. به همین خاطر، صفحه‌ی هر عطر بیش از آن‌که قفسه‌ی فروشگاه باشد، صفحه‌ی یک کتاب کوچک است.
+            </p>
+            <p className="mt-4">
+              فروشنده‌ی هر رایحه، نویسنده‌ی همان صفحه‌ست. حجم و بطری و قیمت را خودش انتخاب می‌کند، و اگر بخواهی،
+              می‌توانی پیش از خرید با او گفت‌وگو کنی. آرام، بی‌شتاب، انسانی.
+            </p>
+          </div>
+        </div>
+        <div className="dotted-divider max-w-md mx-auto mt-16" />
+      </section>
+
+      {/* ── Three pillars ──────────────────────────────────────────────── */}
+      <section className="container mx-auto px-4 py-16">
+        <div className="grid md:grid-cols-3 gap-8">
+          {[
+            { t: "حجم به انتخاب تو", d: "از سَمپلِ نیم‌میلی‌لیتری تا بطری کامل. هر رایحه را به اندازه‌ی همان شب می‌خری." },
+            { t: "گفت‌وگو با فروشنده", d: "پیش از خرید بپرس، بشنو. هر عطرفروش، دفتر خودش را دارد و خودش پاسخ می‌دهد." },
+            { t: "بسته‌بندی با حوصله", d: "هر بسته، با کاغذ و دست‌خط و یک یادداشت کوچک می‌رسد." },
+          ].map((p, i) => (
+            <div key={p.t} className="paper-card paper-grain p-8 text-center" style={{ animation: `moon-rise 900ms var(--ease-moon) ${i * 120}ms both` }}>
+              <PersianArch className="w-10 h-12 mx-auto text-gold mb-4" />
+              <h4 className="font-serif text-ink text-xl mb-2">{p.t}</h4>
+              <p className="text-ink-soft text-sm leading-[2]">{p.d}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Seller invite */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="paper-card p-10 md:p-12 grid md:grid-cols-2 gap-8 items-center bg-gradient-paper">
-          <div>
-            <Store className="w-7 h-7 text-[var(--gold)] mb-3" />
-            <h3 className="heading-display text-2xl md:text-3xl text-ink mb-3">دفتر خودتان را در عطرمون بگشایید</h3>
-            <p className="text-muted-foreground leading-7 text-sm">
-              عطرفروش هستید؟ فروشگاهتان را معرفی کنید، رایحه‌ها را با حجم و بطری دلخواه عرضه کنید، و سفارش‌ها را مستقیم دریافت کنید.
+      {/* ── Seller invite — quiet invitation ───────────────────────────── */}
+      <section className="container mx-auto px-4 py-24">
+        <div className="paper-card paper-grain p-10 md:p-16 grid md:grid-cols-12 gap-10 items-center bg-gradient-paper">
+          <div className="md:col-span-7">
+            <div className="eyebrow ornament mb-5">دعوت</div>
+            <h3 className="heading-display text-3xl md:text-4xl text-ink leading-tight">
+              دفتر خودت را در عطرمون بگشا.
+            </h3>
+            <p className="mt-5 text-ink-soft leading-[2] text-[15px] max-w-xl">
+              اگر عطرفروشی، این‌جا جایی‌ست برای دفتری از آنِ تو؛ بی‌واسطه، آرام، و با شکل و رنگِ خودت.
             </p>
           </div>
-          <div className="md:text-left">
-            <Link to="/register/seller"><Button variant="gold" size="lg" className="font-serif">ثبت‌نام فروشنده</Button></Link>
+          <div className="md:col-span-5 md:text-left">
+            <Link to="/register/seller">
+              <Button variant="gold" size="xl">گشودنِ دفتر</Button>
+            </Link>
+            <p className="mt-4 text-xs text-ink-soft/70 font-serif italic">
+              ثبت‌نام رایگان است · تأیید با حوصله انجام می‌شود
+            </p>
           </div>
         </div>
+      </section>
+
+      {/* ── Closing whisper ────────────────────────────────────────────── */}
+      <section className="container mx-auto px-4 py-24 text-center">
+        <Flourish className="w-64 mx-auto text-ink/30 mb-6" />
+        <p className="font-serif italic text-ink-soft text-lg">
+          عطرمون · بی‌شتاب، بی‌فریاد، بی‌نمایش.
+        </p>
       </section>
     </PublicLayout>
   );
