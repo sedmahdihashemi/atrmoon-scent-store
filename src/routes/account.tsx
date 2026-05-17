@@ -28,7 +28,7 @@ function AccountInner() {
   return (
     <div className="container mx-auto px-4 py-12">
       <h1 className="font-serif text-3xl text-ink">سلام {profile?.full_name || ""}</h1>
-      <p className="text-muted-foreground font-serif italic mt-1">به دفتر خصوصی‌تان در عطرمون خوش‌آمدید.</p>
+      <p className="text-muted-foreground font-serif italic mt-1">به عطاری خصوصی‌تان در عطرمون خوش‌آمدید.</p>
       <div className="grid md:grid-cols-3 gap-4 mt-8">
         {items.map(({ to, label, Icon }) => (
           <Link key={label} to={to} className="paper-card rounded-md p-6 hover:border-[var(--gold)] transition">

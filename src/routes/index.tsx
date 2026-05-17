@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { PersianArch, Crescent, Flourish, ScentTrail } from "@/components/visual/PersianOrnament";
+import { AtrmoonLoader } from "@/components/visual/AtrmoonLoader";
 import heroImg from "@/assets/hero-perfume-2.jpg";
 
 export const Route = createFileRoute("/")({ component: Index });
@@ -9,6 +10,7 @@ export const Route = createFileRoute("/")({ component: Index });
 function Index() {
   return (
     <PublicLayout>
+      <AtrmoonLoader />
       {/* ── Hero — a single bottle in moonlight ───────────────────────── */}
       <section className="relative overflow-hidden">
         <div className="container mx-auto px-4 pt-16 md:pt-24 pb-24 md:pb-32">
@@ -17,7 +19,7 @@ function Index() {
             <div className="md:col-span-7 md:order-1 relative">
               <div className="eyebrow animate-moon-rise">شماره‌ی نخست · پاییز ۱۴۰۳</div>
               <h1 className="heading-display mt-6 text-[20vw] md:text-[8rem] lg:text-[9rem] leading-[0.95] text-ink animate-ink-bloom break-words">
-                عطر<span className="text-gold-deep">مون</span>
+                عطرمون
               </h1>
               <div className="mt-6 animate-scent-trail origin-right">
                 <ScentTrail className="w-48 text-gold" />
@@ -31,7 +33,7 @@ function Index() {
               </p>
               <div className="mt-12 flex flex-wrap gap-3 animate-moon-rise delay-800">
                 <Link to="/products"><Button variant="default" size="xl">پرسه میان رایحه‌ها</Button></Link>
-                <Link to="/stores"><Button variant="outline" size="xl">دفتر عطرفروشان</Button></Link>
+                <Link to="/stores"><Button variant="outline" size="xl">عطاری عطرفروشان</Button></Link>
               </div>
             </div>
 
@@ -66,11 +68,11 @@ function Index() {
         <div className="max-w-2xl mx-auto text-center">
           <div className="eyebrow ornament mb-6">سرآغاز</div>
           <h2 className="heading-display text-3xl md:text-5xl text-ink">
-            پاساژی آرام، بی‌شتاب، انسانی.
+            بازاری آرام، بی‌شتاب، انسانی.
           </h2>
           <div className="gold-divider w-24 mx-auto my-8" />
           <p className="drop-cap text-ink-soft leading-[2.2] text-[16px] text-justify">
-            عطرمون مجموعه‌ای از عطرفروشان مستقل ایرانی است. هر فروشنده، دفتر خودش را دارد؛ رایحه‌ها را خودش معرفی می‌کند،
+            عطرمون مجموعه‌ای از عطرفروشان مستقل ایرانی است. هر فروشنده، عطاری خودش را دارد؛ رایحه‌ها را خودش معرفی می‌کند،
             با خریدار خودش گفت‌وگو می‌کند، و سفارش را با دست‌های خودش می‌بندد. این‌جا تخفیف فریاد نمی‌زند، و آگهی چشمک نمی‌زند.
             این‌جا فقط رایحه‌هاست و کسانی که آن‌ها را دوست می‌دارند.
           </p>
@@ -148,7 +150,7 @@ function Index() {
         <div className="grid md:grid-cols-3 gap-8">
           {[
             { t: "حجم به انتخاب تو", d: "از سَمپلِ نیم‌میلی‌لیتری تا بطری کامل. هر رایحه را به اندازه‌ی همان شب می‌خری." },
-            { t: "گفت‌وگو با فروشنده", d: "پیش از خرید بپرس، بشنو. هر عطرفروش، دفتر خودش را دارد و خودش پاسخ می‌دهد." },
+            { t: "گفت‌وگو با فروشنده", d: "پیش از خرید بپرس، بشنو. هر عطرفروش، عطاری خودش را دارد و خودش پاسخ می‌دهد." },
             { t: "بسته‌بندی با حوصله", d: "هر بسته، با کاغذ و دست‌خط و یک یادداشت کوچک می‌رسد." },
           ].map((p, i) => (
             <div key={p.t} className="paper-card paper-grain p-8 text-center" style={{ animation: `moon-rise 900ms var(--ease-moon) ${i * 120}ms both` }}>
@@ -166,15 +168,15 @@ function Index() {
           <div className="md:col-span-7">
             <div className="eyebrow ornament mb-5">دعوت</div>
             <h3 className="heading-display text-3xl md:text-4xl text-ink leading-tight">
-              دفتر خودت را در عطرمون بگشا.
+              عطاری خودت را در عطرمون بگشا.
             </h3>
             <p className="mt-5 text-ink-soft leading-[2] text-[15px] max-w-xl">
-              اگر عطرفروشی، این‌جا جایی‌ست برای دفتری از آنِ تو؛ بی‌واسطه، آرام، و با شکل و رنگِ خودت.
+              اگر عطرفروشی، این‌جا جایی‌ست برای عطاریی از آنِ تو؛ بی‌واسطه، آرام، و با شکل و رنگِ خودت.
             </p>
           </div>
           <div className="md:col-span-5 md:text-left">
             <Link to="/register/seller">
-              <Button variant="gold" size="xl">گشودنِ دفتر</Button>
+              <Button variant="gold" size="xl">گشودنِ عطاری</Button>
             </Link>
             <p className="mt-4 text-xs text-ink-soft/70 font-serif italic">
               ثبت‌نام رایگان است · تأیید با حوصله انجام می‌شود

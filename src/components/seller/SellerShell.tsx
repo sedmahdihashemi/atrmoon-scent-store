@@ -20,7 +20,7 @@ export function SellerShell({ children }: { children: ReactNode }) {
       <header className="mb-6 md:mb-8">
         <div className="flex items-center gap-3">
           <Store className="w-5 h-5 text-[var(--gold)]" />
-          <h1 className="font-serif text-2xl md:text-3xl text-ink">دفتر فروشنده</h1>
+          <h1 className="font-serif text-2xl md:text-3xl text-ink">عطاری فروشنده</h1>
         </div>
         <p className="text-muted-foreground font-serif italic text-sm mt-1">خوش‌آمدید {profile?.full_name}.</p>
       </header>

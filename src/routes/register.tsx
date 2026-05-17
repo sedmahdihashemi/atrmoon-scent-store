@@ -22,7 +22,7 @@ function RegisterLayout() {
           <Link to="/register/seller" className="paper-card rounded-md p-8 text-center hover:border-[var(--gold)] transition group">
             <Store className="w-10 h-10 mx-auto text-[var(--gold)] mb-3" />
             <h2 className="font-serif text-xl text-ink mb-2">فروشنده</h2>
-            <p className="text-sm text-muted-foreground leading-7">برای گشودن دفتر عطرفروشی.</p>
+            <p className="text-sm text-muted-foreground leading-7">برای گشودن عطاری عطرفروشی.</p>
           </Link>
         </div>
       </div>

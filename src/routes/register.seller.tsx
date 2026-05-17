@@ -73,7 +73,7 @@ function SellerRegister() {
     <PublicLayout>
       <div className="container mx-auto px-4 py-16 max-w-xl">
         <div className="paper-card rounded-md p-8">
-          <h1 className="font-serif text-3xl text-ink text-center mb-1">گشودن دفتر فروشنده</h1>
+          <h1 className="font-serif text-3xl text-ink text-center mb-1">گشودن عطاری فروشنده</h1>
           <p className="text-center text-muted-foreground text-sm mb-8 font-serif italic">پس از ثبت، فروشگاه شما به دست عطرمون بررسی می‌شود.</p>
           <form onSubmit={onSubmit} className="space-y-5">
             <Section title="اطلاعات شخصی">

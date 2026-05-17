@@ -25,7 +25,7 @@ function ProductsListing() {
       <div className="container mx-auto px-4 py-12">
         <header className="mb-10 text-center">
           <h1 className="font-serif text-4xl text-ink">رایحه‌ها</h1>
-          <p className="text-muted-foreground font-serif italic mt-2">از میان دفترهای فروشندگان عطرمون.</p>
+          <p className="text-muted-foreground font-serif italic mt-2">از میان عطاریهای فروشندگان عطرمون.</p>
         </header>
         {items === null ? <LoadingState /> :
          items.length === 0 ? <EmptyState title="هنوز رایحه‌ای ثبت نشده" message="به‌زودی نخستین رایحه‌ها در عطرمون عرضه می‌شوند." icon={<Sparkles className="w-8 h-8" />} /> :
