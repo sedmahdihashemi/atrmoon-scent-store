@@ -23,6 +23,7 @@ function CheckoutPage() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState<{ number: string } | null>(null);
+  const notify = useServerFn(notifyOrder);
 
   const [form, setForm] = useState({
     customer_name: "", customer_phone: "", customer_email: "",
@@ -106,6 +107,9 @@ function CheckoutPage() {
     if (row?.order_number) {
       setSuccess({ number: row.order_number });
       resetAfterCheckout();
+      if (row?.order_id) {
+        notify({ data: { orderId: row.order_id } }).catch((e) => console.error("notify failed", e));
+      }
     } else {
       toast.error("پاسخی از سرور دریافت نشد");
     }
