@@ -85,7 +85,9 @@ function CheckoutPage() {
       toast.error("لطفاً نام، تلفن، نشانی و شهر را تکمیل کنید"); return;
     }
     setSubmitting(true);
-    const session = user ? null : getOrCreateCartSession();
+    // Always send the session id if available — handles the case where the cart
+    // was created as a guest and the user logged in afterwards (customer_id is null).
+    const session = getOrCreateCartSession();
     const { data, error } = await supabase.rpc("place_order", {
       p_cart_id: cartId,
       p_session_id: session,
