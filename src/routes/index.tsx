@@ -209,7 +209,7 @@ function Index() {
             <div className="absolute bottom-0 inset-x-0 p-8 md:p-14 text-center">
               <div className="eyebrow mb-3 text-ink-soft">آهویِ خاطره</div>
               <p className="font-serif italic text-ink text-lg md:text-2xl max-w-xl mx-auto leading-[1.9]">
-                «شتابِ ساکنی دارم؛ مثل آهویی که در خواب مُشک می‌دود.»
+                «رم آهوی تصویرم شتاب ساکنی دارم»
               </p>
             </div>
           </div>
