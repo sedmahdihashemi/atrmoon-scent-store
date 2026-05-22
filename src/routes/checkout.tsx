@@ -10,6 +10,8 @@ import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { formatToman, getOrCreateCartSession } from "@/lib/cart-session";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { notifyOrder } from "@/lib/bale-notify.functions";
 import { toast } from "sonner";
 import { ShoppingBag, CheckCircle2 } from "lucide-react";
 
@@ -21,6 +23,7 @@ function CheckoutPage() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState<{ number: string } | null>(null);
+  const notify = useServerFn(notifyOrder);
 
   const [form, setForm] = useState({
     customer_name: "", customer_phone: "", customer_email: "",
@@ -104,6 +107,9 @@ function CheckoutPage() {
     if (row?.order_number) {
       setSuccess({ number: row.order_number });
       resetAfterCheckout();
+      if (row?.order_id) {
+        notify({ data: { orderId: row.order_id } }).catch((e) => console.error("notify failed", e));
+      }
     } else {
       toast.error("پاسخی از سرور دریافت نشد");
     }
