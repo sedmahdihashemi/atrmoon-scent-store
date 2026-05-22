@@ -50,6 +50,41 @@ export type Database = {
         }
         Relationships: []
       }
+      bot_sessions: {
+        Row: {
+          chat_id: number
+          created_at: string
+          state: string
+          state_data: Json
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          chat_id: number
+          created_at?: string
+          state?: string
+          state_data?: Json
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          chat_id?: number
+          created_at?: string
+          state?: string
+          state_data?: Json
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bot_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bottle_types: {
         Row: {
           created_at: string
