@@ -27,10 +27,10 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <p className="text-muted-foreground font-serif italic text-sm mt-1">عطاری کل عطرمون.</p>
       </header>
       <div className="grid md:grid-cols-[220px_1fr] gap-6 md:gap-8">
-        <aside className="paper-card rounded-md p-3 h-fit md:sticky md:top-24">
-          <nav className="flex md:flex-col gap-1 overflow-auto">
+        <aside className="paper-card rounded-md p-2 md:p-3 h-fit md:sticky md:top-24 min-w-0 max-w-full overflow-hidden">
+          <nav className="flex md:flex-col gap-1 overflow-x-auto md:overflow-visible -mx-1 px-1 scrollbar-thin">
             {nav.map(({ to, label, Icon, exact }) => (
-              <Link key={to} to={to as any} className={`flex items-center gap-2 px-3 py-2 rounded-sm text-sm font-serif transition shrink-0 ${active(to, exact as any) ? "bg-ink text-[var(--paper)]" : "text-ink hover:bg-ink/5"}`}>
+              <Link key={to} to={to as any} className={`flex items-center gap-2 px-3 py-2 rounded-sm text-sm font-serif transition shrink-0 whitespace-nowrap ${active(to, exact as any) ? "bg-ink text-[var(--paper)]" : "text-ink hover:bg-ink/5"}`}>
                 <Icon className="w-4 h-4" /> {label}
               </Link>
             ))}
