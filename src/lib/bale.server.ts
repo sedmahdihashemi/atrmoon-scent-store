@@ -22,7 +22,14 @@ export async function baleCall(method: string, body: Record<string, unknown>) {
 }
 
 export async function sendMessage(chat_id: number, text: string, extra: Record<string, unknown> = {}) {
-  return baleCall("sendMessage", { chat_id, text, parse_mode: "HTML", ...extra });
+  const clean = stripHtml(text);
+  return baleCall("sendMessage", { chat_id, text: clean, ...extra });
+}
+
+function stripHtml(s: string) {
+  return s
+    .replace(/<\/?(b|i|u|s|strong|em|code|pre|br)\b[^>]*>/gi, "")
+    .replace(/<br\s*\/?>/gi, "\n");
 }
 
 export { supabaseAdmin };
