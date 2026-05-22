@@ -86,7 +86,11 @@ const WELCOME_START =
 
 async function handleLoggedIn(chat_id: number, user_id: string, text: string) {
   const role = await getRole(user_id);
-  const t = text.trim();
+  let t = text.trim();
+  // Allow sending a bare order code (e.g. ATR-260522-95419) as a /track shortcut
+  if (/^ATR-[0-9]{6}-[0-9]{4,6}$/i.test(t)) {
+    t = "/track " + t.toUpperCase();
+  }
 
   if (t === "/orders") {
     let query = supabaseAdmin
@@ -125,7 +129,7 @@ async function handleLoggedIn(chat_id: number, user_id: string, text: string) {
   }
 
   if (t.startsWith("/track")) {
-    const code = t.replace("/track", "").trim();
+    const code = t.replace("/track", "").trim().toUpperCase();
     if (!code) {
       await sendMessage(chat_id, "کد پیگیری را وارد کنید: /track ATR-...");
       return;
@@ -262,8 +266,10 @@ async function handleUpdate(update: any) {
   }
 
   // Public /track works without login
-  if (text.trim().startsWith("/track") && !session.user_id) {
-    const code = text.replace("/track", "").trim();
+  const trimmed = text.trim();
+  const bareCode = /^ATR-[0-9]{6}-[0-9]{4,6}$/i.test(trimmed);
+  if ((trimmed.startsWith("/track") || (bareCode && !session.user_id)) && !session.user_id) {
+    const code = (bareCode ? trimmed : trimmed.replace("/track", "").trim()).toUpperCase();
     if (!code) {
       await sendMessage(chat_id, "کد پیگیری را وارد کنید: /track ATR-...");
       return;
