@@ -245,10 +245,15 @@ async function handlePublicTrack(chat_id: number, code: string) {
 }
 
 async function handleUpdate(update: any) {
+  console.log("[bale update]", JSON.stringify(update).slice(0, 500));
   const msg = update.message ?? update.edited_message;
-  if (!msg?.chat?.id) return;
+  if (!msg?.chat?.id) {
+    console.log("[bale] no chat id, skipping");
+    return;
+  }
   const chat_id: number = msg.chat.id;
   const text: string = (msg.text ?? "").toString();
+  console.log("[bale] chat", chat_id, "text", text);
 
   let session = await getSession(chat_id);
   if (!session) {
@@ -355,8 +360,11 @@ export const Route = createFileRoute("/api/public/bale/webhook")({
       POST: async ({ request }) => {
         try {
           const update = await request.json();
-          // Must await on Cloudflare Workers — background promises are killed after Response
-          await handleUpdate(update);
+          try {
+            await handleUpdate(update);
+          } catch (e) {
+            console.error("[bale handleUpdate error]", e);
+          }
         } catch (e) {
           console.error("[bale webhook parse]", e);
         }
