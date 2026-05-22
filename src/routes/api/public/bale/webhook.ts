@@ -355,8 +355,8 @@ export const Route = createFileRoute("/api/public/bale/webhook")({
       POST: async ({ request }) => {
         try {
           const update = await request.json();
-          // Respond fast to Bale, process in background
-          handleUpdate(update).catch((e) => console.error("[bale webhook]", e));
+          // Must await on Cloudflare Workers — background promises are killed after Response
+          await handleUpdate(update);
         } catch (e) {
           console.error("[bale webhook parse]", e);
         }
