@@ -272,12 +272,30 @@ function FavoritesTab() {
 
   const load = async () => {
     if (!user) return;
-    const { data } = await supabase
+    const { data: rows } = await supabase
       .from("wishlists")
-      .select("id, product_id, products(id, name, slug, brands(name))")
+      .select("id, product_id")
       .eq("customer_id", user.id)
       .order("created_at", { ascending: false });
-    setItems(data ?? []);
+    const list = rows ?? [];
+    const pids = list.map((r: any) => r.product_id);
+    if (pids.length) {
+      const { data: prods } = await supabase
+        .from("products")
+        .select("id, name, slug, brand_id")
+        .in("id", pids);
+      const brandIds = Array.from(new Set((prods ?? []).map((p: any) => p.brand_id).filter(Boolean)));
+      let brandMap: Record<string, string> = {};
+      if (brandIds.length) {
+        const { data: brs } = await supabase.from("brands").select("id, name").in("id", brandIds as string[]);
+        (brs ?? []).forEach((b: any) => { brandMap[b.id] = b.name; });
+      }
+      const pmap: Record<string, any> = {};
+      (prods ?? []).forEach((p: any) => { pmap[p.id] = { ...p, brand_name: brandMap[p.brand_id] }; });
+      setItems(list.map((r: any) => ({ ...r, product: pmap[r.product_id] })));
+    } else {
+      setItems([]);
+    }
     setLoading(false);
   };
   useEffect(() => { load(); }, [user]);
@@ -296,11 +314,11 @@ function FavoritesTab() {
         <div key={w.id} className="paper-card rounded-md p-4 flex items-center gap-3">
           <Heart className="w-5 h-5 text-[var(--gold)]" />
           <div className="flex-1 min-w-0">
-            <div className="font-serif text-ink truncate">{(w as any).products?.name}</div>
-            <div className="text-xs text-muted-foreground">{(w as any).products?.brands?.name}</div>
+            <div className="font-serif text-ink truncate">{w.product?.name}</div>
+            <div className="text-xs text-muted-foreground">{w.product?.brand_name}</div>
           </div>
-          {(w as any).products?.slug && (
-            <Link to="/products/$slug" params={{ slug: (w as any).products.slug }}>
+          {w.product?.slug && (
+            <Link to="/products/$slug" params={{ slug: w.product.slug }}>
               <Button size="sm" variant="outline">مشاهده</Button>
             </Link>
           )}
