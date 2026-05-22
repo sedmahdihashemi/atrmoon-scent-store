@@ -24,13 +24,20 @@ export const notifyOrder = createServerFn({ method: "POST" })
       .maybeSingle();
     const sellerId = (store as any)?.seller_id;
 
-    const recipientUserIds = [...new Set([...adminIds, sellerId].filter(Boolean))];
+    const customerId = (order as any).customer_id;
+    const recipientUserIds = [...new Set([...adminIds, sellerId, customerId].filter(Boolean))];
     if (recipientUserIds.length === 0) return { ok: true, sent: 0 };
 
     const { data: sessions } = await supabaseAdmin
       .from("bot_sessions")
       .select("chat_id, user_id")
       .in("user_id", recipientUserIds);
+
+    console.log("[notifyOrder]", {
+      orderId: data.orderId,
+      recipients: recipientUserIds,
+      sessions: (sessions ?? []).length,
+    });
 
     let sent = 0;
     for (const s of sessions ?? []) {
