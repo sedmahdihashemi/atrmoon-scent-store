@@ -45,12 +45,12 @@ function AccountInner() {
         <p className="text-muted-foreground font-serif italic text-sm mt-1">به عطاری خصوصی‌تان در عطرمون خوش‌آمدید.</p>
       </header>
       <Tabs defaultValue="orders" className="w-full">
-        <div className="overflow-x-auto -mx-4 px-4 mb-4 scrollbar-thin">
-          <TabsList className="inline-flex w-auto min-w-full md:w-full md:grid md:grid-cols-4 gap-1">
-            <TabsTrigger value="orders" className="whitespace-nowrap"><Package className="w-4 h-4 ml-1" />سفارش‌ها</TabsTrigger>
-            <TabsTrigger value="addresses" className="whitespace-nowrap"><MapPin className="w-4 h-4 ml-1" />آدرس‌ها</TabsTrigger>
-            <TabsTrigger value="favorites" className="whitespace-nowrap"><Heart className="w-4 h-4 ml-1" />علاقه‌مندی‌ها</TabsTrigger>
-            <TabsTrigger value="profile" className="whitespace-nowrap"><UserIcon className="w-4 h-4 ml-1" />پروفایل</TabsTrigger>
+        <div dir="rtl" className="overflow-x-auto -mx-4 px-4 mb-4 scrollbar-thin">
+          <TabsList className="inline-flex h-auto w-full justify-start md:grid md:grid-cols-4 gap-1">
+            <TabsTrigger value="orders" className="whitespace-nowrap gap-1.5"><Package className="w-4 h-4" />سفارش‌ها</TabsTrigger>
+            <TabsTrigger value="addresses" className="whitespace-nowrap gap-1.5"><MapPin className="w-4 h-4" />آدرس‌ها</TabsTrigger>
+            <TabsTrigger value="favorites" className="whitespace-nowrap gap-1.5"><Heart className="w-4 h-4" />علاقه‌مندی‌ها</TabsTrigger>
+            <TabsTrigger value="profile" className="whitespace-nowrap gap-1.5"><UserIcon className="w-4 h-4" />پروفایل</TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="orders"><OrdersTab /></TabsContent>
@@ -66,6 +66,7 @@ function AccountInner() {
 function OrdersTab() {
   const { user } = useAuth();
   const [orders, setOrders] = useState<any[]>([]);
+  const [stores, setStores] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<string | null>(null);
 
@@ -74,10 +75,18 @@ function OrdersTab() {
     (async () => {
       const { data } = await supabase
         .from("orders")
-        .select("id, order_number, status, total_amount, created_at, store_id, stores(name)")
+        .select("id, order_number, status, total_amount, created_at, store_id")
         .eq("customer_id", user.id)
         .order("created_at", { ascending: false });
-      setOrders(data ?? []);
+      const list = data ?? [];
+      setOrders(list);
+      const ids = Array.from(new Set(list.map((o: any) => o.store_id).filter(Boolean)));
+      if (ids.length) {
+        const { data: srows } = await supabase.from("stores").select("id, store_name").in("id", ids as string[]);
+        const map: Record<string, string> = {};
+        (srows ?? []).forEach((s: any) => { map[s.id] = s.store_name; });
+        setStores(map);
+      }
       setLoading(false);
     })();
   }, [user]);
@@ -92,7 +101,7 @@ function OrdersTab() {
       {orders.map((o) => (
         <button key={o.id} onClick={() => setSelected(o.id)} className="w-full text-right paper-card rounded-md p-4 hover:border-[var(--gold)] transition flex flex-col md:flex-row md:items-center md:justify-between gap-2">
           <div className="min-w-0">
-            <div className="font-serif text-ink truncate">{(o as any).stores?.name || "فروشگاه"}</div>
+            <div className="font-serif text-ink truncate">{stores[o.store_id] || "فروشگاه"}</div>
             <div className="text-xs text-muted-foreground mt-1">کد: {o.order_number}</div>
           </div>
           <div className="flex items-center gap-3">
@@ -107,16 +116,21 @@ function OrdersTab() {
 
 function OrderDetail({ orderId, onBack }: { orderId: string; onBack: () => void }) {
   const [order, setOrder] = useState<any>(null);
+  const [storeName, setStoreName] = useState<string>("");
   const [items, setItems] = useState<any[]>([]);
   const [history, setHistory] = useState<any[]>([]);
   useEffect(() => {
     (async () => {
       const [{ data: o }, { data: it }, { data: h }] = await Promise.all([
-        supabase.from("orders").select("*, stores(name)").eq("id", orderId).maybeSingle(),
+        supabase.from("orders").select("*").eq("id", orderId).maybeSingle(),
         supabase.from("order_items").select("*").eq("order_id", orderId),
         supabase.from("order_status_history").select("*").eq("order_id", orderId).order("created_at", { ascending: true }),
       ]);
       setOrder(o); setItems(it ?? []); setHistory(h ?? []);
+      if (o?.store_id) {
+        const { data: s } = await supabase.from("stores").select("store_name").eq("id", o.store_id).maybeSingle();
+        setStoreName(s?.store_name ?? "");
+      }
     })();
   }, [orderId]);
   if (!order) return <p className="text-muted-foreground text-sm">در حال بارگذاری…</p>;
@@ -126,7 +140,7 @@ function OrderDetail({ orderId, onBack }: { orderId: string; onBack: () => void 
       <div className="paper-card rounded-md p-5">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
-            <h2 className="font-serif text-xl text-ink">{(order as any).stores?.name}</h2>
+            <h2 className="font-serif text-xl text-ink">{storeName}</h2>
             <p className="text-xs text-muted-foreground mt-1">کد پیگیری: {order.order_number}</p>
           </div>
           <Badge variant="outline" className="font-serif">{ORDER_STATUS_FA[order.status] ?? order.status}</Badge>
@@ -258,12 +272,30 @@ function FavoritesTab() {
 
   const load = async () => {
     if (!user) return;
-    const { data } = await supabase
+    const { data: rows } = await supabase
       .from("wishlists")
-      .select("id, product_id, products(id, name, slug, brands(name))")
+      .select("id, product_id")
       .eq("customer_id", user.id)
       .order("created_at", { ascending: false });
-    setItems(data ?? []);
+    const list = rows ?? [];
+    const pids = list.map((r: any) => r.product_id);
+    if (pids.length) {
+      const { data: prods } = await supabase
+        .from("products")
+        .select("id, name, slug, brand_id")
+        .in("id", pids);
+      const brandIds = Array.from(new Set((prods ?? []).map((p: any) => p.brand_id).filter(Boolean)));
+      let brandMap: Record<string, string> = {};
+      if (brandIds.length) {
+        const { data: brs } = await supabase.from("brands").select("id, name").in("id", brandIds as string[]);
+        (brs ?? []).forEach((b: any) => { brandMap[b.id] = b.name; });
+      }
+      const pmap: Record<string, any> = {};
+      (prods ?? []).forEach((p: any) => { pmap[p.id] = { ...p, brand_name: brandMap[p.brand_id] }; });
+      setItems(list.map((r: any) => ({ ...r, product: pmap[r.product_id] })));
+    } else {
+      setItems([]);
+    }
     setLoading(false);
   };
   useEffect(() => { load(); }, [user]);
@@ -282,11 +314,11 @@ function FavoritesTab() {
         <div key={w.id} className="paper-card rounded-md p-4 flex items-center gap-3">
           <Heart className="w-5 h-5 text-[var(--gold)]" />
           <div className="flex-1 min-w-0">
-            <div className="font-serif text-ink truncate">{(w as any).products?.name}</div>
-            <div className="text-xs text-muted-foreground">{(w as any).products?.brands?.name}</div>
+            <div className="font-serif text-ink truncate">{w.product?.name}</div>
+            <div className="text-xs text-muted-foreground">{w.product?.brand_name}</div>
           </div>
-          {(w as any).products?.slug && (
-            <Link to="/products/$slug" params={{ slug: (w as any).products.slug }}>
+          {w.product?.slug && (
+            <Link to="/products/$slug" params={{ slug: w.product.slug }}>
               <Button size="sm" variant="outline">مشاهده</Button>
             </Link>
           )}
