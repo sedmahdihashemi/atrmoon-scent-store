@@ -14,6 +14,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { notifyOrder } from "@/lib/bale-notify.functions";
 import { toast } from "sonner";
 import { ShoppingBag, CheckCircle2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/checkout")({ component: CheckoutPage });
 
@@ -29,6 +30,9 @@ function CheckoutPage() {
     customer_name: "", customer_phone: "", customer_email: "",
     shipping_address: "", city: "", postal_code: "", customer_note: "",
   });
+  const [addresses, setAddresses] = useState<any[]>([]);
+  const [selectedAddrId, setSelectedAddrId] = useState<string>("");
+  const [useNew, setUseNew] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -42,6 +46,37 @@ function CheckoutPage() {
       setForm((f) => ({ ...f, customer_email: f.customer_email || user.email || "" }));
     }
   }, [profile, user]);
+
+  useEffect(() => {
+    if (!user) { setAddresses([]); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("customer_addresses")
+        .select("*")
+        .eq("customer_id", user.id)
+        .order("is_default", { ascending: false })
+        .order("created_at", { ascending: false });
+      const list = data ?? [];
+      setAddresses(list);
+      if (list.length && !selectedAddrId) {
+        const def = list.find((a: any) => a.is_default) ?? list[0];
+        applyAddress(def);
+        setSelectedAddrId(def.id);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  const applyAddress = (a: any) => {
+    setForm((f) => ({
+      ...f,
+      customer_name: a.full_name || f.customer_name,
+      customer_phone: a.phone || f.customer_phone,
+      shipping_address: a.address || "",
+      city: a.city || "",
+      postal_code: a.postal_code || "",
+    }));
+  };
 
   if (loading) return <PublicLayout><LoadingState /></PublicLayout>;
 
@@ -125,6 +160,40 @@ function CheckoutPage() {
         <form onSubmit={submit} className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 paper-card rounded-md p-6 space-y-4">
             <h2 className="font-serif text-lg text-ink mb-2">اطلاعات شما</h2>
+            {addresses.length > 0 && !useNew && (
+              <div className="space-y-2">
+                <Label className="text-xs font-serif text-ink/80">انتخاب از آدرس‌های ذخیره‌شده</Label>
+                <Select
+                  value={selectedAddrId}
+                  onValueChange={(v) => {
+                    setSelectedAddrId(v);
+                    const a = addresses.find((x) => x.id === v);
+                    if (a) applyAddress(a);
+                  }}
+                >
+                  <SelectTrigger><SelectValue placeholder="یک آدرس را انتخاب کنید" /></SelectTrigger>
+                  <SelectContent>
+                    {addresses.map((a) => (
+                      <SelectItem key={a.id} value={a.id}>
+                        {a.full_name} — {a.city}، {a.address.slice(0, 40)}{a.address.length > 40 ? "…" : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <button type="button" onClick={() => setUseNew(true)} className="text-xs text-[var(--gold)] underline font-serif">
+                  استفاده از آدرس جدید
+                </button>
+              </div>
+            )}
+            {addresses.length > 0 && useNew && (
+              <button type="button" onClick={() => {
+                setUseNew(false);
+                const a = addresses.find((x) => x.id === selectedAddrId) ?? addresses[0];
+                if (a) { applyAddress(a); setSelectedAddrId(a.id); }
+              }} className="text-xs text-[var(--gold)] underline font-serif">
+                بازگشت به آدرس‌های ذخیره‌شده
+              </button>
+            )}
             <div className="grid md:grid-cols-2 gap-4">
               <Field label="نام و نام خانوادگی *"><Input value={form.customer_name} onChange={set("customer_name")} required /></Field>
               <Field label="شماره تماس *"><Input value={form.customer_phone} onChange={set("customer_phone")} required dir="ltr" /></Field>
