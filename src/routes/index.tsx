@@ -1,11 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
-import { PersianArch, Crescent, Flourish, ScentTrail } from "@/components/visual/PersianOrnament";
+import {
+  PersianArch, Crescent, Flourish, ScentTrail,
+  IconWood, IconRose, IconMoonSun, IconVial, IconLeaf, IconCrown,
+} from "@/components/visual/PersianOrnament";
 import { AtrmoonLoader } from "@/components/visual/AtrmoonLoader";
 import heroImg from "@/assets/hero-perfume-2.jpg";
 import bannerBottle from "@/assets/banner-bottle.jpg";
-import bannerArch from "@/assets/banner-arch.jpg";
+import bannerDeer from "@/assets/banner-deer.jpg";
 
 export const Route = createFileRoute("/")({ component: Index });
 
@@ -95,26 +98,26 @@ function Index() {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5 md:gap-6">
           {[
-            { fa: "مردانه", en: "Boisé" },
-            { fa: "زنانه", en: "Floral" },
-            { fa: "یونیسکس", en: "Unisex" },
-            { fa: "نیش", en: "Niche" },
-            { fa: "اقتصادی", en: "Daily" },
-            { fa: "لوکس", en: "Maison" },
-          ].map((c, i) => (
+            { fa: "مردانه", en: "Boisé",  Icon: IconWood },
+            { fa: "زنانه",  en: "Floral", Icon: IconRose },
+            { fa: "یونیسکس", en: "Unisex", Icon: IconMoonSun },
+            { fa: "نیش",    en: "Niche",  Icon: IconVial },
+            { fa: "اقتصادی", en: "Daily", Icon: IconLeaf },
+            { fa: "لوکس",   en: "Maison", Icon: IconCrown },
+          ].map(({ fa, en, Icon }, i) => (
             <Link
-              key={c.fa}
+              key={fa}
               to="/products"
               className="group block"
               style={{ animationDelay: `${i * 80}ms` }}
             >
-              <div className="paper-card paper-card-hover paper-grain arch-frame h-44 flex flex-col items-center justify-end pb-5 text-center px-3 relative">
-                <PersianArch className="absolute inset-x-0 top-3 mx-auto w-12 text-gold/40 group-hover:text-gold transition-colors duration-700" />
-                <div className="absolute top-16 left-0 right-0 text-center">
-                  <ScentTrail className="w-16 mx-auto text-gold/60 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+              <div className="paper-card paper-card-hover paper-grain arch-frame h-48 flex flex-col items-center justify-end pb-5 text-center px-3 relative">
+                <Icon className="absolute inset-x-0 top-5 mx-auto w-12 h-12 text-ink/55 group-hover:text-gold-deep" />
+                <div className="absolute top-[5.25rem] left-0 right-0 text-center">
+                  <ScentTrail className="w-16 mx-auto text-gold/70 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
                 </div>
-                <div className="font-serif text-ink text-lg">{c.fa}</div>
-                <div className="eyebrow text-[0.6rem] mt-1 text-ink-soft/70">{c.en}</div>
+                <div className="font-serif text-ink text-lg">{fa}</div>
+                <div className="eyebrow text-[0.6rem] mt-1 text-ink-soft/70">{en}</div>
               </div>
             </Link>
           ))}
@@ -195,8 +198,8 @@ function Index() {
         <div className="container mx-auto px-4">
           <div className="relative rounded-md overflow-hidden paper-grain">
             <img
-              src={bannerArch}
-              alt="طاق و هلال ماه"
+              src={bannerDeer}
+              alt="آهوی ختن و هلال ماه — یادآور مشک آهو"
               loading="lazy"
               width={1920}
               height={1080}
@@ -204,9 +207,9 @@ function Index() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-paper via-paper/10 to-transparent" />
             <div className="absolute bottom-0 inset-x-0 p-8 md:p-14 text-center">
-              <div className="eyebrow mb-3 text-ink-soft">طاقِ خاطره</div>
+              <div className="eyebrow mb-3 text-ink-soft">آهویِ خاطره</div>
               <p className="font-serif italic text-ink text-lg md:text-2xl max-w-xl mx-auto leading-[1.9]">
-                «زیر هر طاقی، ماهی‌ست؛ زیر هر ماهی، عطری.»
+                «از نافِ آهویِ ختن، شبی برخاست که هنوز عطرش به مشام می‌رسد.»
               </p>
             </div>
           </div>
