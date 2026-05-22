@@ -266,8 +266,10 @@ async function handleUpdate(update: any) {
   }
 
   // Public /track works without login
-  if (text.trim().startsWith("/track") && !session.user_id) {
-    const code = text.replace("/track", "").trim();
+  const trimmed = text.trim();
+  const bareCode = /^ATR-[0-9]{6}-[0-9]{4,6}$/i.test(trimmed);
+  if ((trimmed.startsWith("/track") || (bareCode && !session.user_id)) && !session.user_id) {
+    const code = (bareCode ? trimmed : trimmed.replace("/track", "").trim()).toUpperCase();
     if (!code) {
       await sendMessage(chat_id, "کد پیگیری را وارد کنید: /track ATR-...");
       return;
