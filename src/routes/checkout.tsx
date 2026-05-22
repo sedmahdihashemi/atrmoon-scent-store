@@ -10,6 +10,8 @@ import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { formatToman, getOrCreateCartSession } from "@/lib/cart-session";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { notifyOrder } from "@/lib/bale-notify.functions";
 import { toast } from "sonner";
 import { ShoppingBag, CheckCircle2 } from "lucide-react";
 

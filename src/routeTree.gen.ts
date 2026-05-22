@@ -43,6 +43,7 @@ import { Route as AdminBottleTypesRouteImport } from './routes/admin.bottle-type
 import { Route as SellerProductsNewRouteImport } from './routes/seller.products.new'
 import { Route as SellerProductsIdRouteImport } from './routes/seller.products.$id'
 import { Route as SellerOrdersIdRouteImport } from './routes/seller.orders.$id'
+import { Route as ApiPublicBaleWebhookRouteImport } from './routes/api/public/bale/webhook'
 
 const StoresRoute = StoresRouteImport.update({
   id: '/stores',
@@ -214,6 +215,11 @@ const SellerOrdersIdRoute = SellerOrdersIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => SellerOrdersRoute,
 } as any)
+const ApiPublicBaleWebhookRoute = ApiPublicBaleWebhookRouteImport.update({
+  id: '/api/public/bale/webhook',
+  path: '/api/public/bale/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -250,6 +256,7 @@ export interface FileRoutesByFullPath {
   '/seller/orders/$id': typeof SellerOrdersIdRoute
   '/seller/products/$id': typeof SellerProductsIdRoute
   '/seller/products/new': typeof SellerProductsNewRoute
+  '/api/public/bale/webhook': typeof ApiPublicBaleWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -284,6 +291,7 @@ export interface FileRoutesByTo {
   '/seller/orders/$id': typeof SellerOrdersIdRoute
   '/seller/products/$id': typeof SellerProductsIdRoute
   '/seller/products/new': typeof SellerProductsNewRoute
+  '/api/public/bale/webhook': typeof ApiPublicBaleWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -321,6 +329,7 @@ export interface FileRoutesById {
   '/seller/orders/$id': typeof SellerOrdersIdRoute
   '/seller/products/$id': typeof SellerProductsIdRoute
   '/seller/products/new': typeof SellerProductsNewRoute
+  '/api/public/bale/webhook': typeof ApiPublicBaleWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -359,6 +368,7 @@ export interface FileRouteTypes {
     | '/seller/orders/$id'
     | '/seller/products/$id'
     | '/seller/products/new'
+    | '/api/public/bale/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -393,6 +403,7 @@ export interface FileRouteTypes {
     | '/seller/orders/$id'
     | '/seller/products/$id'
     | '/seller/products/new'
+    | '/api/public/bale/webhook'
   id:
     | '__root__'
     | '/'
@@ -429,6 +440,7 @@ export interface FileRouteTypes {
     | '/seller/orders/$id'
     | '/seller/products/$id'
     | '/seller/products/new'
+    | '/api/public/bale/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -446,6 +458,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   SellerRoute: typeof SellerRouteWithChildren
   StoresRoute: typeof StoresRoute
+  ApiPublicBaleWebhookRoute: typeof ApiPublicBaleWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -688,6 +701,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SellerOrdersIdRouteImport
       parentRoute: typeof SellerOrdersRoute
     }
+    '/api/public/bale/webhook': {
+      id: '/api/public/bale/webhook'
+      path: '/api/public/bale/webhook'
+      fullPath: '/api/public/bale/webhook'
+      preLoaderRoute: typeof ApiPublicBaleWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -803,6 +823,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   SellerRoute: SellerRouteWithChildren,
   StoresRoute: StoresRoute,
+  ApiPublicBaleWebhookRoute: ApiPublicBaleWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
