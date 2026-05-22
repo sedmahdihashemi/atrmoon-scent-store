@@ -6,7 +6,9 @@ import { nitro } from "nitro/vite";
 const isVercel = !!process.env.VERCEL || process.env.BUILD_TARGET === "vercel";
 
 export default defineConfig({
-  cloudflare: false,
+  // Keep the default Cloudflare Worker output for Lovable builds; only swap to
+  // the Nitro Vercel preset when actually building on Vercel.
+  ...(isVercel ? { cloudflare: false as const } : {}),
   plugins: isVercel ? [nitro({ preset: "vercel" })] : [],
   tanstackStart: {
     server: { entry: "server" },
