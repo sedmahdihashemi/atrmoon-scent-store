@@ -1159,6 +1159,14 @@ export type Database = {
           read_ct: number
         }[]
       }
+      seller_wishlist_stats: {
+        Args: { p_store_id: string }
+        Returns: {
+          product_id: string
+          product_name: string
+          wishlist_count: number
+        }[]
+      }
     }
     Enums: {
       app_role: "super_admin" | "seller" | "customer"

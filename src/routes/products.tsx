@@ -6,6 +6,7 @@ import { LoadingState, EmptyState } from "@/components/ui/loading-state";
 import { Sparkles } from "lucide-react";
 import { formatToman } from "@/lib/cart-session";
 import { Link } from "@tanstack/react-router";
+import { WishlistButton } from "@/components/WishlistButton";
 
 export const Route = createFileRoute("/products")({ component: ProductsLayout });
 
@@ -33,7 +34,8 @@ function ProductsListing() {
            {items.map((p: any) => {
              const minPrice = Math.min(...(p.product_variants ?? []).filter((v: any) => v.status === "active").map((v: any) => Number(v.price)).filter(Boolean));
              return (
-               <Link key={p.id} to="/products/$slug" params={{ slug: p.slug }} className="paper-card rounded-md p-4 hover:border-[var(--gold)] transition">
+               <Link key={p.id} to="/products/$slug" params={{ slug: p.slug }} className="paper-card rounded-md p-4 hover:border-[var(--gold)] transition relative">
+                 <WishlistButton productId={p.id} />
                  <div className="aspect-square bg-[var(--moon)]/40 rounded-sm mb-3 flex items-center justify-center text-[var(--gold)]/60">
                    {p.main_image_url ? <img src={p.main_image_url} alt={p.name} className="w-full h-full object-cover rounded-sm" /> : <Sparkles className="w-10 h-10" />}
                  </div>

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { formatToman } from "@/lib/cart-session";
 import { useCart } from "@/hooks/useCart";
 import { Sparkles, ShoppingBag, Minus, Plus } from "lucide-react";
+import { WishlistButton } from "@/components/WishlistButton";
 
 export const Route = createFileRoute("/products/$slug")({ component: ProductDetail });
 
@@ -128,13 +129,16 @@ function ProductDetail() {
               </div>
             )}
 
-            <Button
-              className="mt-6 w-full h-12 font-serif text-base"
-              disabled={!sel || !inStock}
-              onClick={() => sel && addItem(product.id, sel.id, product.store_id, qty)}>
-              <ShoppingBag className="w-5 h-5 ml-2" />
-              {inStock ? "افزودن به سبد" : "ناموجود"}
-            </Button>
+            <div className="mt-6 flex gap-3">
+              <Button
+                className="flex-1 h-12 font-serif text-base"
+                disabled={!sel || !inStock}
+                onClick={() => sel && addItem(product.id, sel.id, product.store_id, qty)}>
+                <ShoppingBag className="w-5 h-5 ml-2" />
+                {inStock ? "افزودن به سبد" : "ناموجود"}
+              </Button>
+              <WishlistButton productId={product.id} variant="full" className="shrink-0" />
+            </div>
           </div>
         </div>
       </div>
