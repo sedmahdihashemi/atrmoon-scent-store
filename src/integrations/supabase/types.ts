@@ -1167,6 +1167,21 @@ export type Database = {
           wishlist_count: number
         }[]
       }
+      top_selling_products: {
+        Args: { p_limit?: number }
+        Returns: {
+          brand_name: string
+          cheapest_variant_id: string
+          id: string
+          main_image_url: string
+          min_price: number
+          name: string
+          slug: string
+          sold_qty: number
+          store_id: string
+          store_name: string
+        }[]
+      }
     }
     Enums: {
       app_role: "super_admin" | "seller" | "customer"
