@@ -25,6 +25,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SellerIndexRouteImport } from './routes/seller.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as StoresSlugRouteImport } from './routes/stores.$slug'
 import { Route as SellerSettingsRouteImport } from './routes/seller.settings'
 import { Route as SellerProductsRouteImport } from './routes/seller.products'
 import { Route as SellerPendingRouteImport } from './routes/seller.pending'
@@ -125,6 +126,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const StoresSlugRoute = StoresSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => StoresRoute,
 } as any)
 const SellerSettingsRoute = SellerSettingsRouteImport.update({
   id: '/settings',
@@ -242,7 +248,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRouteWithChildren
   '/search': typeof SearchRoute
   '/seller': typeof SellerRouteWithChildren
-  '/stores': typeof StoresRoute
+  '/stores': typeof StoresRouteWithChildren
   '/admin/bottle-types': typeof AdminBottleTypesRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -258,6 +264,7 @@ export interface FileRoutesByFullPath {
   '/seller/pending': typeof SellerPendingRoute
   '/seller/products': typeof SellerProductsRouteWithChildren
   '/seller/settings': typeof SellerSettingsRoute
+  '/stores/$slug': typeof StoresSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/seller/': typeof SellerIndexRoute
   '/seller/orders/$id': typeof SellerOrdersIdRoute
@@ -278,7 +285,7 @@ export interface FileRoutesByTo {
   '/products': typeof ProductsRouteWithChildren
   '/register': typeof RegisterRouteWithChildren
   '/search': typeof SearchRoute
-  '/stores': typeof StoresRoute
+  '/stores': typeof StoresRouteWithChildren
   '/admin/bottle-types': typeof AdminBottleTypesRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -294,6 +301,7 @@ export interface FileRoutesByTo {
   '/seller/pending': typeof SellerPendingRoute
   '/seller/products': typeof SellerProductsRouteWithChildren
   '/seller/settings': typeof SellerSettingsRoute
+  '/stores/$slug': typeof StoresSlugRoute
   '/admin': typeof AdminIndexRoute
   '/seller': typeof SellerIndexRoute
   '/seller/orders/$id': typeof SellerOrdersIdRoute
@@ -317,7 +325,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRouteWithChildren
   '/search': typeof SearchRoute
   '/seller': typeof SellerRouteWithChildren
-  '/stores': typeof StoresRoute
+  '/stores': typeof StoresRouteWithChildren
   '/admin/bottle-types': typeof AdminBottleTypesRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -333,6 +341,7 @@ export interface FileRoutesById {
   '/seller/pending': typeof SellerPendingRoute
   '/seller/products': typeof SellerProductsRouteWithChildren
   '/seller/settings': typeof SellerSettingsRoute
+  '/stores/$slug': typeof StoresSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/seller/': typeof SellerIndexRoute
   '/seller/orders/$id': typeof SellerOrdersIdRoute
@@ -373,6 +382,7 @@ export interface FileRouteTypes {
     | '/seller/pending'
     | '/seller/products'
     | '/seller/settings'
+    | '/stores/$slug'
     | '/admin/'
     | '/seller/'
     | '/seller/orders/$id'
@@ -409,6 +419,7 @@ export interface FileRouteTypes {
     | '/seller/pending'
     | '/seller/products'
     | '/seller/settings'
+    | '/stores/$slug'
     | '/admin'
     | '/seller'
     | '/seller/orders/$id'
@@ -447,6 +458,7 @@ export interface FileRouteTypes {
     | '/seller/pending'
     | '/seller/products'
     | '/seller/settings'
+    | '/stores/$slug'
     | '/admin/'
     | '/seller/'
     | '/seller/orders/$id'
@@ -470,7 +482,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRouteWithChildren
   SearchRoute: typeof SearchRoute
   SellerRoute: typeof SellerRouteWithChildren
-  StoresRoute: typeof StoresRoute
+  StoresRoute: typeof StoresRouteWithChildren
   ApiPublicBaleWebhookRoute: typeof ApiPublicBaleWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
@@ -588,6 +600,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/stores/$slug': {
+      id: '/stores/$slug'
+      path: '/$slug'
+      fullPath: '/stores/$slug'
+      preLoaderRoute: typeof StoresSlugRouteImport
+      parentRoute: typeof StoresRoute
     }
     '/seller/settings': {
       id: '/seller/settings'
@@ -829,6 +848,17 @@ const SellerRouteChildren: SellerRouteChildren = {
 const SellerRouteWithChildren =
   SellerRoute._addFileChildren(SellerRouteChildren)
 
+interface StoresRouteChildren {
+  StoresSlugRoute: typeof StoresSlugRoute
+}
+
+const StoresRouteChildren: StoresRouteChildren = {
+  StoresSlugRoute: StoresSlugRoute,
+}
+
+const StoresRouteWithChildren =
+  StoresRoute._addFileChildren(StoresRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -843,7 +873,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRouteWithChildren,
   SearchRoute: SearchRoute,
   SellerRoute: SellerRouteWithChildren,
-  StoresRoute: StoresRoute,
+  StoresRoute: StoresRouteWithChildren,
   ApiPublicBaleWebhookRoute: ApiPublicBaleWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }

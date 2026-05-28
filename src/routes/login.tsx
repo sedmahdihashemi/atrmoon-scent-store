@@ -8,7 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/login")({ component: LoginPage });
+export const Route = createFileRoute("/login")({
+  component: LoginPage,
+  validateSearch: (s: Record<string, unknown>) => ({ redirect: typeof s.redirect === "string" ? s.redirect : "" }),
+});
 
 const schema = z.object({
   email: z.string().email("ایمیل معتبر وارد کنید"),
@@ -17,6 +20,7 @@ const schema = z.object({
 
 function LoginPage() {
   const nav = useNavigate();
+  const { redirect } = Route.useSearch();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -34,6 +38,7 @@ function LoginPage() {
     setLoading(false);
     if (error) { toast.error("ورود ناموفق", { description: error.message }); return; }
     toast.success("خوش‌آمدید");
+    if (redirect) { nav({ to: redirect }); return; }
     // Determine target by role
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { nav({ to: "/" }); return; }
