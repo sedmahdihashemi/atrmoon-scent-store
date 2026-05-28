@@ -96,8 +96,8 @@ function SearchPage() {
       // client-side filter for notes (junction) + price + stock + on-sale
       if (params.notes.length) {
         rows = rows.filter((p) => {
-          const ids = new Set((p.product_scent_notes ?? []).map((x: any) => x.scent_note_id));
-          return params.notes.every((n) => ids.has(n));
+          const ids = new Set<string>((p.product_scent_notes ?? []).map((x: any) => x.scent_note_id as string));
+          return params.notes.every((n: string) => ids.has(n));
         });
       }
       rows = rows.map((p) => {
@@ -128,8 +128,8 @@ function SearchPage() {
     navigate({ search: (prev: any) => ({ ...prev, [key]: value }) });
   };
   const toggleArr = (key: "brands" | "notes" | "stores", id: string) => {
-    const cur = params[key];
-    setParam(key, (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]) as any);
+    const cur = params[key] as string[];
+    setParam(key, (cur.includes(id) ? cur.filter((x: string) => x !== id) : [...cur, id]) as any);
   };
 
   const activeCount = useMemo(() => {
@@ -209,15 +209,15 @@ function SearchPage() {
                 {params.on_sale && <Chip label="تخفیف‌دار" onClear={() => setParam("on_sale", false)} />}
                 {params.min_price > 0 && <Chip label={`از ${formatToman(params.min_price)}`} onClear={() => setParam("min_price", 0)} />}
                 {params.max_price > 0 && <Chip label={`تا ${formatToman(params.max_price)}`} onClear={() => setParam("max_price", 0)} />}
-                {params.brands.map((id) => {
+                {params.brands.map((id: string) => {
                   const b = brands.find((x) => x.id === id);
                   return <Chip key={id} label={b?.name ?? "برند"} onClear={() => toggleArr("brands", id)} />;
                 })}
-                {params.notes.map((id) => {
+                {params.notes.map((id: string) => {
                   const n = notes.find((x) => x.id === id);
                   return <Chip key={id} label={n?.name ?? "نُت"} onClear={() => toggleArr("notes", id)} />;
                 })}
-                {params.stores.map((id) => {
+                {params.stores.map((id: string) => {
                   const s = stores.find((x) => x.id === id);
                   return <Chip key={id} label={s?.store_name ?? "عطاری"} onClear={() => toggleArr("stores", id)} />;
                 })}
