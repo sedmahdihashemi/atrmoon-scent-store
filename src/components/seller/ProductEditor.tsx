@@ -14,10 +14,11 @@ import { slugify } from "@/lib/seller-utils";
 type Variant = { id?: string; bottle_type_id: string; volume_ml: number; price: number; discount_price: number | null; status: "active" | "inactive" };
 
 export function ProductEditor({ productId }: { productId?: string }) {
-  const { storeId } = useAuth();
+  const { storeId, user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [brands, setBrands] = useState<any[]>([]);
   const [bottles, setBottles] = useState<any[]>([]);
   const [allNotes, setAllNotes] = useState<any[]>([]);
@@ -75,6 +76,21 @@ export function ProductEditor({ productId }: { productId?: string }) {
     const s = new Set(selectedNotes);
     s.has(id) ? s.delete(id) : s.add(id);
     setSelectedNotes(s);
+  };
+
+  const onUpload = async (file: File) => {
+    if (!user) { toast.error("ابتدا وارد شوید"); return; }
+    if (!file.type.startsWith("image/")) { toast.error("فقط فایل تصویری"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("حداکثر حجم ۵ مگابایت"); return; }
+    setUploading(true);
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("product-images").upload(path, file, { cacheControl: "3600", upsert: false });
+    if (error) { setUploading(false); toast.error(error.message); return; }
+    const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+    setForm((f) => ({ ...f, main_image_url: data.publicUrl }));
+    setUploading(false);
+    toast.success("تصویر بارگذاری شد");
   };
 
   const save = async () => {
@@ -182,7 +198,27 @@ export function ProductEditor({ productId }: { productId?: string }) {
             </Select>
           </Field>
           <div className="md:col-span-2">
-            <Field label="نشانی تصویر اصلی"><Input value={form.main_image_url} dir="ltr" onChange={(e) => setForm({ ...form, main_image_url: e.target.value })} placeholder="https://..." /></Field>
+            <Field label="تصویر اصلی">
+              <div className="flex flex-col sm:flex-row items-start gap-3">
+                {form.main_image_url ? (
+                  <div className="relative">
+                    <img src={form.main_image_url} alt="" className="w-24 h-24 object-cover rounded-sm border border-ink/10" />
+                    <button type="button" onClick={() => setForm({ ...form, main_image_url: "" })}
+                      className="absolute -top-2 -left-2 bg-destructive text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">×</button>
+                  </div>
+                ) : (
+                  <div className="w-24 h-24 bg-[var(--moon)]/40 rounded-sm border border-dashed border-ink/20 flex items-center justify-center text-xs text-ink/40">بدون تصویر</div>
+                )}
+                <div className="flex-1 w-full space-y-2">
+                  <label className="inline-flex items-center justify-center px-3 py-2 text-sm rounded-sm border border-ink/15 cursor-pointer hover:border-[var(--gold)] font-serif">
+                    {uploading ? "در حال بارگذاری…" : "بارگذاری تصویر"}
+                    <input type="file" accept="image/*" className="hidden" disabled={uploading}
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) onUpload(f); e.target.value = ""; }} />
+                  </label>
+                  <Input value={form.main_image_url} dir="ltr" onChange={(e) => setForm({ ...form, main_image_url: e.target.value })} placeholder="یا نشانی تصویر https://..." />
+                </div>
+              </div>
+            </Field>
           </div>
           <div className="md:col-span-2">
             <Field label="توصیف"><Textarea rows={4} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Field>
