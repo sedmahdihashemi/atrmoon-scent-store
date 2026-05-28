@@ -309,3 +309,29 @@ export function ProductEditor({ productId }: { productId?: string }) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (<div><Label className="text-xs font-serif text-ink/80 mb-1.5 block">{label}</Label>{children}</div>);
 }
+
+function AddNoteInline({ type, onAdded }: { type: "top"|"middle"|"base"|"general"; onAdded: (n: { id: string; name: string; type: string }) => void }) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [busy, setBusy] = useState(false);
+  const submit = async () => {
+    const v = name.trim();
+    if (!v) return;
+    setBusy(true);
+    const { data, error } = await supabase.from("scent_notes").insert({ name: v, type }).select("id, name, type").single();
+    setBusy(false);
+    if (error || !data) { toast.error(error?.message ?? "خطا"); return; }
+    onAdded(data as any);
+    setName(""); setOpen(false);
+    toast.success("نُت افزوده شد");
+  };
+  if (!open) return <button type="button" onClick={() => setOpen(true)} className="text-xs text-ink/70 hover:text-[var(--gold)] font-serif inline-flex items-center gap-1"><Plus className="w-3 h-3" /> افزودن</button>;
+  return (
+    <div className="flex items-center gap-1">
+      <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="نام نُت" className="h-8 text-sm w-40"
+        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); submit(); } }} autoFocus />
+      <Button size="sm" disabled={busy} onClick={submit}>افزودن</Button>
+      <Button size="sm" variant="ghost" onClick={() => { setOpen(false); setName(""); }}>انصراف</Button>
+    </div>
+  );
+}
