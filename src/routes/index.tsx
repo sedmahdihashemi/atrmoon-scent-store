@@ -153,6 +153,50 @@ function Index() {
         <div className="dotted-divider max-w-md mx-auto mt-10" />
       </section>
 
+      {/* ── Best sellers ──────────────────────────────────────────────── */}
+      <BestSellers />
+
+      {/* ── Trust strip — quiet reassurances ──────────────────────────── */}
+      <section className="container mx-auto px-4 py-8 md:py-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+          {[
+            { Icon: ShieldCheck, t: "اصالت تضمین‌شده", d: "هر فروشنده پیش از پذیرش، با حوصله بررسی می‌شود." },
+            { Icon: Truck,       t: "ارسال سراسری",     d: "از قلب شهر فروشنده، تا درِ خانه‌ی تو." },
+            { Icon: MessageCircle, t: "گفت‌وگوی مستقیم", d: "پیش از خرید، بپرس. فروشنده خودش پاسخ می‌دهد." },
+            { Icon: Sparkles,    t: "از سَمپل تا بطری",  d: "نیم میلی‌لیتر یا یک شیشه‌ی کامل — انتخاب با توست." },
+          ].map(({ Icon, t, d }) => (
+            <div key={t} className="paper-card paper-grain p-5 text-center">
+              <Icon className="w-6 h-6 mx-auto text-gold-deep mb-2" />
+              <div className="font-serif text-ink text-sm">{t}</div>
+              <p className="text-xs text-ink-soft mt-1 leading-[1.8]">{d}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Whispers — testimonials in editorial voice ────────────────── */}
+      <section className="container mx-auto px-4 py-12 md:py-16">
+        <div className="text-center mb-8">
+          <div className="eyebrow ornament mb-3">از پسِ پرده</div>
+          <h2 className="heading-display text-3xl md:text-4xl text-ink">نجوای خریداران</h2>
+        </div>
+        <div className="grid md:grid-cols-3 gap-6">
+          {[
+            { q: "بسته‌ای رسید با یک یادداشتِ دست‌نویس. انگار نامه‌ای از یک دوستِ دور.", who: "نگار · تهران" },
+            { q: "سَمپل گرفتم، عاشق شدم، بعد بطری خریدم. این روال را دوست دارم.", who: "آرش · اصفهان" },
+            { q: "با فروشنده حرف زدم پیش از سفارش. مثل خریدِ کتاب از کتاب‌فروشِ محله.", who: "مهسا · شیراز" },
+          ].map((r, i) => (
+            <figure key={i} className="paper-card paper-grain p-6 flex flex-col">
+              <Flourish className="w-16 text-gold/60 mb-3" />
+              <blockquote className="font-serif italic text-ink text-[15px] leading-[1.95] flex-1">
+                «{r.q}»
+              </blockquote>
+              <figcaption className="eyebrow mt-4 text-ink-soft">{r.who}</figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+
       {/* ── Cinematic banner — bottle on aged paper ───────────────────── */}
       <section className="container mx-auto px-4 pb-14">
         <div className="relative arch-frame overflow-hidden paper-grain shadow-elevated group">
