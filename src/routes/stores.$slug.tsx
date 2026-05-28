@@ -3,9 +3,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { LoadingState, EmptyState } from "@/components/ui/loading-state";
-import { Store, Sparkles, MapPin } from "lucide-react";
+import { Store, Sparkles, MapPin, ShoppingBag } from "lucide-react";
 import { formatToman } from "@/lib/cart-session";
 import { WishlistButton } from "@/components/WishlistButton";
+import { Button } from "@/components/ui/button";
+import { useCart } from "@/hooks/useCart";
 
 export const Route = createFileRoute("/stores/$slug")({ component: StoreDetail });
 
@@ -28,7 +30,7 @@ function StoreDetail() {
       if (s) {
         const { data: ps } = await supabase
           .from("products")
-          .select("id, slug, name, main_image_url, gender, brands(name), product_variants(price, status)")
+          .select("id, slug, name, main_image_url, gender, store_id, brands(name), product_variants(id, price, discount_price, status)")
           .eq("store_id", s.id)
           .eq("status", "active");
         setProducts(ps ?? []);
@@ -63,21 +65,57 @@ function StoreDetail() {
          products.length === 0 ? <EmptyState title="هنوز رایحه‌ای ثبت نشده" icon={<Sparkles className="w-8 h-8" />} /> :
          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
            {products.map((p: any) => {
-             const minPrice = Math.min(...(p.product_variants ?? []).filter((v: any) => v.status === "active").map((v: any) => Number(v.price)).filter(Boolean));
-             return (
-               <Link key={p.id} to="/products/$slug" params={{ slug: p.slug }} className="paper-card rounded-md p-4 hover:border-[var(--gold)] transition relative">
-                 <WishlistButton productId={p.id} />
-                 <div className="aspect-square bg-[var(--moon)]/40 rounded-sm mb-3 flex items-center justify-center text-[var(--gold)]/60">
-                   {p.main_image_url ? <img src={p.main_image_url} alt={p.name} className="w-full h-full object-cover rounded-sm" /> : <Sparkles className="w-10 h-10" />}
-                 </div>
-                 <h3 className="font-serif text-ink truncate">{p.name}</h3>
-                 <p className="text-xs text-muted-foreground mt-1 truncate">{p.brands?.name ?? "—"}</p>
-                 {Number.isFinite(minPrice) && <p className="text-sm text-[var(--gold)] mt-2 font-serif">{formatToman(minPrice)}</p>}
-               </Link>
-             );
+             return <ProductCard key={p.id} product={p} storeId={store.id} />;
            })}
          </div>}
       </div>
     </PublicLayout>
+  );
+}
+
+function ProductCard({ product: p, storeId }: { product: any; storeId: string }) {
+  const { addItem } = useCart();
+  const [loading, setLoading] = useState(false);
+  const activeVariants = (p.product_variants ?? []).filter((v: any) => v.status === "active");
+  const cheapest = activeVariants.reduce((min: any, v: any) => {
+    const price = Number(v.discount_price ?? v.price);
+    if (!min || price < Number(min.discount_price ?? min.price)) return v;
+    return min;
+  }, null as any);
+  const minPrice = cheapest ? Number(cheapest.discount_price ?? cheapest.price) : NaN;
+
+  async function onAdd(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!cheapest) return;
+    setLoading(true);
+    try { await addItem(p.id, cheapest.id, storeId, 1); } finally { setLoading(false); }
+  }
+
+  return (
+    <div className="paper-card rounded-md p-4 hover:border-[var(--gold)] transition relative flex flex-col">
+      <WishlistButton productId={p.id} />
+      <Link to="/products/$slug" params={{ slug: p.slug }} className="block">
+        <div className="aspect-square bg-[var(--moon)]/40 rounded-sm mb-3 flex items-center justify-center text-[var(--gold)]/60 overflow-hidden">
+          {p.main_image_url ? <img src={p.main_image_url} alt={p.name} className="w-full h-full object-cover rounded-sm" /> : <Sparkles className="w-10 h-10" />}
+        </div>
+        <h3 className="font-serif text-ink truncate">{p.name}</h3>
+        <p className="text-xs text-muted-foreground mt-1 truncate">{p.brands?.name ?? "—"}</p>
+        {Number.isFinite(minPrice) && <p className="text-sm text-[var(--gold)] mt-2 font-serif">{formatToman(minPrice)}</p>}
+      </Link>
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        className="mt-3 w-full font-serif"
+        onClick={onAdd}
+        disabled={!cheapest}
+        loading={loading}
+        loadingText="در حال افزودن…"
+      >
+        <ShoppingBag className="w-4 h-4 ml-1" />
+        افزودن به سبد
+      </Button>
+    </div>
   );
 }
