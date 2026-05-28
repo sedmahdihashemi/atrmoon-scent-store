@@ -52,6 +52,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const ensureCart = useCallback(async (): Promise<{ id: string; session: string | null } | null> => {
     if (typeof window === "undefined") return null;
     const session = user ? null : getOrCreateCartSession();
+    // RLS for guest carts requires this header to match the cart's session_id.
+    // Authenticated users are matched by customer_id and don't need it.
+    const rest = (supabase as any).rest;
+    if (rest?.headers) {
+      if (session) rest.headers["x-cart-session"] = session;
+      else delete rest.headers["x-cart-session"];
+    }
     // try existing
     let q = supabase.from("carts").select("id, store_id").limit(1);
     if (user) q = q.eq("customer_id", user.id);
