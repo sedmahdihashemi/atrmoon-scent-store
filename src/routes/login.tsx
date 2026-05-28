@@ -63,8 +63,8 @@ function LoginPage() {
               <Input id="password" name="password" type="password" autoComplete="current-password" required />
               {errors.password && <p className="text-xs text-destructive mt-1">{errors.password}</p>}
             </div>
-            <Button type="submit" className="w-full font-serif" disabled={loading}>
-              {loading ? "در حال ورود…" : "ورود"}
+            <Button type="submit" className="w-full font-serif" loading={loading} loadingText="در حال ورود…">
+              ورود
             </Button>
           </form>
           <p className="mt-6 text-center text-sm text-muted-foreground">

@@ -300,7 +300,7 @@ export function ProductEditor({ productId }: { productId?: string }) {
 
       <div className="flex gap-2 justify-end">
         <Button variant="outline" onClick={() => navigate({ to: "/seller/products" })}>انصراف</Button>
-        <Button disabled={saving} onClick={save}>{saving ? "ذخیره…" : "ذخیره"}</Button>
+        <Button loading={saving} loadingText="ذخیره…" onClick={save}>ذخیره</Button>
       </div>
     </div>
   );
@@ -330,7 +330,7 @@ function AddNoteInline({ type, onAdded }: { type: "top"|"middle"|"base"|"general
     <div className="flex items-center gap-1">
       <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="نام نُت" className="h-8 text-sm w-40"
         onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); submit(); } }} autoFocus />
-      <Button size="sm" disabled={busy} onClick={submit}>افزودن</Button>
+      <Button size="sm" loading={busy} onClick={submit}>افزودن</Button>
       <Button size="sm" variant="ghost" onClick={() => { setOpen(false); setName(""); }}>انصراف</Button>
     </div>
   );

@@ -98,8 +98,8 @@ function SellerRegister() {
                 <Textarea id="description" name="description" rows={3} placeholder="درباره فروشگاه شما…" />
               </div>
             </Section>
-            <Button type="submit" className="w-full font-serif" disabled={loading}>
-              {loading ? "در حال ثبت…" : "ثبت درخواست"}
+            <Button type="submit" className="w-full font-serif" loading={loading} loadingText="در حال ثبت…">
+              ثبت درخواست
             </Button>
           </form>
           <p className="mt-6 text-center text-sm text-muted-foreground">

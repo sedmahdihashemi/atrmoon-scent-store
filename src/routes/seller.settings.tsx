@@ -65,7 +65,7 @@ function SellerSettings() {
         </div>
       </div>
       <div className="flex justify-end">
-        <Button onClick={save} disabled={saving}>{saving ? "ذخیره…" : "ذخیره"}</Button>
+        <Button onClick={save} loading={saving} loadingText="ذخیره…">ذخیره</Button>
       </div>
     </div>
   );
