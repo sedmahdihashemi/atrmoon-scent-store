@@ -1,54 +1,39 @@
-# اتصال دامنه atrmoon.top به پروژه Lovable
 
-## هدل
-اتصال دامنه atrmoon.top به پروژه Lovable، با حفظ backend فعلی (Supabase) و تنظیمات امنیتی.
+## هدف
+جلوگیری از کلیک چندباره روی دکمه‌های ثبت/ذخیره/ارسال در سراسر سایت با نمایش یک حالت «در حال انجام» منسجم (اسپینر + غیرفعال‌سازی خودکار).
 
----
+## رویکرد
+به‌جای اصلاح تک‌تک فرم‌ها به‌صورت پراکنده، یک قابلیت ساده به کامپوننت `Button` اضافه می‌کنیم و سپس همه‌ی نقاط مهم را به آن وصل می‌کنیم.
 
-## مراحل اجرا
+### ۱) ارتقاء `src/components/ui/button.tsx`
+افزودن دو prop جدید (بدون تغییر API فعلی):
+- `loading?: boolean` — وقتی true:
+  - دکمه به‌صورت خودکار `disabled` می‌شود (حتی اگر prop دیگری نباشد).
+  - یک آیکن چرخان (`Loader2` از lucide-react) در ابتدای دکمه نمایش داده می‌شود.
+  - `aria-busy="true"` ست می‌شود.
+  - برای جلوگیری از دابل‌کلیک، `onClick` در حالت loading نادیده گرفته می‌شود.
+- `loadingText?: string` — متن جایگزین هنگام loading (اختیاری). اگر داده نشود، خود `children` نشان داده می‌شود ولی با اسپینر و حالت غیرفعال.
 
-### ۱. تنظیم DNS در ایران‌سرور (یا Cloudflare)
-دو رکورد باید اضافه شود:
-```
-A     atrmoon.top          →   Lovable IP
-CNAME www.atrmoon.top      →   atrmoon.top
-```
-اگر پنل ایران‌سرور رکورد A مستقیم نمی‌گیره، Nameserverها رو می‌بریم روی Cloudflare (رایگان) و DNS رو اونجا مدیریت می‌کنیم.
+این تغییر سازگار با همه‌ی استفاده‌های فعلی است.
 
-### ۲. اضافه کردن دامنه در Lovable
-در تنظیمات پروژه:
-```
-Publish → Settings → Custom Domain → Add atrmoon.top
-```
-Lovable دو رکورد DNS ارائه می‌ده:
-- IP address برای رکورد A
-- Target برای رکورد CNAME (www)
+### ۲) به‌روزرسانی فرم‌ها و دکمه‌های ثبت/ذخیره
+در نقاط زیر `disabled={state}` و متن دستی «در حال…» با `loading={state}` جایگزین می‌شود تا اسپینر و رفتار یکدست داشته باشند:
 
-### ۳. صبر برای تأیید DNS و SSL
-بعد از ثبت رکوردها، Lovable به‌طور خودکار:
-- DNS رو verify می‌کنه
-- SSL certificate (HTTPS) صادر می‌کنه
-- دامنه رو فعال می‌کنه
+- `src/routes/login.tsx` — دکمه ورود
+- `src/routes/register.customer.tsx` — ثبت‌نام مشتری
+- `src/routes/register.seller.tsx` — ثبت درخواست فروشنده
+- `src/routes/checkout.tsx` — دکمه «ثبت سفارش»
+- `src/routes/account.tsx` — ذخیره پروفایل، ذخیره/افزودن آدرس
+- `src/routes/contact.tsx` — فرم تماس (در صورت وجود دکمه ارسال)
+- `src/routes/seller.settings.tsx` — ذخیره تنظیمات فروشگاه
+- `src/routes/seller.orders.$id.tsx` — ذخیره وضعیت سفارش
+- `src/components/seller/ProductEditor.tsx` — ذخیره محصول، افزودن واریانت (busy)، آپلود تصویر
+- `src/components/admin/RefDataManager.tsx` — افزودن و ذخیره ردیف‌ها (saving)
 
-این مرحله می‌تونه از ۵ دقیقه تا چند ساعت طول بکشه.
+### ۳) بررسی نهایی
+- بعد از اعمال تغییرات، یک سرچ سراسری برای الگوی `type="submit"` و `onClick={...async` انجام می‌شود تا مطمئن شویم همه‌ی دکمه‌های فعال‌شونده‌ی شبکه‌ای حالت loading دارند.
+- خروجی build بررسی می‌شود.
 
-### ۴. تنظیمات نهایی
-- بررسی: atrmoon.top و www.atrmoon.top هر دو باید به سایت redirect بشن
-- اگر "Edit with Lovable" badge رو می‌خوای مخفی کنی، این تنظیم رو update کن
-
----
-
-## پیش‌نیازها از سمت شما
-- **دسترسی به پنل مدیریت دامنه ایران‌سرور**
-- **تصمیم در مورد www**: redirect to non-www یا برعکس (پیشنهاد: non-www اصلی، www redirect)
-- **استفاده از Cloudflare به‌عنوان DNS proxy** (اختیاری اما پیشنهاد میشه برای SSL راحت‌تر)
-
----
-
-## وضعیت backend
-بدون تغییر. Supabase همچنان به‌صورت مستقل کار می‌کنه و URL های API فعلی:
-- `https://gxoignprlnlwindigjkx.supabase.co`
-- در آینده اگر خواستی می‌تونی custom domain (api.atrmoon.top) رو با پلن paid Supabase بگیری
-
-## وضعیت ایمیل
-برای اینکه ایمیل‌های سایت (مثل سفارشات) از atrmoon.top ارسال بشن، باید تنظیمات email domain رو انجام بدیم. می‌تونیم بعد از اتصال دامنه این کار رو انجام بدیم.
+## خارج از محدوده
+- تغییر منطق فرم‌ها، اعتبارسنجی یا استایل بصری دکمه‌ها (به‌جز افزودن اسپینر کوچک).
+- تغییرات بک‌اند یا RLS.
