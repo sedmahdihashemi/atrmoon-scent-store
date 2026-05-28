@@ -9,6 +9,8 @@ import { AtrmoonLoader } from "@/components/visual/AtrmoonLoader";
 import heroImg from "@/assets/hero-perfume-2.jpg";
 import bannerBottle from "@/assets/banner-bottle.jpg";
 import bannerDeer from "@/assets/banner-deer.jpg";
+import { BestSellers } from "@/components/home/BestSellers";
+import { Sparkles, Truck, ShieldCheck, MessageCircle } from "lucide-react";
 
 export const Route = createFileRoute("/")({ component: Index });
 
