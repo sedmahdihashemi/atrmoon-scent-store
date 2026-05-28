@@ -60,8 +60,8 @@ function CustomerRegister() {
             <Field name="phone" label="شماره موبایل" type="tel" err={errors.phone} />
             <Field name="password" label="رمز عبور" type="password" err={errors.password} />
             <Field name="confirm" label="تکرار رمز عبور" type="password" err={errors.confirm} />
-            <Button type="submit" className="w-full font-serif" disabled={loading}>
-              {loading ? "در حال ثبت…" : "ثبت‌نام"}
+            <Button type="submit" className="w-full font-serif" loading={loading} loadingText="در حال ثبت…">
+              ثبت‌نام
             </Button>
           </form>
           <p className="mt-6 text-center text-sm text-muted-foreground">
