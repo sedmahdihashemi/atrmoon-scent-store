@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
+import { Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -44,13 +45,38 @@ const buttonVariants = cva(
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
+  loading?: boolean;
+  loadingText?: React.ReactNode;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, loading = false, loadingText, disabled, onClick, children, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
+    const isDisabled = disabled || loading;
+    const handleClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+      if (loading) { e.preventDefault(); e.stopPropagation(); return; }
+      onClick?.(e);
+    };
+    const content = asChild ? (
+      children
+    ) : (
+      <>
+        {loading && <Loader2 className="animate-spin" aria-hidden />}
+        {loading && loadingText !== undefined ? loadingText : children}
+      </>
+    );
     return (
-      <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        disabled={isDisabled}
+        aria-busy={loading || undefined}
+        data-loading={loading || undefined}
+        onClick={handleClick}
+        {...props}
+      >
+        {content}
+      </Comp>
     );
   },
 );
