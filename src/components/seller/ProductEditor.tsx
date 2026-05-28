@@ -274,12 +274,15 @@ export function ProductEditor({ productId }: { productId?: string }) {
         <h2 className="font-serif text-lg text-ink">نُت‌های عطر</h2>
         {(["top","middle","base","general"] as const).map((t) => {
           const items = allNotes.filter((n) => n.type === t);
-          if (!items.length) return null;
           const label = t === "top" ? "آغازین" : t === "middle" ? "میانی" : t === "base" ? "پایه" : "عمومی";
           return (
             <div key={t}>
-              <p className="text-xs font-serif text-[var(--gold)] mb-2">{label}</p>
+              <div className="flex items-center justify-between mb-2 gap-2">
+                <p className="text-xs font-serif text-[var(--gold)]">{label}</p>
+                <AddNoteInline type={t} onAdded={(n) => { setAllNotes((a) => [...a, n]); setSelectedNotes((s) => new Set(s).add(n.id)); }} />
+              </div>
               <div className="flex flex-wrap gap-2">
+                {items.length === 0 && <p className="text-xs text-muted-foreground">نُتی ثبت نشده.</p>}
                 {items.map((n) => {
                   const on = selectedNotes.has(n.id);
                   return (
