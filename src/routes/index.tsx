@@ -18,8 +18,8 @@ function Index() {
       <AtrmoonLoader />
       {/* ── Hero — a single bottle in moonlight ───────────────────────── */}
       <section className="relative overflow-hidden">
-        <div className="container mx-auto px-4 pt-16 md:pt-24 pb-24 md:pb-32">
-          <div className="grid md:grid-cols-12 gap-10 md:gap-16 items-end">
+        <div className="container mx-auto px-4 pt-10 md:pt-16 pb-12 md:pb-16">
+          <div className="grid md:grid-cols-12 gap-8 md:gap-12 items-end">
             {/* Left — editorial text column */}
             <div className="md:col-span-7 md:order-1 relative">
               <div className="eyebrow animate-moon-rise">شماره‌ی نخست · پاییز ۱۴۰۳</div>
@@ -29,14 +29,14 @@ function Index() {
               <div className="mt-6 animate-scent-trail origin-right">
                 <ScentTrail className="w-48 text-gold" />
               </div>
-              <p className="pull-quote mt-8 max-w-lg animate-moon-rise delay-400">
+              <p className="pull-quote mt-6 max-w-lg animate-moon-rise delay-400">
                 «هر رایحه‌ای، خاطره‌ایست که هنوز نوشته نشده.»
               </p>
-              <p className="mt-6 max-w-lg text-ink-soft leading-[2.1] text-[15px] animate-moon-rise delay-600">
+              <p className="mt-4 max-w-lg text-ink-soft leading-[1.9] text-[15px] animate-moon-rise delay-600">
                 در عطرمون، آرام پرسه می‌زنیم میان عطرفروشی‌های مستقل ایران. بطری به بطری، حجم به حجم،
                 خاطره به خاطره. این‌جا خرید نیست؛ گفت‌وگوست.
               </p>
-              <div className="mt-12 flex flex-wrap gap-3 animate-moon-rise delay-800">
+              <div className="mt-8 flex flex-wrap gap-3 animate-moon-rise delay-800">
                 <Link to="/products"><Button variant="default" size="xl">پرسه میان رایحه‌ها</Button></Link>
                 <Link to="/stores"><Button variant="outline" size="xl">عطاری عطرفروشان</Button></Link>
               </div>
@@ -70,14 +70,14 @@ function Index() {
       </section>
 
       {/* ── Editorial intro — a slow paragraph ─────────────────────────── */}
-      <section className="container mx-auto px-4 py-24 md:py-32">
+      <section className="container mx-auto px-4 py-14 md:py-20">
         <div className="max-w-2xl mx-auto text-center">
-          <div className="eyebrow ornament mb-6">سرآغاز</div>
+          <div className="eyebrow ornament mb-4">سرآغاز</div>
           <h2 className="heading-display text-3xl md:text-5xl text-ink">
             بازاری آرام، بی‌شتاب، انسانی.
           </h2>
-          <div className="gold-divider w-24 mx-auto my-8" />
-          <p className="text-ink-soft leading-[2.2] text-[16px] text-justify">
+          <div className="gold-divider w-24 mx-auto my-5" />
+          <p className="text-ink-soft leading-[1.95] text-[16px] text-justify">
             عطرمون مجموعه‌ای از عطرفروشان مستقل ایرانی است. هر فروشنده، عطاری خودش را دارد؛ رایحه‌ها را خودش معرفی می‌کند،
             با خریدار خودش گفت‌وگو می‌کند، و سفارش را با دست‌های خودش می‌بندد. این‌جا تخفیف فریاد نمی‌زند، و آگهی چشمک نمی‌زند.
             این‌جا فقط رایحه‌هاست و کسانی که آن‌ها را دوست می‌دارند.
@@ -86,8 +86,8 @@ function Index() {
       </section>
 
       {/* ── Fragrance families — arch cards ────────────────────────────── */}
-      <section className="container mx-auto px-4 py-16 md:py-20">
-        <div className="flex items-end justify-between mb-12 gap-4">
+      <section className="container mx-auto px-4 py-10 md:py-14">
+        <div className="flex items-end justify-between mb-8 gap-4">
           <div>
             <div className="eyebrow">فصلِ یکم</div>
             <h2 className="heading-display text-3xl md:text-4xl text-ink mt-2">خانواده‌های رایحه</h2>
@@ -125,9 +125,9 @@ function Index() {
       </section>
 
       {/* ── Editorial split — two columns like an old newspaper ────────── */}
-      <section className="container mx-auto px-4 py-24">
-        <div className="dotted-divider max-w-md mx-auto mb-16" />
-        <div className="grid md:grid-cols-12 gap-10 md:gap-16">
+      <section className="container mx-auto px-4 py-14 md:py-16">
+        <div className="dotted-divider max-w-md mx-auto mb-10" />
+        <div className="grid md:grid-cols-12 gap-8 md:gap-12">
           <div className="md:col-span-5">
             <div className="vlabel hidden md:inline-block float-left mr-4 mt-2">SECTION · II</div>
             <div className="eyebrow mb-3">یادداشتِ ماه</div>
@@ -137,7 +137,7 @@ function Index() {
               <span className="italic text-gold-deep">صدایی‌ست از روزی دیگر.</span>
             </h3>
           </div>
-          <div className="md:col-span-7 text-ink-soft leading-[2.2] text-[15px] columns-1 md:columns-2 gap-10">
+          <div className="md:col-span-7 text-ink-soft leading-[1.95] text-[15px] columns-1 md:columns-2 gap-8">
             <p>
               در عطرمون، رایحه را کالا نمی‌بینیم. آن را یک یادداشت کوتاه می‌دانیم؛ چند کلمه‌ای که از پشت سال‌ها برمی‌گردد و
               کنار گوشت می‌نشیند. به همین خاطر، صفحه‌ی هر عطر بیش از آن‌که قفسه‌ی فروشگاه باشد، صفحه‌ی یک کتاب کوچک است.
@@ -148,11 +148,11 @@ function Index() {
             </p>
           </div>
         </div>
-        <div className="dotted-divider max-w-md mx-auto mt-16" />
+        <div className="dotted-divider max-w-md mx-auto mt-10" />
       </section>
 
       {/* ── Cinematic banner — bottle on aged paper ───────────────────── */}
-      <section className="container mx-auto px-4 pb-24">
+      <section className="container mx-auto px-4 pb-14">
         <div className="relative arch-frame overflow-hidden paper-grain shadow-elevated group">
           <img
             src={bannerBottle}
@@ -177,24 +177,24 @@ function Index() {
       </section>
 
       {/* ── Three pillars ──────────────────────────────────────────────── */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="grid md:grid-cols-3 gap-8">
+      <section className="container mx-auto px-4 py-10 md:py-14">
+        <div className="grid md:grid-cols-3 gap-6">
           {[
             { t: "حجم به انتخاب تو", d: "از سَمپلِ نیم‌میلی‌لیتری تا بطری کامل. هر رایحه را به اندازه‌ی همان شب می‌خری." },
             { t: "گفت‌وگو با فروشنده", d: "پیش از خرید بپرس، بشنو. هر عطرفروش، عطاری خودش را دارد و خودش پاسخ می‌دهد." },
             { t: "بسته‌بندی با حوصله", d: "هر بسته، با کاغذ و دست‌خط و یک یادداشت کوچک می‌رسد." },
           ].map((p, i) => (
-            <div key={p.t} className="paper-card paper-grain p-8 text-center" style={{ animation: `moon-rise 900ms var(--ease-moon) ${i * 120}ms both` }}>
-              <PersianArch className="w-10 h-12 mx-auto text-gold mb-4" />
+            <div key={p.t} className="paper-card paper-grain p-6 text-center" style={{ animation: `moon-rise 900ms var(--ease-moon) ${i * 120}ms both` }}>
+              <PersianArch className="w-9 h-11 mx-auto text-gold mb-3" />
               <h4 className="font-serif text-ink text-xl mb-2">{p.t}</h4>
-              <p className="text-ink-soft text-sm leading-[2]">{p.d}</p>
+              <p className="text-ink-soft text-sm leading-[1.85]">{p.d}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* ── Full-bleed arch & crescent banner ─────────────────────────── */}
-      <section className="relative py-24">
+      <section className="relative py-12 md:py-16">
         <div className="container mx-auto px-4">
           <div className="relative rounded-md overflow-hidden paper-grain">
             <img
@@ -203,10 +203,10 @@ function Index() {
               loading="lazy"
               width={1920}
               height={1080}
-              className="w-full h-[320px] md:h-[520px] object-cover animate-drift"
+              className="w-full h-[260px] md:h-[420px] object-cover animate-drift"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-paper via-paper/10 to-transparent" />
-            <div className="absolute bottom-0 inset-x-0 p-8 md:p-14 text-center">
+            <div className="absolute bottom-0 inset-x-0 p-6 md:p-10 text-center">
               <div className="eyebrow mb-3 text-ink-soft">آهویِ خاطره</div>
               <p className="font-serif italic text-ink text-lg md:text-2xl max-w-xl mx-auto leading-[1.9]">
                 «رم آهوی تصویرم شتاب ساکنی دارم»
@@ -217,14 +217,14 @@ function Index() {
       </section>
 
       {/* ── Seller invite — quiet invitation ───────────────────────────── */}
-      <section className="container mx-auto px-4 py-24">
-        <div className="paper-card paper-grain p-10 md:p-16 grid md:grid-cols-12 gap-10 items-center bg-gradient-paper">
+      <section className="container mx-auto px-4 py-12 md:py-16">
+        <div className="paper-card paper-grain p-8 md:p-12 grid md:grid-cols-12 gap-8 items-center bg-gradient-paper">
           <div className="md:col-span-7">
-            <div className="eyebrow ornament mb-5">دعوت</div>
+            <div className="eyebrow ornament mb-4">دعوت</div>
             <h3 className="heading-display text-3xl md:text-4xl text-ink leading-tight">
               عطاری خودت را در عطرمون بگشا.
             </h3>
-            <p className="mt-5 text-ink-soft leading-[2] text-[15px] max-w-xl">
+            <p className="mt-4 text-ink-soft leading-[1.9] text-[15px] max-w-xl">
               اگر عطرفروشی، این‌جا جایی‌ست برای عطاریی از آنِ تو؛ بی‌واسطه، آرام، و با شکل و رنگِ خودت.
             </p>
           </div>
@@ -240,8 +240,8 @@ function Index() {
       </section>
 
       {/* ── Closing whisper ────────────────────────────────────────────── */}
-      <section className="container mx-auto px-4 py-24 text-center">
-        <Flourish className="w-64 mx-auto text-ink/30 mb-6" />
+      <section className="container mx-auto px-4 py-12 text-center">
+        <Flourish className="w-56 mx-auto text-ink/30 mb-4" />
         <p className="font-serif italic text-ink-soft text-lg">
           عطرمون · بی‌شتاب، بی‌فریاد، بی‌نمایش.
         </p>
