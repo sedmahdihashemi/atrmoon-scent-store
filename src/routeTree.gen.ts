@@ -43,6 +43,7 @@ import { Route as AdminBottleTypesRouteImport } from './routes/admin.bottle-type
 import { Route as SellerProductsNewRouteImport } from './routes/seller.products.new'
 import { Route as SellerProductsIdRouteImport } from './routes/seller.products.$id'
 import { Route as SellerOrdersIdRouteImport } from './routes/seller.orders.$id'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ApiPublicBaleWebhookRouteImport } from './routes/api/public/bale/webhook'
 
 const StoresRoute = StoresRouteImport.update({
@@ -215,6 +216,12 @@ const SellerOrdersIdRoute = SellerOrdersIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => SellerOrdersRoute,
 } as any)
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicBaleWebhookRoute = ApiPublicBaleWebhookRouteImport.update({
   id: '/api/public/bale/webhook',
   path: '/api/public/bale/webhook',
@@ -257,6 +264,7 @@ export interface FileRoutesByFullPath {
   '/seller/products/$id': typeof SellerProductsIdRoute
   '/seller/products/new': typeof SellerProductsNewRoute
   '/api/public/bale/webhook': typeof ApiPublicBaleWebhookRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -292,6 +300,7 @@ export interface FileRoutesByTo {
   '/seller/products/$id': typeof SellerProductsIdRoute
   '/seller/products/new': typeof SellerProductsNewRoute
   '/api/public/bale/webhook': typeof ApiPublicBaleWebhookRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -330,6 +339,7 @@ export interface FileRoutesById {
   '/seller/products/$id': typeof SellerProductsIdRoute
   '/seller/products/new': typeof SellerProductsNewRoute
   '/api/public/bale/webhook': typeof ApiPublicBaleWebhookRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -369,6 +379,7 @@ export interface FileRouteTypes {
     | '/seller/products/$id'
     | '/seller/products/new'
     | '/api/public/bale/webhook'
+    | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -404,6 +415,7 @@ export interface FileRouteTypes {
     | '/seller/products/$id'
     | '/seller/products/new'
     | '/api/public/bale/webhook'
+    | '/lovable/email/queue/process'
   id:
     | '__root__'
     | '/'
@@ -441,6 +453,7 @@ export interface FileRouteTypes {
     | '/seller/products/$id'
     | '/seller/products/new'
     | '/api/public/bale/webhook'
+    | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -459,6 +472,7 @@ export interface RootRouteChildren {
   SellerRoute: typeof SellerRouteWithChildren
   StoresRoute: typeof StoresRoute
   ApiPublicBaleWebhookRoute: typeof ApiPublicBaleWebhookRoute
+  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -701,6 +715,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SellerOrdersIdRouteImport
       parentRoute: typeof SellerOrdersRoute
     }
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/bale/webhook': {
       id: '/api/public/bale/webhook'
       path: '/api/public/bale/webhook'
@@ -824,6 +845,7 @@ const rootRouteChildren: RootRouteChildren = {
   SellerRoute: SellerRouteWithChildren,
   StoresRoute: StoresRoute,
   ApiPublicBaleWebhookRoute: ApiPublicBaleWebhookRoute,
+  LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
