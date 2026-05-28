@@ -8,7 +8,6 @@ import { formatToman } from "@/lib/cart-session";
 import { WishlistButton } from "@/components/WishlistButton";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/useCart";
-import { useState } from "react";
 
 export const Route = createFileRoute("/stores/$slug")({ component: StoreDetail });
 
