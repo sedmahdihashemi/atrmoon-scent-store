@@ -253,7 +253,7 @@ function AddressesTab() {
           </div>
           <div><Label>آدرس کامل</Label><Textarea rows={3} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
           <div className="flex gap-2">
-            <Button onClick={submit} disabled={saving}>ذخیره</Button>
+            <Button onClick={submit} loading={saving} loadingText="ذخیره…">ذخیره</Button>
             <Button variant="outline" onClick={() => setShowForm(false)}>انصراف</Button>
           </div>
         </div>
@@ -353,7 +353,7 @@ function ProfileTab() {
       <div><Label>نام و نام خانوادگی</Label><Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} /></div>
       <div><Label>ایمیل</Label><Input value={profile?.email || ""} disabled /></div>
       <div><Label>تلفن</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
-      <Button onClick={save} disabled={saving}>ذخیره تغییرات</Button>
+      <Button onClick={save} loading={saving} loadingText="در حال ذخیره…">ذخیره تغییرات</Button>
     </div>
   );
 }

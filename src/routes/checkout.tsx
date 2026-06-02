@@ -228,8 +228,8 @@ function CheckoutPage() {
               <span>قابل پرداخت</span>
               <span className="text-[var(--gold)]">{formatToman(subtotal)}</span>
             </div>
-            <Button type="submit" disabled={submitting} className="w-full h-11 font-serif">
-              {submitting ? "در حال ثبت…" : "ثبت سفارش"}
+            <Button type="submit" loading={submitting} loadingText="در حال ثبت…" className="w-full h-11 font-serif">
+              ثبت سفارش
             </Button>
           </aside>
         </form>

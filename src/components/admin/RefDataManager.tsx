@@ -82,7 +82,7 @@ export function RefDataManager({
           {fields.map((f) => (
             <FieldInput key={f.key} f={f} value={form[f.key] ?? ""} onChange={(v) => setForm({ ...form, [f.key]: v })} />
           ))}
-          <Button onClick={create} disabled={saving} className="h-9 sm:col-span-2 md:col-span-1"><Plus className="w-4 h-4 me-1" />افزودن</Button>
+          <Button onClick={create} loading={saving} className="h-9 sm:col-span-2 md:col-span-1"><Plus className="w-4 h-4 me-1" />افزودن</Button>
         </div>
       </div>
 

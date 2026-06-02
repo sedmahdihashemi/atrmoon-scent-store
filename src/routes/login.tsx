@@ -8,7 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/login")({ component: LoginPage });
+export const Route = createFileRoute("/login")({
+  component: LoginPage,
+  validateSearch: (s: Record<string, unknown>) => ({ redirect: typeof s.redirect === "string" ? s.redirect : "" }),
+});
 
 const schema = z.object({
   email: z.string().email("ایمیل معتبر وارد کنید"),
@@ -17,6 +20,7 @@ const schema = z.object({
 
 function LoginPage() {
   const nav = useNavigate();
+  const { redirect } = Route.useSearch();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -34,6 +38,7 @@ function LoginPage() {
     setLoading(false);
     if (error) { toast.error("ورود ناموفق", { description: error.message }); return; }
     toast.success("خوش‌آمدید");
+    if (redirect) { nav({ to: redirect }); return; }
     // Determine target by role
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { nav({ to: "/" }); return; }
@@ -63,8 +68,8 @@ function LoginPage() {
               <Input id="password" name="password" type="password" autoComplete="current-password" required />
               {errors.password && <p className="text-xs text-destructive mt-1">{errors.password}</p>}
             </div>
-            <Button type="submit" className="w-full font-serif" disabled={loading}>
-              {loading ? "در حال ورود…" : "ورود"}
+            <Button type="submit" className="w-full font-serif" loading={loading} loadingText="در حال ورود…">
+              ورود
             </Button>
           </form>
           <p className="mt-6 text-center text-sm text-muted-foreground">

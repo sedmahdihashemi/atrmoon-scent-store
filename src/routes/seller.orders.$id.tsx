@@ -94,7 +94,7 @@ function OrderDetail() {
               <Label className="text-xs font-serif text-ink/80 mb-1.5 block">یادداشت فروشنده (اختیاری)</Label>
               <Textarea rows={3} value={note} onChange={(e) => setNote(e.target.value)} />
             </div>
-            <Button onClick={save} disabled={saving} className="w-full">{saving ? "ذخیره…" : "ذخیره"}</Button>
+            <Button onClick={save} loading={saving} loadingText="ذخیره…" className="w-full">ذخیره</Button>
           </div>
         </aside>
       </div>

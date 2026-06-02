@@ -25,6 +25,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SellerIndexRouteImport } from './routes/seller.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as StoresSlugRouteImport } from './routes/stores.$slug'
 import { Route as SellerSettingsRouteImport } from './routes/seller.settings'
 import { Route as SellerProductsRouteImport } from './routes/seller.products'
 import { Route as SellerPendingRouteImport } from './routes/seller.pending'
@@ -43,6 +44,7 @@ import { Route as AdminBottleTypesRouteImport } from './routes/admin.bottle-type
 import { Route as SellerProductsNewRouteImport } from './routes/seller.products.new'
 import { Route as SellerProductsIdRouteImport } from './routes/seller.products.$id'
 import { Route as SellerOrdersIdRouteImport } from './routes/seller.orders.$id'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ApiPublicBaleWebhookRouteImport } from './routes/api/public/bale/webhook'
 
 const StoresRoute = StoresRouteImport.update({
@@ -124,6 +126,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const StoresSlugRoute = StoresSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => StoresRoute,
 } as any)
 const SellerSettingsRoute = SellerSettingsRouteImport.update({
   id: '/settings',
@@ -215,6 +222,12 @@ const SellerOrdersIdRoute = SellerOrdersIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => SellerOrdersRoute,
 } as any)
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicBaleWebhookRoute = ApiPublicBaleWebhookRouteImport.update({
   id: '/api/public/bale/webhook',
   path: '/api/public/bale/webhook',
@@ -235,7 +248,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRouteWithChildren
   '/search': typeof SearchRoute
   '/seller': typeof SellerRouteWithChildren
-  '/stores': typeof StoresRoute
+  '/stores': typeof StoresRouteWithChildren
   '/admin/bottle-types': typeof AdminBottleTypesRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -251,12 +264,14 @@ export interface FileRoutesByFullPath {
   '/seller/pending': typeof SellerPendingRoute
   '/seller/products': typeof SellerProductsRouteWithChildren
   '/seller/settings': typeof SellerSettingsRoute
+  '/stores/$slug': typeof StoresSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/seller/': typeof SellerIndexRoute
   '/seller/orders/$id': typeof SellerOrdersIdRoute
   '/seller/products/$id': typeof SellerProductsIdRoute
   '/seller/products/new': typeof SellerProductsNewRoute
   '/api/public/bale/webhook': typeof ApiPublicBaleWebhookRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -270,7 +285,7 @@ export interface FileRoutesByTo {
   '/products': typeof ProductsRouteWithChildren
   '/register': typeof RegisterRouteWithChildren
   '/search': typeof SearchRoute
-  '/stores': typeof StoresRoute
+  '/stores': typeof StoresRouteWithChildren
   '/admin/bottle-types': typeof AdminBottleTypesRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -286,12 +301,14 @@ export interface FileRoutesByTo {
   '/seller/pending': typeof SellerPendingRoute
   '/seller/products': typeof SellerProductsRouteWithChildren
   '/seller/settings': typeof SellerSettingsRoute
+  '/stores/$slug': typeof StoresSlugRoute
   '/admin': typeof AdminIndexRoute
   '/seller': typeof SellerIndexRoute
   '/seller/orders/$id': typeof SellerOrdersIdRoute
   '/seller/products/$id': typeof SellerProductsIdRoute
   '/seller/products/new': typeof SellerProductsNewRoute
   '/api/public/bale/webhook': typeof ApiPublicBaleWebhookRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -308,7 +325,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRouteWithChildren
   '/search': typeof SearchRoute
   '/seller': typeof SellerRouteWithChildren
-  '/stores': typeof StoresRoute
+  '/stores': typeof StoresRouteWithChildren
   '/admin/bottle-types': typeof AdminBottleTypesRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -324,12 +341,14 @@ export interface FileRoutesById {
   '/seller/pending': typeof SellerPendingRoute
   '/seller/products': typeof SellerProductsRouteWithChildren
   '/seller/settings': typeof SellerSettingsRoute
+  '/stores/$slug': typeof StoresSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/seller/': typeof SellerIndexRoute
   '/seller/orders/$id': typeof SellerOrdersIdRoute
   '/seller/products/$id': typeof SellerProductsIdRoute
   '/seller/products/new': typeof SellerProductsNewRoute
   '/api/public/bale/webhook': typeof ApiPublicBaleWebhookRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -363,12 +382,14 @@ export interface FileRouteTypes {
     | '/seller/pending'
     | '/seller/products'
     | '/seller/settings'
+    | '/stores/$slug'
     | '/admin/'
     | '/seller/'
     | '/seller/orders/$id'
     | '/seller/products/$id'
     | '/seller/products/new'
     | '/api/public/bale/webhook'
+    | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -398,12 +419,14 @@ export interface FileRouteTypes {
     | '/seller/pending'
     | '/seller/products'
     | '/seller/settings'
+    | '/stores/$slug'
     | '/admin'
     | '/seller'
     | '/seller/orders/$id'
     | '/seller/products/$id'
     | '/seller/products/new'
     | '/api/public/bale/webhook'
+    | '/lovable/email/queue/process'
   id:
     | '__root__'
     | '/'
@@ -435,12 +458,14 @@ export interface FileRouteTypes {
     | '/seller/pending'
     | '/seller/products'
     | '/seller/settings'
+    | '/stores/$slug'
     | '/admin/'
     | '/seller/'
     | '/seller/orders/$id'
     | '/seller/products/$id'
     | '/seller/products/new'
     | '/api/public/bale/webhook'
+    | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -457,8 +482,9 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRouteWithChildren
   SearchRoute: typeof SearchRoute
   SellerRoute: typeof SellerRouteWithChildren
-  StoresRoute: typeof StoresRoute
+  StoresRoute: typeof StoresRouteWithChildren
   ApiPublicBaleWebhookRoute: typeof ApiPublicBaleWebhookRoute
+  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -574,6 +600,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/stores/$slug': {
+      id: '/stores/$slug'
+      path: '/$slug'
+      fullPath: '/stores/$slug'
+      preLoaderRoute: typeof StoresSlugRouteImport
+      parentRoute: typeof StoresRoute
     }
     '/seller/settings': {
       id: '/seller/settings'
@@ -701,6 +734,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SellerOrdersIdRouteImport
       parentRoute: typeof SellerOrdersRoute
     }
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/bale/webhook': {
       id: '/api/public/bale/webhook'
       path: '/api/public/bale/webhook'
@@ -808,6 +848,17 @@ const SellerRouteChildren: SellerRouteChildren = {
 const SellerRouteWithChildren =
   SellerRoute._addFileChildren(SellerRouteChildren)
 
+interface StoresRouteChildren {
+  StoresSlugRoute: typeof StoresSlugRoute
+}
+
+const StoresRouteChildren: StoresRouteChildren = {
+  StoresSlugRoute: StoresSlugRoute,
+}
+
+const StoresRouteWithChildren =
+  StoresRoute._addFileChildren(StoresRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -822,8 +873,9 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRouteWithChildren,
   SearchRoute: SearchRoute,
   SellerRoute: SellerRouteWithChildren,
-  StoresRoute: StoresRoute,
+  StoresRoute: StoresRouteWithChildren,
   ApiPublicBaleWebhookRoute: ApiPublicBaleWebhookRoute,
+  LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

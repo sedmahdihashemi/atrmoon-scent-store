@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getOrCreateCartSession, getStoredCartId, setStoredCartId, clearCartSession } from "@/lib/cart-session";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { useNavigate } from "@tanstack/react-router";
 
 export type CartItem = {
   id: string;
@@ -44,6 +45,7 @@ const CartCtx = createContext<Ctx | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [cartId, setCartId] = useState<string | null>(null);
   const [storeId, setStoreId] = useState<string | null>(null);
   const [items, setItems] = useState<CartItem[]>([]);
@@ -52,6 +54,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const ensureCart = useCallback(async (): Promise<{ id: string; session: string | null } | null> => {
     if (typeof window === "undefined") return null;
     const session = user ? null : getOrCreateCartSession();
+    // RLS for guest carts requires this header to match the cart's session_id.
+    // Authenticated users are matched by customer_id and don't need it.
+    const rest = (supabase as any).rest;
+    if (rest?.headers) {
+      if (session) rest.headers["x-cart-session"] = session;
+      else delete rest.headers["x-cart-session"];
+    }
     // try existing
     let q = supabase.from("carts").select("id, store_id").limit(1);
     if (user) q = q.eq("customer_id", user.id);
@@ -99,6 +108,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => { void refresh(); }, [refresh]);
 
   const addItem = useCallback(async (productId: string, variantId: string, itemStoreId: string, qty = 1) => {
+    if (!user) {
+      toast.info("برای افزودن به سبد ابتدا وارد شوید");
+      const redirect = typeof window !== "undefined" ? window.location.pathname + window.location.search : "/";
+      navigate({ to: "/login", search: { redirect } as any });
+      return;
+    }
     const c = await ensureCart();
     if (!c) { toast.error("سبد در دسترس نیست"); return; }
     // single-store rule: if cart has a different store, ask to clear
@@ -121,7 +136,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setStoreId(itemStoreId);
     await loadItems(c.id);
     toast.success("به سبد افزوده شد");
-  }, [ensureCart, loadItems, storeId]);
+  }, [ensureCart, loadItems, storeId, user, navigate]);
 
   const updateQty = useCallback(async (itemId: string, qty: number) => {
     if (qty < 1) return;
