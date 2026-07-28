@@ -1,0 +1,2 @@
+CREATE POLICY inv_public_read_avail_auth ON public.product_inventory FOR SELECT TO authenticated USING (EXISTS (SELECT 1 FROM products p JOIN stores s ON s.id = p.store_id WHERE p.id = product_inventory.product_id AND p.status = 'active' AND s.status = 'approved'));
+GRANT SELECT ON public.product_inventory TO authenticated;
