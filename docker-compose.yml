@@ -10,9 +10,11 @@ services:
       # Server-side backend URL (used by server functions at runtime).
       SUPABASE_URL: ${SELF_HOST_SUPABASE_URL:-https://atrmoon.top/sb}
       SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY}
-      # NOTE: SUPABASE_SERVICE_ROLE_KEY is not available on Lovable Cloud.
-      # Features that need it (Bale bot order notifications, email queue)
-      # stay disabled on the self-hosted deployment.
+      # Optional: set these in .env to enable the Bale bot and the email queue.
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
+      BALE_BOT_TOKEN: ${BALE_BOT_TOKEN:-}
+      LOVABLE_API_KEY: ${LOVABLE_API_KEY:-}
+      LOVABLE_SEND_URL: ${LOVABLE_SEND_URL:-}
     restart: unless-stopped
 
   caddy:
