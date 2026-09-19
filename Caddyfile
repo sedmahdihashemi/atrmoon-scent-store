@@ -17,7 +17,7 @@ atrmoon.top, www.atrmoon.top {
 	# (not the Node app) so it's never affected by the app's static-file
 	# handling and always comes back as real JSON with no redirects.
 	handle /.well-known/* {
-		root * /srv/well-known
+		root * /srv
 		header Content-Type application/json
 		file_server
 	}
