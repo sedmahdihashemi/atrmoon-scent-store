@@ -16,14 +16,46 @@ function AllOrders() {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
+      const { data: orders, error } = await supabase
         .from("orders")
-        .select("*, stores:store_id(store_name, support_phone, seller_id, profiles:seller_id(full_name)), profiles:customer_id(full_name, email)")
+        .select("*")
         .order("created_at", { ascending: false })
         .limit(200);
-      setRows(data ?? []);
+      if (error) { console.error(error); setRows([]); return; }
+      const list = orders ?? [];
+      const storeIds = [...new Set(list.map((o: any) => o.store_id).filter(Boolean))];
+      const customerIds = [...new Set(list.map((o: any) => o.customer_id).filter(Boolean))];
+
+      const [{ data: stores }, { data: profs }] = await Promise.all([
+        storeIds.length
+          ? supabase.from("stores").select("id, store_name, support_phone, seller_id").in("id", storeIds)
+          : Promise.resolve({ data: [] as any[] }),
+        customerIds.length
+          ? supabase.from("profiles").select("id, full_name, email").in("id", customerIds)
+          : Promise.resolve({ data: [] as any[] }),
+      ]);
+
+      const sellerIds = [...new Set((stores ?? []).map((s: any) => s.seller_id).filter(Boolean))];
+      const { data: sellerProfs } = sellerIds.length
+        ? await supabase.from("profiles").select("id, full_name").in("id", sellerIds)
+        : { data: [] as any[] };
+
+      const sellerMap = new Map((sellerProfs ?? []).map((p: any) => [p.id, p]));
+      const storeMap = new Map(
+        (stores ?? []).map((s: any) => [s.id, { ...s, profiles: sellerMap.get(s.seller_id) ?? null }]),
+      );
+      const profMap = new Map((profs ?? []).map((p: any) => [p.id, p]));
+
+      setRows(
+        list.map((o: any) => ({
+          ...o,
+          stores: storeMap.get(o.store_id) ?? null,
+          profiles: profMap.get(o.customer_id) ?? null,
+        })),
+      );
     })();
   }, []);
+
 
   const toggle = async (id: string) => {
     if (open === id) { setOpen(null); return; }

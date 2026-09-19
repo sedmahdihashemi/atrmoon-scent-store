@@ -1,0 +1,12 @@
+node_modules
+dist
+.output
+.wrangler
+.git
+.lovable
+.workspace
+.agents
+.claude
+docs
+*.log
+.DS_Store

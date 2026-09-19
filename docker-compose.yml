@@ -1,0 +1,33 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        # Browser-side backend URL. Defaults to your own /sb proxy (see Caddyfile).
+        VITE_SUPABASE_URL: ${SELF_HOST_SUPABASE_URL:-https://atrmoon.top/sb}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY}
+    environment:
+      # Server-side backend URL (used by server functions at runtime).
+      SUPABASE_URL: ${SELF_HOST_SUPABASE_URL:-https://atrmoon.top/sb}
+      SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY}
+      # NOTE: SUPABASE_SERVICE_ROLE_KEY is not available on Lovable Cloud.
+      # Features that need it (Bale bot order notifications, email queue)
+      # stay disabled on the self-hosted deployment.
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+volumes:
+  caddy_data:
+  caddy_config:
