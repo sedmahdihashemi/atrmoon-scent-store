@@ -1,1 +1,8 @@
-[]
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "top.atrmoon.twa",
+        "sha256_cert_fingerprints": ["7D:CF:75:B2:CE:BB:E0:62:88:0D:59:02:D6:C5:40:99:04:6E:D1:CD:12:26:35:05:80:83:AB:EB:A4:DD:F1:DC"]
+      }
+    }]
