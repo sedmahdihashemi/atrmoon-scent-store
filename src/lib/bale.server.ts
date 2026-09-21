@@ -34,6 +34,14 @@ function stripHtml(s: string) {
 
 export { supabaseAdmin };
 
+// Supabase queries in the bot code often ignore the `error` field and just
+// use `data` (which is null/empty on failure), so a bad key or RLS issue
+// silently looks like "no rows" instead of surfacing anywhere. Call this
+// wherever such a result is read so failures at least show up in the logs.
+export function logIfError(context: string, error: unknown) {
+  if (error) console.error("[bale]", context, error);
+}
+
 const STATUS_FA: Record<string, string> = {
   pending_contact: "در انتظار تماس",
   contacted: "تماس گرفته شد",
@@ -53,11 +61,12 @@ function fmtMoney(n: number | string) {
 }
 
 export async function buildInvoiceText(orderId: string, opts: { includeStore?: boolean } = {}) {
-  const { data: order } = await supabaseAdmin
+  const { data: order, error } = await supabaseAdmin
     .from("orders")
     .select("*, stores(store_name), order_items(*)")
     .eq("id", orderId)
     .maybeSingle();
+  logIfError(`buildInvoiceText(${orderId})`, error);
   if (!order) return null;
 
   const items = (order as any).order_items as any[];

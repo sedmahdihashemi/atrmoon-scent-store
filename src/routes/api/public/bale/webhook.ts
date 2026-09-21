@@ -5,6 +5,7 @@ import {
   supabaseAdmin,
   buildInvoiceText,
   statusFa,
+  logIfError,
 } from "@/lib/bale.server";
 
 function authClient() {
@@ -14,25 +15,28 @@ function authClient() {
 }
 
 async function getSession(chat_id: number) {
-  const { data } = await supabaseAdmin
+  const { data, error } = await supabaseAdmin
     .from("bot_sessions")
     .select("*")
     .eq("chat_id", chat_id)
     .maybeSingle();
+  logIfError(`getSession(${chat_id})`, error);
   return data as any;
 }
 
 async function upsertSession(chat_id: number, patch: Record<string, unknown>) {
-  await supabaseAdmin
+  const { error } = await supabaseAdmin
     .from("bot_sessions")
     .upsert({ chat_id, ...patch }, { onConflict: "chat_id" });
+  logIfError(`upsertSession(${chat_id})`, error);
 }
 
 async function getRole(user_id: string): Promise<"super_admin" | "seller" | "customer" | null> {
-  const { data } = await supabaseAdmin
+  const { data, error } = await supabaseAdmin
     .from("user_roles")
     .select("role")
     .eq("user_id", user_id);
+  logIfError(`getRole(${user_id})`, error);
   const roles = (data ?? []).map((r: any) => r.role);
   if (roles.includes("super_admin")) return "super_admin";
   if (roles.includes("seller")) return "seller";
@@ -99,10 +103,11 @@ async function handleLoggedIn(chat_id: number, user_id: string, text: string) {
       .order("created_at", { ascending: false })
       .limit(5);
     if (role === "seller") {
-      const { data: stores } = await supabaseAdmin
+      const { data: stores, error: storesErr } = await supabaseAdmin
         .from("stores")
         .select("id")
         .eq("seller_id", user_id);
+      logIfError(`/orders stores(${user_id})`, storesErr);
       const ids = (stores ?? []).map((s: any) => s.id);
       if (ids.length === 0) {
         await sendMessage(chat_id, "فروشگاهی برای شما ثبت نشده است.");
@@ -115,7 +120,8 @@ async function handleLoggedIn(chat_id: number, user_id: string, text: string) {
       await sendMessage(chat_id, "دسترسی ندارید.");
       return;
     }
-    const { data: orders } = await query;
+    const { data: orders, error: ordersErr } = await query;
+    logIfError(`/orders query(${user_id})`, ordersErr);
     if (!orders || orders.length === 0) {
       await sendMessage(chat_id, "سفارشی یافت نشد.\nبرای پیگیری یک سفارش خاص: <code>/track ATR-...</code>");
       return;
@@ -134,11 +140,12 @@ async function handleLoggedIn(chat_id: number, user_id: string, text: string) {
       await sendMessage(chat_id, "کد پیگیری را وارد کنید: /track ATR-...");
       return;
     }
-    const { data: order } = await supabaseAdmin
+    const { data: order, error: orderErr } = await supabaseAdmin
       .from("orders")
       .select("id, store_id, customer_id")
       .eq("order_number", code)
       .maybeSingle();
+    logIfError(`/track order(${code})`, orderErr);
     if (!order) {
       await sendMessage(chat_id, "سفارشی با این کد یافت نشد.");
       return;
@@ -146,11 +153,12 @@ async function handleLoggedIn(chat_id: number, user_id: string, text: string) {
     // authorization for non-admin
     if (role !== "super_admin") {
       if (role === "seller") {
-        const { data: s } = await supabaseAdmin
+        const { data: s, error: sErr } = await supabaseAdmin
           .from("stores")
           .select("seller_id")
           .eq("id", (order as any).store_id)
           .maybeSingle();
+        logIfError(`/track store(${(order as any).store_id})`, sErr);
         if ((s as any)?.seller_id !== user_id) {
           await sendMessage(chat_id, "دسترسی ندارید.");
           return;
@@ -184,19 +192,21 @@ async function handleLoggedIn(chat_id: number, user_id: string, text: string) {
       );
       return;
     }
-    const { data: order } = await supabaseAdmin
+    const { data: order, error: orderErr } = await supabaseAdmin
       .from("orders")
       .select("id, customer_id")
       .eq("order_number", code)
       .maybeSingle();
+    logIfError(`/review order(${code})`, orderErr);
     if (!order || (order as any).customer_id !== user_id) {
       await sendMessage(chat_id, "این سفارش متعلق به شما نیست یا یافت نشد.");
       return;
     }
-    const { data: items } = await supabaseAdmin
+    const { data: items, error: itemsErr } = await supabaseAdmin
       .from("order_items")
       .select("product_id")
       .eq("order_id", (order as any).id);
+    logIfError(`/review items(${(order as any).id})`, itemsErr);
     const productIds = [...new Set((items ?? []).map((i: any) => i.product_id).filter(Boolean))];
     if (productIds.length === 0) {
       await sendMessage(chat_id, "محصولی برای ثبت نظر یافت نشد.");
@@ -233,11 +243,12 @@ async function handleLoggedIn(chat_id: number, user_id: string, text: string) {
 }
 
 async function handlePublicTrack(chat_id: number, code: string) {
-  const { data: order } = await supabaseAdmin
+  const { data: order, error } = await supabaseAdmin
     .from("orders")
     .select("order_number, status, created_at, customer_name")
     .eq("order_number", code)
     .maybeSingle();
+  logIfError(`handlePublicTrack(${code})`, error);
   if (!order) {
     await sendMessage(chat_id, "سفارشی با این کد یافت نشد.");
     return;
