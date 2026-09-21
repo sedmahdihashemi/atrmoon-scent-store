@@ -5,18 +5,31 @@ import { supabase } from "@/integrations/supabase/client";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/register/customer")({ component: CustomerRegister });
+export const Route = createFileRoute("/register/customer")({
+  component: CustomerRegister,
+  head: () => ({
+    meta: [
+      { title: "ثبت‌نام مشتری | عطرمون" },
+      { name: "description", content: "ساخت حساب مشتری در عطرمون برای خرید و پیگیری رایحه‌ها." },
+      { property: "og:title", content: "ثبت‌نام مشتری | عطرمون" },
+      { property: "og:description", content: "حساب مشتری عطرمون را بسازید." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
+});
 
 const schema = z.object({
   full_name: z.string().trim().min(2, "نام را وارد کنید").max(100),
   email: z.string().email("ایمیل معتبر"),
   phone: z.string().trim().min(8).max(20),
-  password: z.string().min(8, "حداقل ۸ کاراکتر"),
-  confirm: z.string(),
-}).refine((d) => d.password === d.confirm, { message: "رمزها یکسان نیستند", path: ["confirm"] });
+  password: z.string().min(8, "رمز عبور باید حداقل ۸ نویسه باشد").max(72, "رمز عبور نمی‌تواند بیشتر از ۷۲ نویسه باشد"),
+  confirm: z.string().min(1, "تکرار رمز عبور را وارد کنید"),
+}).refine((d) => d.password === d.confirm, { message: "تکرار رمز عبور با رمز اصلی یکسان نیست", path: ["confirm"] });
 
 function CustomerRegister() {
   const nav = useNavigate();
@@ -58,8 +71,8 @@ function CustomerRegister() {
             <Field name="full_name" label="نام و نام خانوادگی" err={errors.full_name} />
             <Field name="email" label="ایمیل" type="email" err={errors.email} />
             <Field name="phone" label="شماره موبایل" type="tel" err={errors.phone} />
-            <Field name="password" label="رمز عبور" type="password" err={errors.password} />
-            <Field name="confirm" label="تکرار رمز عبور" type="password" err={errors.confirm} />
+            <PasswordField name="password" label="رمز عبور" err={errors.password} hint="حداقل ۸ و حداکثر ۷۲ نویسه" autoComplete="new-password" />
+            <PasswordField name="confirm" label="تکرار رمز عبور" err={errors.confirm} autoComplete="new-password" />
             <Button type="submit" className="w-full font-serif" loading={loading} loadingText="در حال ثبت…">
               ثبت‌نام
             </Button>
@@ -79,6 +92,17 @@ function Field({ name, label, type = "text", err }: { name: string; label: strin
       <Label htmlFor={name}>{label}</Label>
       <Input id={name} name={name} type={type} required />
       {err && <p className="text-xs text-destructive mt-1">{err}</p>}
+    </div>
+  );
+}
+
+function PasswordField({ name, label, err, hint, autoComplete }: { name: string; label: string; err?: string; hint?: string; autoComplete: string }) {
+  const messageId = `${name}-${err ? "error" : "hint"}`;
+  return (
+    <div>
+      <Label htmlFor={name}>{label}</Label>
+      <PasswordInput id={name} name={name} autoComplete={autoComplete} maxLength={72} required aria-invalid={Boolean(err)} aria-describedby={err || hint ? messageId : undefined} />
+      {err ? <p id={messageId} className="text-xs text-destructive mt-1">{err}</p> : hint ? <p id={messageId} className="text-xs text-muted-foreground mt-1">{hint}</p> : null}
     </div>
   );
 }
