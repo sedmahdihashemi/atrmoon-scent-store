@@ -20,6 +20,9 @@ services:
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
+    environment:
+      # Full https://... URL of your Supabase project (set in .env on the server).
+      SUPABASE_UPSTREAM_HOST: ${SUPABASE_UPSTREAM_HOST}
     ports:
       - "80:80"
       - "443:443"

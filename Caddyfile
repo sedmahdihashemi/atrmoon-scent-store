@@ -1,14 +1,16 @@
 # Reverse proxy + automatic HTTPS for atrmoon.top
 # - Site traffic        -> the app container (Node server)
-# - /sb/*               -> the Lovable Cloud backend (database/auth/storage)
+# - /sb/*               -> the Supabase backend (database/auth/storage)
 #   so the browser only ever talks to YOUR domain.
+#   The actual Supabase project URL is never hardcoded here — it comes
+#   from the SUPABASE_UPSTREAM_HOST env var (set in .env on the server).
 
 atrmoon.top, www.atrmoon.top {
 	encode zstd gzip
 
 	handle /sb/* {
 		uri strip_prefix /sb
-		reverse_proxy https://gxoignprlnlwindigjkx.supabase.co {
+		reverse_proxy {$SUPABASE_UPSTREAM_HOST} {
 			header_up Host {upstream_hostport}
 		}
 	}
