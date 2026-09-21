@@ -14,6 +14,10 @@ services:
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
       BALE_BOT_TOKEN: ${BALE_BOT_TOKEN:-}
       BALE_PAYMENT_TOKEN: ${BALE_PAYMENT_TOKEN:-}
+      # Checkout "Pay with Bale" button — off by default. Flip to "true" in
+      # .env once testing is done; no rebuild needed, just restart (up -d).
+      BALE_PAY_ENABLED: ${BALE_PAY_ENABLED:-false}
+      BALE_BOT_USERNAME: ${BALE_BOT_USERNAME:-}
       LOVABLE_API_KEY: ${LOVABLE_API_KEY:-}
       LOVABLE_SEND_URL: ${LOVABLE_SEND_URL:-}
     restart: unless-stopped
