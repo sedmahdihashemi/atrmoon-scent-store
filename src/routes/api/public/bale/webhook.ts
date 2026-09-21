@@ -8,11 +8,10 @@ import {
   logIfError,
   sendInvoice,
   answerPreCheckoutQuery,
-  inquireTransaction,
   sendToAdmins,
   tomanToRial,
 } from "@/lib/bale.server";
-import { notifyOrder } from "@/lib/bale-notify.functions";
+import { confirmBalePayment } from "@/lib/bale-payment.server";
 
 function authClient() {
   return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
@@ -355,8 +354,8 @@ async function handlePreCheckoutQuery(pcq: any) {
 }
 
 // successful_payment webhooks are public input and therefore spoofable —
-// this NEVER marks an order paid on the webhook body alone. It always
-// re-verifies with inquireTransaction first (mandatory, per instruction).
+// confirmBalePayment (bale-payment.server.ts) NEVER marks an order paid on
+// the webhook body alone; it always re-verifies with inquireTransaction.
 async function handleSuccessfulPayment(chat_id: number, sp: any) {
   console.log("[bale successful_payment]", JSON.stringify(sp).slice(0, 1000));
 
@@ -382,17 +381,13 @@ async function handleSuccessfulPayment(chat_id: number, sp: any) {
     return;
   }
 
-  const { data: order, error: orderErr } = await supabaseAdmin
-    .from("orders")
-    .select("id, status, payment_method, total_amount")
-    .eq("id", orderId)
-    .maybeSingle();
-  logIfError(`successful_payment order(${orderId})`, orderErr);
-
   // Record the raw event before doing anything else — nothing here should
-  // ever be able to make a payment vanish without a trace.
+  // ever be able to make a payment vanish without a trace. order_id is
+  // filled in as-is even if the order turns out not to exist below (it'll
+  // just be null in that case).
+  const { data: orderForEvent } = await supabaseAdmin.from("orders").select("id").eq("id", orderId).maybeSingle();
   const { error: evErr } = await supabaseAdmin.from("bale_payment_events").insert({
-    order_id: (order as any)?.id ?? null,
+    order_id: (orderForEvent as any)?.id ?? null,
     chat_id,
     transaction_id: transactionId,
     amount_rial: Number.isFinite(amountRial) ? amountRial : null,
@@ -401,7 +396,7 @@ async function handleSuccessfulPayment(chat_id: number, sp: any) {
   });
   logIfError(`successful_payment insert event(${orderId})`, evErr);
 
-  if (!order) {
+  if (!orderForEvent) {
     console.error("[bale] successful_payment for unknown order", { orderId, transactionId, amountRial });
     await sendToAdmins(
       `⚠️ پرداخت موفق برای سفارشی که پیدا نشد.\nشناسه: ${orderId}\nمبلغ: ${amountRial} ریال\nتراکنش: ${transactionId}`
@@ -420,87 +415,22 @@ async function handleSuccessfulPayment(chat_id: number, sp: any) {
     return;
   }
 
-  // Mandatory server-side verification. On any inquiry failure: log, do NOT
-  // confirm, do NOT reject — leave the order pending_payment for the retry
-  // pass (step د) to pick up again later.
-  let verified: any;
-  try {
-    verified = await inquireTransaction(transactionId);
-  } catch (e) {
-    console.error("[bale] inquireTransaction threw", { orderId, transactionId, error: String(e) });
+  const result = await confirmBalePayment({
+    orderId,
+    transactionId,
+    chatId: chat_id,
+    amountRial: Number.isFinite(amountRial) ? amountRial : 0,
+  });
+
+  // "mismatch" and "already_processed" already message the user inside
+  // confirmBalePayment; "inquire_failed" leaves the order pending_payment
+  // for the cron retry pass (step د) to pick up, but the user should still
+  // hear something now rather than silence.
+  if (result === "inquire_failed") {
     await sendMessage(
       chat_id,
       "پرداخت شما در حال تأیید است، چند لحظه صبر کنید. اگر تا چند دقیقه‌ی دیگر تأیید نشد، با پشتیبانی تماس بگیرید."
     );
-    return;
-  }
-
-  if (!verified?.ok || !verified?.result) {
-    console.error("[bale] inquireTransaction failed", { orderId, transactionId, response: verified });
-    await sendMessage(
-      chat_id,
-      "پرداخت شما در حال تأیید است، چند لحظه صبر کنید. اگر تا چند دقیقه‌ی دیگر تأیید نشد، با پشتیبانی تماس بگیرید."
-    );
-    return;
-  }
-
-  const txn = verified.result;
-  const expectedRial = tomanToRial((order as any).total_amount);
-  if (txn.status !== "paid" || Number(txn.amount) !== expectedRial) {
-    console.error("[bale] inquireTransaction mismatch", { orderId, transactionId, txn, expectedRial });
-    await sendToAdmins(
-      `⚠️ ناهماهنگی در تأیید پرداخت سفارش ${orderId}.\nوضعیت گزارش‌شده: ${txn.status}\nمبلغ: ${txn.amount} (انتظار: ${expectedRial})`
-    );
-    await sendMessage(chat_id, "در تأیید پرداخت مشکلی پیش آمد. لطفاً با پشتیبانی تماس بگیرید.");
-    return;
-  }
-
-  // Atomic + idempotent: only flips orders that are still pending_payment,
-  // so a duplicate webhook delivery for an already-processed order is a
-  // guaranteed no-op here (handled below), never a double-update.
-  const { data: updated, error: updErr } = await supabaseAdmin
-    .from("orders")
-    .update({
-      status: "pending_contact",
-      bale_transaction_id: transactionId,
-      paid_amount_rial: amountRial,
-      paid_at: new Date().toISOString(),
-    })
-    .eq("id", orderId)
-    .eq("status", "pending_payment")
-    .select("id")
-    .maybeSingle();
-  logIfError(`successful_payment update order(${orderId})`, updErr);
-
-  if (!updated) {
-    // Real money moved but we can't apply it to an order that's no longer
-    // pending_payment (duplicate delivery, or it expired in between).
-    // No refund API exists in Bale's docs, so a human has to handle this.
-    console.error("[bale] successful_payment for non-pending order", { orderId, transactionId, amountRial });
-    await sendToAdmins(
-      `⚠️ پرداخت موفق برای سفارش ${orderId} رسید ولی سفارش دیگر «در انتظار پرداخت» نبود ` +
-        `(احتمالاً تکراری یا منقضی‌شده). تراکنش: ${transactionId}، مبلغ: ${amountRial} ریال. ` +
-        `نیاز به بررسی دستی (بازپرداخت فقط از طریق پشتیبانی بله ممکن است، API بازپرداختی وجود ندارد).`
-    );
-    await sendMessage(
-      chat_id,
-      "پرداخت شما دریافت شد. اگر سفارش قبلاً پردازش شده بود، با پشتیبانی تماس بگیرید تا بررسی شود."
-    );
-    return;
-  }
-
-  await supabaseAdmin
-    .from("bale_payment_events")
-    .update({ matched: true })
-    .eq("order_id", orderId)
-    .eq("transaction_id", transactionId);
-
-  await sendMessage(chat_id, "✅ پرداخت شما با موفقیت تأیید شد. فروشنده به‌زودی برای هماهنگی ارسال با شما تماس می‌گیرد.");
-
-  try {
-    await notifyOrder({ data: { orderId } });
-  } catch (e) {
-    console.error("[bale] notifyOrder after payment failed", orderId, e);
   }
 }
 

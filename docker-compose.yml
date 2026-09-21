@@ -18,6 +18,9 @@ services:
       # .env once testing is done; no rebuild needed, just restart (up -d).
       BALE_PAY_ENABLED: ${BALE_PAY_ENABLED:-false}
       BALE_BOT_USERNAME: ${BALE_BOT_USERNAME:-}
+      # Shared secret for the cron endpoint that expires stale bale
+      # payments and retries unresolved ones (see docs/... deploy notes).
+      CRON_SECRET: ${CRON_SECRET:-}
       LOVABLE_API_KEY: ${LOVABLE_API_KEY:-}
       LOVABLE_SEND_URL: ${LOVABLE_SEND_URL:-}
     restart: unless-stopped

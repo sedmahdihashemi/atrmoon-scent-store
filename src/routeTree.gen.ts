@@ -44,6 +44,7 @@ import { Route as StoresSlugRouteImport } from './routes/stores.$slug'
 import { Route as SellerOrdersIdRouteImport } from './routes/seller.orders.$id'
 import { Route as SellerProductsIdRouteImport } from './routes/seller.products.$id'
 import { Route as SellerProductsNewRouteImport } from './routes/seller.products.new'
+import { Route as ApiPublicBaleCronExpireRouteImport } from './routes/api/public/bale/cron-expire'
 import { Route as ApiPublicBaleWebhookRouteImport } from './routes/api/public/bale/webhook'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 
@@ -222,6 +223,11 @@ const SellerProductsNewRoute = SellerProductsNewRouteImport.update({
   path: '/new',
   getParentRoute: () => SellerProductsRoute,
 } as any)
+const ApiPublicBaleCronExpireRoute = ApiPublicBaleCronExpireRouteImport.update({
+  id: '/api/public/bale/cron-expire',
+  path: '/api/public/bale/cron-expire',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicBaleWebhookRoute = ApiPublicBaleWebhookRouteImport.update({
   id: '/api/public/bale/webhook',
   path: '/api/public/bale/webhook',
@@ -270,6 +276,7 @@ export interface FileRoutesByFullPath {
   '/seller/orders/$id': typeof SellerOrdersIdRoute
   '/seller/products/$id': typeof SellerProductsIdRoute
   '/seller/products/new': typeof SellerProductsNewRoute
+  '/api/public/bale/cron-expire': typeof ApiPublicBaleCronExpireRoute
   '/api/public/bale/webhook': typeof ApiPublicBaleWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
@@ -307,6 +314,7 @@ export interface FileRoutesByTo {
   '/seller/orders/$id': typeof SellerOrdersIdRoute
   '/seller/products/$id': typeof SellerProductsIdRoute
   '/seller/products/new': typeof SellerProductsNewRoute
+  '/api/public/bale/cron-expire': typeof ApiPublicBaleCronExpireRoute
   '/api/public/bale/webhook': typeof ApiPublicBaleWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
@@ -347,6 +355,7 @@ export interface FileRoutesById {
   '/seller/orders/$id': typeof SellerOrdersIdRoute
   '/seller/products/$id': typeof SellerProductsIdRoute
   '/seller/products/new': typeof SellerProductsNewRoute
+  '/api/public/bale/cron-expire': typeof ApiPublicBaleCronExpireRoute
   '/api/public/bale/webhook': typeof ApiPublicBaleWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
@@ -388,6 +397,7 @@ export interface FileRouteTypes {
     | '/seller/orders/$id'
     | '/seller/products/$id'
     | '/seller/products/new'
+    | '/api/public/bale/cron-expire'
     | '/api/public/bale/webhook'
     | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
@@ -425,6 +435,7 @@ export interface FileRouteTypes {
     | '/seller/orders/$id'
     | '/seller/products/$id'
     | '/seller/products/new'
+    | '/api/public/bale/cron-expire'
     | '/api/public/bale/webhook'
     | '/lovable/email/queue/process'
   id:
@@ -464,6 +475,7 @@ export interface FileRouteTypes {
     | '/seller/orders/$id'
     | '/seller/products/$id'
     | '/seller/products/new'
+    | '/api/public/bale/cron-expire'
     | '/api/public/bale/webhook'
     | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
@@ -483,6 +495,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   SellerRoute: typeof SellerRouteWithChildren
   StoresRoute: typeof StoresRouteWithChildren
+  ApiPublicBaleCronExpireRoute: typeof ApiPublicBaleCronExpireRoute
   ApiPublicBaleWebhookRoute: typeof ApiPublicBaleWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
@@ -734,6 +747,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SellerProductsNewRouteImport
       parentRoute: typeof SellerProductsRoute
     }
+    '/api/public/bale/cron-expire': {
+      id: '/api/public/bale/cron-expire'
+      path: '/api/public/bale/cron-expire'
+      fullPath: '/api/public/bale/cron-expire'
+      preLoaderRoute: typeof ApiPublicBaleCronExpireRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/bale/webhook': {
       id: '/api/public/bale/webhook'
       path: '/api/public/bale/webhook'
@@ -874,6 +894,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   SellerRoute: SellerRouteWithChildren,
   StoresRoute: StoresRouteWithChildren,
+  ApiPublicBaleCronExpireRoute: ApiPublicBaleCronExpireRoute,
   ApiPublicBaleWebhookRoute: ApiPublicBaleWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }

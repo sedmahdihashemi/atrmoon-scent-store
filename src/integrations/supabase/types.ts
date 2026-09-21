@@ -1170,6 +1170,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      expire_pending_bale_orders: { Args: never; Returns: number }
       gen_order_number: { Args: never; Returns: string }
       get_primary_role: {
         Args: { _user_id: string }
@@ -1199,6 +1200,7 @@ export type Database = {
           p_customer_name: string
           p_customer_note: string
           p_customer_phone: string
+          p_payment_method?: string
           p_postal_code: string
           p_session_id: string
           p_shipping_address: string
