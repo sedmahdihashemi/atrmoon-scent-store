@@ -13,6 +13,7 @@ services:
       # Optional: set these in .env to enable the Bale bot and the email queue.
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
       BALE_BOT_TOKEN: ${BALE_BOT_TOKEN:-}
+      BALE_PAYMENT_TOKEN: ${BALE_PAYMENT_TOKEN:-}
       LOVABLE_API_KEY: ${LOVABLE_API_KEY:-}
       LOVABLE_SEND_URL: ${LOVABLE_SEND_URL:-}
     restart: unless-stopped

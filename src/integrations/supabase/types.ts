@@ -50,6 +50,47 @@ export type Database = {
         }
         Relationships: []
       }
+      bale_payment_events: {
+        Row: {
+          amount_rial: number | null
+          chat_id: number | null
+          created_at: string
+          id: string
+          matched: boolean
+          order_id: string | null
+          raw_payload: Json | null
+          transaction_id: string | null
+        }
+        Insert: {
+          amount_rial?: number | null
+          chat_id?: number | null
+          created_at?: string
+          id?: string
+          matched: boolean
+          order_id?: string | null
+          raw_payload?: Json | null
+          transaction_id?: string | null
+        }
+        Update: {
+          amount_rial?: number | null
+          chat_id?: number | null
+          created_at?: string
+          id?: string
+          matched?: boolean
+          order_id?: string | null
+          raw_payload?: Json | null
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bale_payment_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bot_sessions: {
         Row: {
           chat_id: number
@@ -564,6 +605,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          bale_transaction_id: string | null
           city: string
           created_at: string
           customer_email: string | null
@@ -573,6 +615,10 @@ export type Database = {
           customer_phone: string
           id: string
           order_number: string
+          paid_amount_rial: number | null
+          paid_at: string | null
+          payment_expires_at: string | null
+          payment_method: string
           postal_code: string | null
           seller_note: string | null
           shipping_address: string
@@ -582,6 +628,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          bale_transaction_id?: string | null
           city: string
           created_at?: string
           customer_email?: string | null
@@ -591,6 +638,10 @@ export type Database = {
           customer_phone: string
           id?: string
           order_number: string
+          paid_amount_rial?: number | null
+          paid_at?: string | null
+          payment_expires_at?: string | null
+          payment_method?: string
           postal_code?: string | null
           seller_note?: string | null
           shipping_address: string
@@ -600,6 +651,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          bale_transaction_id?: string | null
           city?: string
           created_at?: string
           customer_email?: string | null
@@ -609,6 +661,10 @@ export type Database = {
           customer_phone?: string
           id?: string
           order_number?: string
+          paid_amount_rial?: number | null
+          paid_at?: string | null
+          payment_expires_at?: string | null
+          payment_method?: string
           postal_code?: string | null
           seller_note?: string | null
           shipping_address?: string
@@ -1189,6 +1245,7 @@ export type Database = {
       email_status: "sent" | "failed"
       notification_type: "order" | "store" | "inventory" | "system"
       order_status:
+        | "pending_payment"
         | "pending_contact"
         | "confirmed_by_seller"
         | "preparing"
@@ -1335,6 +1392,7 @@ export const Constants = {
       email_status: ["sent", "failed"],
       notification_type: ["order", "store", "inventory", "system"],
       order_status: [
+        "pending_payment",
         "pending_contact",
         "confirmed_by_seller",
         "preparing",

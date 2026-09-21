@@ -6,7 +6,13 @@ import {
   buildInvoiceText,
   statusFa,
   logIfError,
+  sendInvoice,
+  answerPreCheckoutQuery,
+  inquireTransaction,
+  sendToAdmins,
+  tomanToRial,
 } from "@/lib/bale.server";
+import { notifyOrder } from "@/lib/bale-notify.functions";
 
 function authClient() {
   return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
@@ -259,14 +265,265 @@ async function handlePublicTrack(chat_id: number, code: string) {
   );
 }
 
+// Triggered by the deep link ble.ir/<bot>?start=pay_<orderId>, which Bale
+// delivers as a normal /start message with the payload appended
+// (confirmed live: text becomes "/start pay_<orderId>").
+async function handlePayDeepLink(chat_id: number, orderId: string) {
+  const { data: order, error } = await supabaseAdmin
+    .from("orders")
+    .select("id, order_number, status, payment_method, total_amount, payment_expires_at, stores(store_name)")
+    .eq("id", orderId)
+    .maybeSingle();
+  logIfError(`payDeepLink order(${orderId})`, error);
+
+  if (!order) {
+    await sendMessage(chat_id, "سفارشی با این شناسه پیدا نشد.");
+    return;
+  }
+  if ((order as any).payment_method !== "bale") {
+    await sendMessage(chat_id, "این سفارش برای پرداخت آنلاین ثبت نشده است.");
+    return;
+  }
+  if ((order as any).status !== "pending_payment") {
+    await sendMessage(chat_id, "این سفارش قبلاً پرداخت شده یا دیگر معتبر نیست.");
+    return;
+  }
+  const expiresAt = (order as any).payment_expires_at
+    ? new Date((order as any).payment_expires_at).getTime()
+    : 0;
+  if (expiresAt && expiresAt < Date.now()) {
+    await sendMessage(chat_id, "مهلت پرداخت این سفارش تمام شده است. لطفاً دوباره از سایت سفارش ثبت کنید.");
+    return;
+  }
+
+  const storeName = (order as any).stores?.store_name;
+  await sendInvoice({
+    chat_id,
+    title: `سفارش ${(order as any).order_number}`,
+    description: (storeName ? `عطرفروشی ${storeName} — ` : "") + "پرداخت سفارش عطرمون",
+    payload: orderId,
+    amount_rial: tomanToRial((order as any).total_amount),
+  });
+}
+
+// Bale must respond to the user within 10s of a PreCheckoutQuery, so this
+// does exactly one fast DB read before answering. Whether this update type
+// actually reaches our webhook at all is unconfirmed — logged either way
+// so the first live test settles it.
+async function handlePreCheckoutQuery(pcq: any) {
+  console.log("[bale pre_checkout_query]", JSON.stringify(pcq).slice(0, 500));
+
+  const orderId: string | undefined = pcq.invoice_payload;
+  const totalAmount = Number(pcq.total_amount);
+
+  if (!orderId) {
+    console.error("[bale] pre_checkout_query without invoice_payload", pcq);
+    await answerPreCheckoutQuery(pcq.id, false, "سفارش یافت نشد.");
+    return;
+  }
+
+  const { data: order, error } = await supabaseAdmin
+    .from("orders")
+    .select("id, status, payment_method, total_amount, payment_expires_at")
+    .eq("id", orderId)
+    .maybeSingle();
+  logIfError(`preCheckout order(${orderId})`, error);
+
+  if (!order) {
+    await answerPreCheckoutQuery(pcq.id, false, "سفارش یافت نشد.");
+    return;
+  }
+  if ((order as any).payment_method !== "bale" || (order as any).status !== "pending_payment") {
+    await answerPreCheckoutQuery(pcq.id, false, "این سفارش قبلاً پردازش شده یا معتبر نیست.");
+    return;
+  }
+  const expiresAt = (order as any).payment_expires_at
+    ? new Date((order as any).payment_expires_at).getTime()
+    : 0;
+  if (expiresAt && expiresAt < Date.now()) {
+    await answerPreCheckoutQuery(pcq.id, false, "مهلت پرداخت این سفارش تمام شده است.");
+    return;
+  }
+  const expectedRial = tomanToRial((order as any).total_amount);
+  if (totalAmount !== expectedRial) {
+    console.error("[bale] pre_checkout amount mismatch", { orderId, expectedRial, totalAmount });
+    await answerPreCheckoutQuery(pcq.id, false, "مبلغ نامعتبر است.");
+    return;
+  }
+
+  await answerPreCheckoutQuery(pcq.id, true);
+}
+
+// successful_payment webhooks are public input and therefore spoofable —
+// this NEVER marks an order paid on the webhook body alone. It always
+// re-verifies with inquireTransaction first (mandatory, per instruction).
+async function handleSuccessfulPayment(chat_id: number, sp: any) {
+  console.log("[bale successful_payment]", JSON.stringify(sp).slice(0, 1000));
+
+  const orderId: string | undefined = sp.invoice_payload;
+  const transactionId: string | null =
+    sp.provider_payment_charge_id || sp.telegram_payment_charge_id || null;
+  const amountRial = Number(sp.total_amount);
+
+  if (!orderId) {
+    console.error("[bale] successful_payment without invoice_payload", sp);
+    await sendToAdmins(
+      `⚠️ پرداخت موفق بدون شناسه‌ی سفارش (invoice_payload خالی).\nمبلغ: ${amountRial} ریال\nتراکنش: ${transactionId}`
+    );
+    await supabaseAdmin.from("bale_payment_events").insert({
+      order_id: null,
+      chat_id,
+      transaction_id: transactionId,
+      amount_rial: Number.isFinite(amountRial) ? amountRial : null,
+      matched: false,
+      raw_payload: sp,
+    });
+    await sendMessage(chat_id, "پرداخت شما دریافت شد ولی سفارش مرتبط پیدا نشد. لطفاً با پشتیبانی تماس بگیرید.");
+    return;
+  }
+
+  const { data: order, error: orderErr } = await supabaseAdmin
+    .from("orders")
+    .select("id, status, payment_method, total_amount")
+    .eq("id", orderId)
+    .maybeSingle();
+  logIfError(`successful_payment order(${orderId})`, orderErr);
+
+  // Record the raw event before doing anything else — nothing here should
+  // ever be able to make a payment vanish without a trace.
+  const { error: evErr } = await supabaseAdmin.from("bale_payment_events").insert({
+    order_id: (order as any)?.id ?? null,
+    chat_id,
+    transaction_id: transactionId,
+    amount_rial: Number.isFinite(amountRial) ? amountRial : null,
+    matched: false,
+    raw_payload: sp,
+  });
+  logIfError(`successful_payment insert event(${orderId})`, evErr);
+
+  if (!order) {
+    console.error("[bale] successful_payment for unknown order", { orderId, transactionId, amountRial });
+    await sendToAdmins(
+      `⚠️ پرداخت موفق برای سفارشی که پیدا نشد.\nشناسه: ${orderId}\nمبلغ: ${amountRial} ریال\nتراکنش: ${transactionId}`
+    );
+    await sendMessage(
+      chat_id,
+      "پرداخت شما دریافت شد ولی سفارش مرتبط پیدا نشد. لطفاً با پشتیبانی تماس بگیرید و همین پیام را نشان دهید."
+    );
+    return;
+  }
+
+  if (!transactionId) {
+    console.error("[bale] successful_payment missing transaction id", { orderId, raw: sp });
+    await sendToAdmins(`⚠️ پرداخت موفق بدون شناسه‌ی تراکنش برای سفارش ${orderId}. نیاز به بررسی دستی.`);
+    await sendMessage(chat_id, "پرداخت شما در حال بررسی است. اگر تا چند دقیقه‌ی دیگر تأیید نشد، با پشتیبانی تماس بگیرید.");
+    return;
+  }
+
+  // Mandatory server-side verification. On any inquiry failure: log, do NOT
+  // confirm, do NOT reject — leave the order pending_payment for the retry
+  // pass (step د) to pick up again later.
+  let verified: any;
+  try {
+    verified = await inquireTransaction(transactionId);
+  } catch (e) {
+    console.error("[bale] inquireTransaction threw", { orderId, transactionId, error: String(e) });
+    await sendMessage(
+      chat_id,
+      "پرداخت شما در حال تأیید است، چند لحظه صبر کنید. اگر تا چند دقیقه‌ی دیگر تأیید نشد، با پشتیبانی تماس بگیرید."
+    );
+    return;
+  }
+
+  if (!verified?.ok || !verified?.result) {
+    console.error("[bale] inquireTransaction failed", { orderId, transactionId, response: verified });
+    await sendMessage(
+      chat_id,
+      "پرداخت شما در حال تأیید است، چند لحظه صبر کنید. اگر تا چند دقیقه‌ی دیگر تأیید نشد، با پشتیبانی تماس بگیرید."
+    );
+    return;
+  }
+
+  const txn = verified.result;
+  const expectedRial = tomanToRial((order as any).total_amount);
+  if (txn.status !== "paid" || Number(txn.amount) !== expectedRial) {
+    console.error("[bale] inquireTransaction mismatch", { orderId, transactionId, txn, expectedRial });
+    await sendToAdmins(
+      `⚠️ ناهماهنگی در تأیید پرداخت سفارش ${orderId}.\nوضعیت گزارش‌شده: ${txn.status}\nمبلغ: ${txn.amount} (انتظار: ${expectedRial})`
+    );
+    await sendMessage(chat_id, "در تأیید پرداخت مشکلی پیش آمد. لطفاً با پشتیبانی تماس بگیرید.");
+    return;
+  }
+
+  // Atomic + idempotent: only flips orders that are still pending_payment,
+  // so a duplicate webhook delivery for an already-processed order is a
+  // guaranteed no-op here (handled below), never a double-update.
+  const { data: updated, error: updErr } = await supabaseAdmin
+    .from("orders")
+    .update({
+      status: "pending_contact",
+      bale_transaction_id: transactionId,
+      paid_amount_rial: amountRial,
+      paid_at: new Date().toISOString(),
+    })
+    .eq("id", orderId)
+    .eq("status", "pending_payment")
+    .select("id")
+    .maybeSingle();
+  logIfError(`successful_payment update order(${orderId})`, updErr);
+
+  if (!updated) {
+    // Real money moved but we can't apply it to an order that's no longer
+    // pending_payment (duplicate delivery, or it expired in between).
+    // No refund API exists in Bale's docs, so a human has to handle this.
+    console.error("[bale] successful_payment for non-pending order", { orderId, transactionId, amountRial });
+    await sendToAdmins(
+      `⚠️ پرداخت موفق برای سفارش ${orderId} رسید ولی سفارش دیگر «در انتظار پرداخت» نبود ` +
+        `(احتمالاً تکراری یا منقضی‌شده). تراکنش: ${transactionId}، مبلغ: ${amountRial} ریال. ` +
+        `نیاز به بررسی دستی (بازپرداخت فقط از طریق پشتیبانی بله ممکن است، API بازپرداختی وجود ندارد).`
+    );
+    await sendMessage(
+      chat_id,
+      "پرداخت شما دریافت شد. اگر سفارش قبلاً پردازش شده بود، با پشتیبانی تماس بگیرید تا بررسی شود."
+    );
+    return;
+  }
+
+  await supabaseAdmin
+    .from("bale_payment_events")
+    .update({ matched: true })
+    .eq("order_id", orderId)
+    .eq("transaction_id", transactionId);
+
+  await sendMessage(chat_id, "✅ پرداخت شما با موفقیت تأیید شد. فروشنده به‌زودی برای هماهنگی ارسال با شما تماس می‌گیرد.");
+
+  try {
+    await notifyOrder({ data: { orderId } });
+  } catch (e) {
+    console.error("[bale] notifyOrder after payment failed", orderId, e);
+  }
+}
+
 async function handleUpdate(update: any) {
   console.log("[bale update]", JSON.stringify(update).slice(0, 500));
+
+  if (update.pre_checkout_query) {
+    await handlePreCheckoutQuery(update.pre_checkout_query);
+    return;
+  }
+
   const msg = update.message ?? update.edited_message;
   if (!msg?.chat?.id) {
-    console.log("[bale] no chat id, skipping");
+    console.log("[bale] unhandled update type (no chat id)", JSON.stringify(update).slice(0, 500));
     return;
   }
   const chat_id: number = msg.chat.id;
+
+  if (msg.successful_payment) {
+    await handleSuccessfulPayment(chat_id, msg.successful_payment);
+    return;
+  }
+
   const text: string = (msg.text ?? "").toString();
   console.log("[bale] chat", chat_id, "text", text);
 
@@ -274,6 +531,16 @@ async function handleUpdate(update: any) {
   if (!session) {
     await upsertSession(chat_id, { state: "idle", state_data: {} });
     session = { chat_id, user_id: null, state: "idle", state_data: {} };
+  }
+
+  // Deep link from checkout: ble.ir/<bot>?start=pay_<orderId> arrives as
+  // "/start pay_<orderId>". Works regardless of bot login — the order id
+  // (a UUID) is unguessable, so it acts as its own bearer token; a guest
+  // checkout customer isn't required to /login just to pay.
+  const payMatch = text.trim().match(/^\/start\s+pay_([0-9a-fA-F-]{36})$/);
+  if (payMatch) {
+    await handlePayDeepLink(chat_id, payMatch[1]);
+    return;
   }
 
   // Public /track works without login

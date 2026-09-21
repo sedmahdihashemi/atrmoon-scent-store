@@ -8,6 +8,13 @@ function token() {
   return t;
 }
 
+// Never log this value — it authorizes real money movement on the bot's wallet.
+function paymentToken() {
+  const t = process.env.BALE_PAYMENT_TOKEN;
+  if (!t) throw new Error("BALE_PAYMENT_TOKEN is not configured");
+  return t;
+}
+
 export async function baleCall(method: string, body: Record<string, unknown>) {
   const res = await fetch(`${BALE_API}/bot${token()}/${method}`, {
     method: "POST",
@@ -96,4 +103,68 @@ export async function buildInvoiceText(orderId: string, opts: { includeStore?: b
   lines.push(`💰 <b>مبلغ کل:</b> ${fmtMoney(order.total_amount)}`);
   lines.push(`📅 ${new Date(order.created_at).toLocaleString("fa-IR")}`);
   return { text: lines.join("\n"), order };
+}
+
+// ============ Bale wallet payment ============
+
+// orders.total_amount is stored in Toman; Bale's payment API wants a plain
+// integer number of Rial (no /100 or other sub-unit convention — confirmed
+// against the docs, not assumed from Telegram's convention).
+export function tomanToRial(toman: number | string): number {
+  return Math.round(Number(toman) * 10);
+}
+
+export async function sendInvoice(params: {
+  chat_id: number;
+  title: string;
+  description: string;
+  payload: string;
+  amount_rial: number;
+}) {
+  return baleCall("sendInvoice", {
+    chat_id: params.chat_id,
+    title: params.title.slice(0, 32),
+    description: params.description.slice(0, 255),
+    payload: params.payload,
+    provider_token: paymentToken(),
+    prices: [{ label: "مبلغ سفارش", amount: params.amount_rial }],
+  });
+}
+
+export async function answerPreCheckoutQuery(
+  pre_checkout_query_id: string,
+  ok: boolean,
+  error_message?: string
+) {
+  return baleCall("answerPreCheckoutQuery", {
+    pre_checkout_query_id,
+    ok,
+    ...(error_message ? { error_message } : {}),
+  });
+}
+
+// Docs don't state the exact endpoint path, so this follows the same
+// `bot<token>/<method>` pattern every other documented method uses.
+export async function inquireTransaction(transaction_id: string) {
+  return baleCall("inquireTransaction", { transaction_id });
+}
+
+export async function sendToAdmins(text: string) {
+  const { data: admins, error: adminsErr } = await supabaseAdmin
+    .from("user_roles")
+    .select("user_id")
+    .eq("role", "super_admin");
+  logIfError("sendToAdmins admins", adminsErr);
+  const adminIds = (admins ?? []).map((r: any) => r.user_id);
+  if (adminIds.length === 0) return;
+
+  const { data: sessions, error: sessionsErr } = await supabaseAdmin
+    .from("bot_sessions")
+    .select("chat_id")
+    .in("user_id", adminIds);
+  logIfError("sendToAdmins sessions", sessionsErr);
+
+  for (const s of sessions ?? []) {
+    await sendMessage(Number((s as any).chat_id), text);
+  }
 }
