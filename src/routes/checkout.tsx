@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { notifyOrder } from "@/lib/bale-notify.functions";
 import { getBalePayConfig } from "@/lib/bale-pay-flag.functions";
+import { getOrderStatus } from "@/lib/order-status.functions";
 import { toast } from "sonner";
 import { ShoppingBag, CheckCircle2, Wallet } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -33,6 +34,7 @@ function CheckoutPage() {
   });
   const notify = useServerFn(notifyOrder);
   const fetchBalePayConfig = useServerFn(getBalePayConfig);
+  const fetchOrderStatus = useServerFn(getOrderStatus);
 
   useEffect(() => {
     fetchBalePayConfig()
@@ -40,6 +42,44 @@ function CheckoutPage() {
       .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // While waiting on a Bale payment, the customer pays in a separate app —
+  // when they come back to this tab, re-check the order instead of leaving
+  // the stale "pay now" screen up. Polls as a fallback, but also checks
+  // immediately on tab focus/visibility for a snappier return.
+  useEffect(() => {
+    if (!pendingPayment) return;
+    let cancelled = false;
+    const check = async () => {
+      try {
+        const res = await fetchOrderStatus({ data: { orderId: pendingPayment.orderId } });
+        if (cancelled) return;
+        if (res?.status === "pending_contact") {
+          setSuccess({ number: pendingPayment.number });
+          setPendingPayment(null);
+        } else if (res?.status === "cancelled") {
+          toast.error("مهلت پرداخت این سفارش تمام شد. لطفاً دوباره سفارش دهید.");
+          setPendingPayment(null);
+        }
+      } catch (e) {
+        console.error("order status check failed", e);
+      }
+    };
+    check();
+    const interval = setInterval(check, 5000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") check();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingPayment?.orderId]);
 
   const [form, setForm] = useState({
     customer_name: "", customer_phone: "", customer_email: "",
