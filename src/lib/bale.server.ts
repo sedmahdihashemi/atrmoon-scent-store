@@ -1,4 +1,5 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { orderStatusLabels } from "@/lib/seller-utils";
 
 const BALE_API = "https://tapi.bale.ai";
 
@@ -49,18 +50,11 @@ export function logIfError(context: string, error: unknown) {
   if (error) console.error("[bale]", context, error);
 }
 
-const STATUS_FA: Record<string, string> = {
-  pending_payment: "در انتظار پرداخت",
-  pending_contact: "در انتظار تماس",
-  contacted: "تماس گرفته شد",
-  preparing: "در حال آماده‌سازی",
-  shipped: "ارسال شد",
-  delivered: "تحویل داده شد",
-  cancelled: "لغو شد",
-};
-
+// Single source of truth for Persian status labels — shared with the
+// seller/admin panels (seller-utils.ts) so the bot can never drift out of
+// sync with what real order_status values actually exist again.
 export function statusFa(s: string) {
-  return STATUS_FA[s] ?? s;
+  return orderStatusLabels[s] ?? s;
 }
 
 function fmtMoney(n: number | string) {
