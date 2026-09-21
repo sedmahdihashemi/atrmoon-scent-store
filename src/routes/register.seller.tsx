@@ -5,24 +5,37 @@ import { supabase } from "@/integrations/supabase/client";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/register/seller")({ component: SellerRegister });
+export const Route = createFileRoute("/register/seller")({
+  component: SellerRegister,
+  head: () => ({
+    meta: [
+      { title: "ثبت‌نام فروشنده | عطرمون" },
+      { name: "description", content: "ثبت درخواست فروشندگی و ساخت فروشگاه در عطرمون." },
+      { property: "og:title", content: "ثبت‌نام فروشنده | عطرمون" },
+      { property: "og:description", content: "فروشگاه عطر خود را در عطرمون ثبت کنید." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
+});
 
 const schema = z.object({
   full_name: z.string().trim().min(2).max(100),
   email: z.string().email(),
   phone: z.string().trim().min(8).max(20),
-  password: z.string().min(8),
-  confirm: z.string(),
+  password: z.string().min(8, "رمز عبور باید حداقل ۸ نویسه باشد").max(72, "رمز عبور نمی‌تواند بیشتر از ۷۲ نویسه باشد"),
+  confirm: z.string().min(1, "تکرار رمز عبور را وارد کنید"),
   store_name: z.string().trim().min(2).max(100),
   city: z.string().trim().min(2).max(50),
   support_phone: z.string().trim().min(8).max(20),
   support_email: z.string().email(),
   description: z.string().trim().max(500).optional().or(z.literal("")),
-}).refine((d) => d.password === d.confirm, { message: "رمزها یکسان نیستند", path: ["confirm"] });
+}).refine((d) => d.password === d.confirm, { message: "تکرار رمز عبور با رمز اصلی یکسان نیست", path: ["confirm"] });
 
 function slugify(s: string) {
   return s.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9\-آ-ی]/gi, "").slice(0, 50) + "-" + Math.random().toString(36).slice(2, 7);
@@ -82,8 +95,8 @@ function SellerRegister() {
                 <F name="phone" label="موبایل" err={errors.phone} type="tel" />
                 <F name="email" label="ایمیل" err={errors.email} type="email" />
                 <span />
-                <F name="password" label="رمز عبور" err={errors.password} type="password" />
-                <F name="confirm" label="تکرار رمز" err={errors.confirm} type="password" />
+                <PasswordField name="password" label="رمز عبور" err={errors.password} hint="حداقل ۸ و حداکثر ۷۲ نویسه" />
+                <PasswordField name="confirm" label="تکرار رمز" err={errors.confirm} />
               </div>
             </Section>
             <Section title="اطلاعات فروشگاه">
@@ -126,6 +139,17 @@ function F({ name, label, type = "text", err }: { name: string; label: string; t
       <Label htmlFor={name}>{label}</Label>
       <Input id={name} name={name} type={type} required />
       {err && <p className="text-xs text-destructive mt-1">{err}</p>}
+    </div>
+  );
+}
+
+function PasswordField({ name, label, err, hint }: { name: string; label: string; err?: string; hint?: string }) {
+  const messageId = `${name}-${err ? "error" : "hint"}`;
+  return (
+    <div>
+      <Label htmlFor={name}>{label}</Label>
+      <PasswordInput id={name} name={name} autoComplete="new-password" maxLength={72} required aria-invalid={Boolean(err)} aria-describedby={err || hint ? messageId : undefined} />
+      {err ? <p id={messageId} className="text-xs text-destructive mt-1">{err}</p> : hint ? <p id={messageId} className="text-xs text-muted-foreground mt-1">{hint}</p> : null}
     </div>
   );
 }
