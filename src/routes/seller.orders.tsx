@@ -22,7 +22,7 @@ function OrdersList() {
   useEffect(() => {
     if (!storeId) return;
     supabase.from("orders").select("id, order_number, customer_name, customer_phone, total_amount, status, created_at")
-      .eq("store_id", storeId).order("created_at", { ascending: false })
+      .eq("store_id", storeId).neq("status", "pending_payment").order("created_at", { ascending: false })
       .then(({ data }) => setOrders(data ?? []));
   }, [storeId]);
 

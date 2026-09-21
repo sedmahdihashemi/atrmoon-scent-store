@@ -19,6 +19,7 @@ function AllOrders() {
       const { data: orders, error } = await supabase
         .from("orders")
         .select("*")
+        .neq("status", "pending_payment")
         .order("created_at", { ascending: false })
         .limit(200);
       if (error) { console.error(error); setRows([]); return; }

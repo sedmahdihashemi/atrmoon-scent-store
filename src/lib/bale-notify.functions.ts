@@ -9,6 +9,13 @@ export const notifyOrder = createServerFn({ method: "POST" })
     if (!built) return { ok: false, reason: "order_not_found" };
     const { order } = built;
 
+    // Orders paid via the Bale bot start out as "pending_payment" and must
+    // not notify anyone until the payment actually succeeds (the webhook's
+    // successful_payment handler calls notifyOrder again once it does).
+    if ((order as any).status === "pending_payment") {
+      return { ok: true, sent: 0, reason: "awaiting_payment" };
+    }
+
     // Find admin chat_ids
     const { data: admins, error: adminsErr } = await supabaseAdmin
       .from("user_roles")

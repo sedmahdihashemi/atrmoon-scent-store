@@ -11,6 +11,7 @@ export function slugify(input: string): string {
 }
 
 export const orderStatusLabels: Record<string, string> = {
+  pending_payment: "در انتظار پرداخت",
   pending_contact: "در انتظار تماس",
   confirmed_by_seller: "تأیید فروشنده",
   preparing: "در حال آماده‌سازی",

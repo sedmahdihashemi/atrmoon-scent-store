@@ -43,6 +43,7 @@ export function logIfError(context: string, error: unknown) {
 }
 
 const STATUS_FA: Record<string, string> = {
+  pending_payment: "در انتظار پرداخت",
   pending_contact: "در انتظار تماس",
   contacted: "تماس گرفته شد",
   preparing: "در حال آماده‌سازی",

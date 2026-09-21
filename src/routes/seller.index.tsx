@@ -20,9 +20,9 @@ function Overview() {
     (async () => {
       const [p, ords, low, recentOrds, wish] = await Promise.all([
         supabase.from("products").select("id", { count: "exact", head: true }).eq("store_id", storeId),
-        supabase.from("orders").select("total_amount, status").eq("store_id", storeId),
+        supabase.from("orders").select("total_amount, status").eq("store_id", storeId).neq("status", "pending_payment"),
         supabase.from("product_inventory").select("id, available_stock_ml, low_stock_alert_ml").eq("store_id", storeId),
-        supabase.from("orders").select("id, order_number, customer_name, total_amount, status, created_at").eq("store_id", storeId).order("created_at", { ascending: false }).limit(5),
+        supabase.from("orders").select("id, order_number, customer_name, total_amount, status, created_at").eq("store_id", storeId).neq("status", "pending_payment").order("created_at", { ascending: false }).limit(5),
         (supabase as any).rpc("seller_wishlist_stats", { p_store_id: storeId }),
       ]);
       const orders = ords.data ?? [];

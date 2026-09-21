@@ -15,7 +15,7 @@ function AdminOverview() {
         supabase.from("stores").select("id", { count: "exact", head: true }),
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("products").select("id", { count: "exact", head: true }),
-        supabase.from("orders").select("total_amount, status"),
+        supabase.from("orders").select("total_amount, status").neq("status", "pending_payment"),
       ]);
       const revenue = (orders.data ?? []).filter((o: any) => ["completed", "shipped"].includes(o.status)).reduce((s: number, o: any) => s + Number(o.total_amount), 0);
       setStats({
