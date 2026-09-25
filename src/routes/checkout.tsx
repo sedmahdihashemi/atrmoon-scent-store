@@ -15,7 +15,7 @@ import { notifyOrder } from "@/lib/bale-notify.functions";
 import { getBalePayConfig } from "@/lib/bale-pay-flag.functions";
 import { getOrderStatus } from "@/lib/order-status.functions";
 import { toast } from "sonner";
-import { ShoppingBag, CheckCircle2, Wallet } from "lucide-react";
+import { ShoppingBag, CheckCircle2, Wallet, Copy } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/checkout")({ component: CheckoutPage });
@@ -146,12 +146,41 @@ function CheckoutPage() {
           <p className="font-serif text-2xl text-[var(--gold)] mt-1 tracking-wider">{pendingPayment.number}</p>
           <p className="mt-6 text-ink/80 leading-loose font-serif text-[15px]">
             سفارش شما ثبت شد و منتظر پرداخت است. برای تکمیل، روی دکمه‌ی زیر بزنید تا در ربات بله پرداخت را انجام دهید.
+            این سفارش تا ۳۰ دقیقه برایتان نگه داشته می‌شود.
           </p>
           <div className="mt-8 flex gap-3 justify-center">
             <a href={payUrl} target="_blank" rel="noopener noreferrer">
               <Button className="h-11 font-serif">پرداخت با بله</Button>
             </a>
             {user ? <Link to="/account"><Button variant="outline">پیگیری در حساب من</Button></Link> : null}
+          </div>
+
+          <div className="mt-10 paper-card rounded-md p-5 text-right">
+            <p className="text-sm font-serif text-ink mb-2">
+              پیام‌رسان بله ندارید یا از کامپیوتر این صفحه را باز کرده‌اید؟
+            </p>
+            <p className="text-xs text-muted-foreground font-serif leading-relaxed mb-3">
+              لینک زیر را کپی کنید و برای گوشی خودتان بفرستید (مثلاً از طریق تلگرام به خودتان، ایمیل، یا هر روش دیگر)، در گوشی بازش کنید و در اپ بله پرداخت را کامل کنید.
+              همین صفحه باز بماند — به‌محض پرداخت، خودکار به‌روزرسانی می‌شود، نیازی به رفرش دستی نیست.
+            </p>
+            <div className="flex gap-2">
+              <Input value={payUrl} readOnly dir="ltr" className="text-xs" onFocus={(e) => e.currentTarget.select()} />
+              <Button
+                type="button"
+                variant="outline"
+                className="shrink-0"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(payUrl);
+                    toast.success("لینک کپی شد");
+                  } catch {
+                    toast.error("کپی خودکار کار نکرد؛ لینک را دستی انتخاب و کپی کنید");
+                  }
+                }}
+              >
+                <Copy className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </PublicLayout>
