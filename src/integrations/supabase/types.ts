@@ -606,6 +606,13 @@ export type Database = {
       orders: {
         Row: {
           bale_transaction_id: string | null
+          card_transfer_attempt_count: number
+          card_transfer_note: string | null
+          card_transfer_receipt_path: string | null
+          card_transfer_rejection_reason: string | null
+          card_transfer_reviewed_at: string | null
+          card_transfer_reviewed_by: string | null
+          card_transfer_submitted_at: string | null
           city: string
           created_at: string
           customer_email: string | null
@@ -629,6 +636,13 @@ export type Database = {
         }
         Insert: {
           bale_transaction_id?: string | null
+          card_transfer_attempt_count?: number
+          card_transfer_note?: string | null
+          card_transfer_receipt_path?: string | null
+          card_transfer_rejection_reason?: string | null
+          card_transfer_reviewed_at?: string | null
+          card_transfer_reviewed_by?: string | null
+          card_transfer_submitted_at?: string | null
           city: string
           created_at?: string
           customer_email?: string | null
@@ -652,6 +666,13 @@ export type Database = {
         }
         Update: {
           bale_transaction_id?: string | null
+          card_transfer_attempt_count?: number
+          card_transfer_note?: string | null
+          card_transfer_receipt_path?: string | null
+          card_transfer_rejection_reason?: string | null
+          card_transfer_reviewed_at?: string | null
+          card_transfer_reviewed_by?: string | null
+          card_transfer_submitted_at?: string | null
           city?: string
           created_at?: string
           customer_email?: string | null
@@ -1028,6 +1049,8 @@ export type Database = {
       stores: {
         Row: {
           address: string | null
+          card_holder_name: string | null
+          card_number: string | null
           city: string | null
           created_at: string
           description: string | null
@@ -1046,6 +1069,8 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          card_holder_name?: string | null
+          card_number?: string | null
           city?: string | null
           created_at?: string
           description?: string | null
@@ -1064,6 +1089,8 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          card_holder_name?: string | null
+          card_number?: string | null
           city?: string | null
           created_at?: string
           description?: string | null

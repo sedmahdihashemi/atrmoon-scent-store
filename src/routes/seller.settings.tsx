@@ -16,11 +16,14 @@ function SellerSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [s, setS] = useState<any>({});
+  const [confirmCardNumber, setConfirmCardNumber] = useState("");
 
   useEffect(() => {
     if (!storeId) return;
     supabase.from("stores").select("*").eq("id", storeId).single().then(({ data }) => {
-      setS(data ?? {}); setLoading(false);
+      setS(data ?? {});
+      setConfirmCardNumber((data as any)?.card_number ?? "");
+      setLoading(false);
     });
   }, [storeId]);
 
@@ -29,14 +32,35 @@ function SellerSettings() {
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setS({ ...s, [k]: e.target.value });
 
   const save = async () => {
+    if (!storeId) return;
+
+    // Card number is optional (empty = card-to-card disabled for this
+    // store), but if it's set, it must be confirmed and have a holder name.
+    const cardNumber = (s.card_number ?? "").replace(/[\s-]/g, "");
+    if (cardNumber) {
+      if (!/^\d{16}$/.test(cardNumber)) {
+        toast.error("شماره کارت باید ۱۶ رقم باشد");
+        return;
+      }
+      if (cardNumber !== confirmCardNumber.replace(/[\s-]/g, "")) {
+        toast.error("شماره کارت و تکرار آن یکسان نیستند");
+        return;
+      }
+      if (!s.card_holder_name?.trim()) {
+        toast.error("نام صاحب کارت را وارد کنید");
+        return;
+      }
+    }
+
     setSaving(true);
     // editable subset (status changes are admin-only)
-    if (!storeId) return;
     const { error } = await supabase.from("stores").update({
       store_name: s.store_name, description: s.description, logo_url: s.logo_url,
       city: s.city, address: s.address, support_phone: s.support_phone,
       support_email: s.support_email, whatsapp_number: s.whatsapp_number,
       instagram_url: s.instagram_url, telegram_id: s.telegram_id,
+      card_number: cardNumber || null,
+      card_holder_name: cardNumber ? s.card_holder_name.trim() : null,
     }).eq("id", storeId);
     setSaving(false);
     if (error) toast.error(error.message); else toast.success("ذخیره شد");
@@ -64,6 +88,30 @@ function SellerSettings() {
           <Field label="درباره"><Textarea rows={4} value={s.description ?? ""} onChange={set("description")} /></Field>
         </div>
       </div>
+
+      <div className="paper-card rounded-md p-5">
+        <h3 className="font-serif text-base text-ink mb-1">پرداخت کارت‌به‌کارت</h3>
+        <p className="text-xs text-muted-foreground font-serif mb-4">
+          اگر شماره کارت را خالی بگذارید، گزینه‌ی «کارت به کارت» در تسویه‌حساب برای مشتری‌های این فروشگاه نمایش داده نمی‌شود.
+        </p>
+        <div className="grid md:grid-cols-2 gap-4">
+          <Field label="نام صاحب کارت"><Input value={s.card_holder_name ?? ""} onChange={set("card_holder_name")} /></Field>
+          <div />
+          <Field label="شماره کارت (۱۶ رقم)">
+            <Input value={s.card_number ?? ""} onChange={set("card_number")} dir="ltr" inputMode="numeric" placeholder="6037XXXXXXXXXXXX" />
+          </Field>
+          <Field label="تکرار شماره کارت">
+            <Input
+              value={confirmCardNumber}
+              onChange={(e) => setConfirmCardNumber(e.target.value)}
+              dir="ltr"
+              inputMode="numeric"
+              placeholder="6037XXXXXXXXXXXX"
+            />
+          </Field>
+        </div>
+      </div>
+
       <div className="flex justify-end">
         <Button onClick={save} loading={saving} loadingText="ذخیره…">ذخیره</Button>
       </div>
