@@ -211,7 +211,7 @@ function OrderDetail({ orderId, onBack, botUsername }: { orderId: string; onBack
               <li key={h.id} className="flex items-center gap-3">
                 <span className="w-2 h-2 rounded-full bg-[var(--gold)]" />
                 <span className="font-serif">{ORDER_STATUS_FA[h.new_status] ?? h.new_status}</span>
-                <span className="text-xs text-muted-foreground mr-auto">{new Date(h.created_at).toLocaleString("fa-IR")}</span>
+                <span className="text-xs text-muted-foreground mr-auto">{new Date(h.created_at).toLocaleString("fa-IR", { timeZone: "Asia/Tehran" })}</span>
               </li>
             ))}
           </ol>

@@ -10,6 +10,7 @@ import {
   answerPreCheckoutQuery,
   sendToAdmins,
   tomanToRial,
+  fmtTehranDate,
 } from "@/lib/bale.server";
 import { confirmBalePayment } from "@/lib/bale-payment.server";
 
@@ -260,7 +261,7 @@ async function handlePublicTrack(chat_id: number, code: string) {
   }
   await sendMessage(
     chat_id,
-    `🔎 وضعیت سفارش\nشماره: <code>${order.order_number}</code>\nوضعیت: ${statusFa(order.status)}\nتاریخ ثبت: ${new Date(order.created_at).toLocaleString("fa-IR")}`
+    `🔎 وضعیت سفارش\nشماره: <code>${order.order_number}</code>\nوضعیت: ${statusFa(order.status)}\nتاریخ ثبت: ${fmtTehranDate(order.created_at)}`
   );
 }
 

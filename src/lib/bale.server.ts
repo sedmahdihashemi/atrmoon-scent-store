@@ -62,6 +62,12 @@ function fmtMoney(n: number | string) {
   return new Intl.NumberFormat("fa-IR").format(Math.round(v)) + " تومان";
 }
 
+// The server runs in UTC, so a bare toLocaleString("fa-IR") shows GMT time
+// instead of Iran time — always pass the explicit timeZone.
+export function fmtTehranDate(d: string | number | Date) {
+  return new Date(d).toLocaleString("fa-IR", { timeZone: "Asia/Tehran" });
+}
+
 export async function buildInvoiceText(orderId: string, opts: { includeStore?: boolean } = {}) {
   const { data: order, error } = await supabaseAdmin
     .from("orders")
@@ -91,11 +97,13 @@ export async function buildInvoiceText(orderId: string, opts: { includeStore?: b
   lines.push("");
   lines.push(`🛒 <b>اقلام</b>`);
   for (const it of items) {
-    lines.push(`• ${it.product_name}${it.brand_name ? ` (${it.brand_name})` : ""} — ${it.bottle_name} × ${it.quantity} = ${fmtMoney(it.total_price)}`);
+    lines.push(
+      `• ${it.product_name}${it.brand_name ? ` (${it.brand_name})` : ""} — ${it.bottle_name} ${it.volume_ml} میلی‌لیتر × ${it.quantity} = ${fmtMoney(it.total_price)}`
+    );
   }
   lines.push("");
   lines.push(`💰 <b>مبلغ کل:</b> ${fmtMoney(order.total_amount)}`);
-  lines.push(`📅 ${new Date(order.created_at).toLocaleString("fa-IR")}`);
+  lines.push(`📅 ${fmtTehranDate(order.created_at)}`);
   return { text: lines.join("\n"), order };
 }
 
