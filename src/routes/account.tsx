@@ -12,19 +12,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { formatToman } from "@/lib/cart-session";
-import { User as UserIcon, MapPin, Package, Heart, Trash2, Plus, Star, ChevronLeft } from "lucide-react";
+import { orderStatusLabels } from "@/lib/seller-utils";
+import { getBalePayConfig } from "@/lib/bale-pay-flag.functions";
+import { useServerFn } from "@tanstack/react-start";
+import { User as UserIcon, MapPin, Package, Heart, Trash2, Plus, Star, ChevronLeft, Wallet } from "lucide-react";
 
 export const Route = createFileRoute("/account")({ component: AccountPage });
 
-const ORDER_STATUS_FA: Record<string, string> = {
-  pending_contact: "در انتظار تماس",
-  confirmed_by_seller: "تأییدشده",
-  preparing: "در حال آماده‌سازی",
-  shipped: "ارسال‌شده",
-  completed: "تکمیل‌شده",
-  cancelled: "لغو شده",
-  rejected_by_seller: "رد شده",
-};
+// Single source of truth for status labels lives in seller-utils.ts — do
+// not keep a separate copy here, that's exactly what caused "pending_payment"
+// to show up untranslated (this file had its own list, missing that status).
+const ORDER_STATUS_FA = orderStatusLabels;
 
 function AccountPage() {
   return (
@@ -62,6 +60,20 @@ function AccountInner() {
   );
 }
 
+// Where to send the customer to finish an unpaid order. null if there's
+// nothing to resume (already paid/cancelled, or card_transfer whose
+// tracking page doesn't exist yet).
+function resumePaymentLink(order: { id: string; status: string; payment_method?: string }, botUsername: string | null): string | null {
+  if (order.status !== "pending_payment") return null;
+  if (order.payment_method === "bale" && botUsername) {
+    return `https://ble.ir/${botUsername}?start=pay_${order.id}`;
+  }
+  if (order.payment_method === "card_transfer") {
+    return `/track/${order.id}`;
+  }
+  return null;
+}
+
 /* ---------------- Orders ---------------- */
 function OrdersTab() {
   const { user } = useAuth();
@@ -69,13 +81,20 @@ function OrdersTab() {
   const [stores, setStores] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<string | null>(null);
+  const [botUsername, setBotUsername] = useState<string | null>(null);
+  const fetchBalePayConfig = useServerFn(getBalePayConfig);
+
+  useEffect(() => {
+    fetchBalePayConfig().then((c) => setBotUsername(c.botUsername)).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
       const { data } = await supabase
         .from("orders")
-        .select("id, order_number, status, total_amount, created_at, store_id")
+        .select("id, order_number, status, payment_method, total_amount, created_at, store_id")
         .eq("customer_id", user.id)
         .order("created_at", { ascending: false });
       const list = data ?? [];
@@ -91,30 +110,38 @@ function OrdersTab() {
     })();
   }, [user]);
 
-  if (selected) return <OrderDetail orderId={selected} onBack={() => setSelected(null)} />;
+  if (selected) return <OrderDetail orderId={selected} onBack={() => setSelected(null)} botUsername={botUsername} />;
 
   if (loading) return <p className="text-muted-foreground text-sm">در حال بارگذاری…</p>;
   if (!orders.length) return <p className="paper-card rounded-md p-6 text-muted-foreground text-sm">هنوز سفارشی ثبت نشده.</p>;
 
   return (
     <div className="space-y-3">
-      {orders.map((o) => (
-        <button key={o.id} onClick={() => setSelected(o.id)} className="w-full text-right paper-card rounded-md p-4 hover:border-[var(--gold)] transition flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-          <div className="min-w-0">
-            <div className="font-serif text-ink truncate">{stores[o.store_id] || "فروشگاه"}</div>
-            <div className="text-xs text-muted-foreground mt-1">کد: {o.order_number}</div>
+      {orders.map((o) => {
+        const payLink = resumePaymentLink(o, botUsername);
+        return (
+          <div key={o.id} className="w-full paper-card rounded-md p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+            <button onClick={() => setSelected(o.id)} className="text-right min-w-0 flex-1">
+              <div className="font-serif text-ink truncate">{stores[o.store_id] || "فروشگاه"}</div>
+              <div className="text-xs text-muted-foreground mt-1">کد: {o.order_number}</div>
+            </button>
+            <div className="flex items-center gap-3">
+              <Badge variant="outline" className="font-serif">{ORDER_STATUS_FA[o.status] ?? o.status}</Badge>
+              <span className="font-serif text-ink text-sm">{formatToman(o.total_amount)}</span>
+              {payLink && (
+                <a href={payLink} target={payLink.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer">
+                  <Button size="sm" className="gap-1"><Wallet className="w-3.5 h-3.5" />تکمیل پرداخت</Button>
+                </a>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Badge variant="outline" className="font-serif">{ORDER_STATUS_FA[o.status] ?? o.status}</Badge>
-            <span className="font-serif text-ink text-sm">{formatToman(o.total_amount)}</span>
-          </div>
-        </button>
-      ))}
+        );
+      })}
     </div>
   );
 }
 
-function OrderDetail({ orderId, onBack }: { orderId: string; onBack: () => void }) {
+function OrderDetail({ orderId, onBack, botUsername }: { orderId: string; onBack: () => void; botUsername: string | null }) {
   const [order, setOrder] = useState<any>(null);
   const [storeName, setStoreName] = useState<string>("");
   const [items, setItems] = useState<any[]>([]);
@@ -151,6 +178,16 @@ function OrderDetail({ orderId, onBack }: { orderId: string; onBack: () => void 
           <div className="md:col-span-2"><span className="text-muted-foreground">آدرس: </span>{order.city} - {order.shipping_address}</div>
           <div><span className="text-muted-foreground">مبلغ کل: </span>{formatToman(order.total_amount)}</div>
         </div>
+        {resumePaymentLink(order, botUsername) && (
+          <a
+            href={resumePaymentLink(order, botUsername)!}
+            target={resumePaymentLink(order, botUsername)!.startsWith("http") ? "_blank" : undefined}
+            rel="noopener noreferrer"
+            className="inline-block mt-4"
+          >
+            <Button size="sm" className="gap-1"><Wallet className="w-3.5 h-3.5" />تکمیل پرداخت</Button>
+          </a>
+        )}
       </div>
       <div className="paper-card rounded-md p-5">
         <h3 className="font-serif text-ink mb-3">اقلام</h3>
