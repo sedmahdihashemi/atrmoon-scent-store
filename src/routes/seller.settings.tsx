@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { LoadingState } from "@/components/ui/loading-state";
 import { toast } from "sonner";
+import { detectIranianBank } from "@/lib/iran-bank-cards";
 
 export const Route = createFileRoute("/seller/settings")({ component: SellerSettings });
 
@@ -99,6 +100,9 @@ function SellerSettings() {
           <div />
           <Field label="شماره کارت (۱۶ رقم)">
             <Input value={s.card_number ?? ""} onChange={set("card_number")} dir="ltr" inputMode="numeric" placeholder="6037XXXXXXXXXXXX" />
+            {detectIranianBank(s.card_number) && (
+              <p className="text-xs text-muted-foreground font-serif mt-1">بانک: {detectIranianBank(s.card_number)}</p>
+            )}
           </Field>
           <Field label="تکرار شماره کارت">
             <Input
