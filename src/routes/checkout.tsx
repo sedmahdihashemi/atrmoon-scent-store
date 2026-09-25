@@ -14,27 +14,34 @@ import { useServerFn } from "@tanstack/react-start";
 import { notifyOrder } from "@/lib/bale-notify.functions";
 import { getBalePayConfig } from "@/lib/bale-pay-flag.functions";
 import { getOrderStatus } from "@/lib/order-status.functions";
+import { getStoreCardPayment } from "@/lib/card-transfer.functions";
 import { toast } from "sonner";
-import { ShoppingBag, CheckCircle2, Wallet, Copy } from "lucide-react";
+import { ShoppingBag, CheckCircle2, Wallet, Copy, Landmark } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/checkout")({ component: CheckoutPage });
 
 function CheckoutPage() {
-  const { items, loading, subtotal, cartId, resetAfterCheckout } = useCart();
+  const { items, loading, subtotal, cartId, storeId, resetAfterCheckout } = useCart();
   const { user, profile } = useAuth();
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState<{ number: string } | null>(null);
   const [pendingPayment, setPendingPayment] = useState<{ orderId: string; number: string } | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<"cod" | "bale">("cod");
+  const [cardTransferOrder, setCardTransferOrder] = useState<{ orderId: string; number: string } | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "bale" | "card_transfer">("cod");
   const [balePay, setBalePay] = useState<{ enabled: boolean; botUsername: string | null }>({
     enabled: false,
     botUsername: null,
   });
+  const [cardPayment, setCardPayment] = useState<{ cardNumber: string | null; cardHolderName: string | null }>({
+    cardNumber: null,
+    cardHolderName: null,
+  });
   const notify = useServerFn(notifyOrder);
   const fetchBalePayConfig = useServerFn(getBalePayConfig);
   const fetchOrderStatus = useServerFn(getOrderStatus);
+  const fetchStoreCardPayment = useServerFn(getStoreCardPayment);
 
   useEffect(() => {
     fetchBalePayConfig()
@@ -42,6 +49,17 @@ function CheckoutPage() {
       .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!storeId) {
+      setCardPayment({ cardNumber: null, cardHolderName: null });
+      return;
+    }
+    fetchStoreCardPayment({ data: { storeId } })
+      .then(setCardPayment)
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeId]);
 
   // While waiting on a Bale payment, the customer pays in a separate app —
   // when they come back to this tab, re-check the order instead of leaving
@@ -187,6 +205,51 @@ function CheckoutPage() {
     );
   }
 
+  if (cardTransferOrder) {
+    const trackUrl = `/track/${cardTransferOrder.orderId}`;
+    const formattedCard = (cardPayment.cardNumber ?? "").replace(/(\d{4})(?=\d)/g, "$1 ");
+    return (
+      <PublicLayout>
+        <div className="container mx-auto px-4 py-20 max-w-xl text-center">
+          <Landmark className="w-14 h-14 text-[var(--gold)] mx-auto mb-4" />
+          <h1 className="font-serif text-3xl text-ink mb-3">سفارش شما ثبت شد</h1>
+          <p className="text-muted-foreground font-serif">شماره سفارش</p>
+          <p className="font-serif text-2xl text-[var(--gold)] mt-1 tracking-wider">{cardTransferOrder.number}</p>
+
+          <div className="mt-8 paper-card rounded-md p-6 text-right">
+            <p className="text-sm font-serif text-ink mb-4">
+              مبلغ <span className="text-[var(--gold-deep)]">{formatToman(subtotal)}</span> را به شماره کارت زیر واریز کنید:
+            </p>
+            <div className="space-y-2 mb-4">
+              <div>
+                <Label className="text-xs font-serif text-ink/80">شماره کارت</Label>
+                <p dir="ltr" className="font-serif text-lg text-ink tracking-widest text-left">{formattedCard}</p>
+              </div>
+              <div>
+                <Label className="text-xs font-serif text-ink/80">به نام</Label>
+                <p className="font-serif text-ink">{cardPayment.cardHolderName}</p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground font-serif leading-relaxed">
+              بعد از واریز، از لینک زیر مدرک پرداخت (عکس رسید یا کد پیگیری بانک) را ارسال کنید تا فروشنده تأیید کند.
+              تا ۳ روز فرصت دارید؛ بعد از آن سفارش خودکار لغو می‌شود.
+            </p>
+          </div>
+
+          <div className="mt-8 flex gap-3 justify-center">
+            <Link to={trackUrl as any}>
+              <Button className="h-11 font-serif">ارسال مدرک پرداخت</Button>
+            </Link>
+            {user ? <Link to="/account"><Button variant="outline">پیگیری در حساب من</Button></Link> : null}
+          </div>
+          <p className="mt-4 text-xs text-muted-foreground font-serif">
+            این لینک را نگه دارید تا بعداً هم بتوانید سفارش را پیگیری کنید: <span dir="ltr">{typeof window !== "undefined" ? window.location.origin : ""}{trackUrl}</span>
+          </p>
+        </div>
+      </PublicLayout>
+    );
+  }
+
   if (success) {
     return (
       <PublicLayout>
@@ -230,7 +293,9 @@ function CheckoutPage() {
     // Always send the session id if available — handles the case where the cart
     // was created as a guest and the user logged in afterwards (customer_id is null).
     const session = getOrCreateCartSession();
-    const method: "cod" | "bale" = balePay.enabled ? paymentMethod : "cod";
+    let method: "cod" | "bale" | "card_transfer" = paymentMethod;
+    if (method === "bale" && !balePay.enabled) method = "cod";
+    if (method === "card_transfer" && !cardPayment.cardNumber) method = "cod";
     const { data, error } = await supabase.rpc("place_order", {
       p_cart_id: cartId,
       p_session_id: session,
@@ -257,6 +322,12 @@ function CheckoutPage() {
         // status anyway, but we simply don't call it yet: the payment
         // webhook (successful_payment) is what notifies everyone once paid.
         setPendingPayment({ orderId: row.order_id, number: row.order_number });
+        return;
+      }
+      if (method === "card_transfer" && row?.order_id) {
+        // Same reasoning as bale: no notify until a seller actually
+        // approves the submitted receipt.
+        setCardTransferOrder({ orderId: row.order_id, number: row.order_number });
         return;
       }
       setSuccess({ number: row.order_number });
@@ -344,10 +415,10 @@ function CheckoutPage() {
               <span>قابل پرداخت</span>
               <span className="text-[var(--gold)]">{formatToman(subtotal)}</span>
             </div>
-            {balePay.enabled && (
+            {(balePay.enabled || cardPayment.cardNumber) && (
               <div className="mb-5 space-y-2">
                 <Label className="text-xs font-serif text-ink/80">روش پرداخت</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className={`grid gap-2 ${balePay.enabled && cardPayment.cardNumber ? "grid-cols-3" : "grid-cols-2"}`}>
                   <button
                     type="button"
                     onClick={() => setPaymentMethod("cod")}
@@ -357,15 +428,28 @@ function CheckoutPage() {
                   >
                     پرداخت نقدی / تماس
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod("bale")}
-                    className={`rounded-md border px-3 py-2 text-sm font-serif transition-colors ${
-                      paymentMethod === "bale" ? "border-[var(--gold)] text-[var(--gold-deep)] bg-[var(--gold)]/6" : "border-ink/20 text-ink-soft"
-                    }`}
-                  >
-                    پرداخت با بله
-                  </button>
+                  {balePay.enabled && (
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("bale")}
+                      className={`rounded-md border px-3 py-2 text-sm font-serif transition-colors ${
+                        paymentMethod === "bale" ? "border-[var(--gold)] text-[var(--gold-deep)] bg-[var(--gold)]/6" : "border-ink/20 text-ink-soft"
+                      }`}
+                    >
+                      پرداخت با بله
+                    </button>
+                  )}
+                  {cardPayment.cardNumber && (
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("card_transfer")}
+                      className={`rounded-md border px-3 py-2 text-sm font-serif transition-colors ${
+                        paymentMethod === "card_transfer" ? "border-[var(--gold)] text-[var(--gold-deep)] bg-[var(--gold)]/6" : "border-ink/20 text-ink-soft"
+                      }`}
+                    >
+                      کارت به کارت
+                    </button>
+                  )}
                 </div>
               </div>
             )}
