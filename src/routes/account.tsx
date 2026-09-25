@@ -43,7 +43,7 @@ function AccountInner() {
         <h1 className="font-serif text-2xl md:text-3xl text-ink">سلام {profile?.full_name || ""}</h1>
         <p className="text-muted-foreground font-serif italic text-sm mt-1">به عطاری خصوصی‌تان در عطرمون خوش‌آمدید.</p>
       </header>
-      <Tabs defaultValue="orders" className="w-full">
+      <Tabs dir="rtl" defaultValue="orders" className="w-full">
         <div dir="rtl" className="overflow-x-auto -mx-4 px-4 mb-4 scrollbar-thin">
           <TabsList className="inline-flex h-auto w-full justify-start md:grid md:grid-cols-4 gap-1">
             <TabsTrigger value="orders" className="whitespace-nowrap gap-1.5"><Package className="w-4 h-4" />سفارش‌ها</TabsTrigger>

@@ -12,6 +12,7 @@ import { getBalePayConfig } from "@/lib/bale-pay-flag.functions";
 import { detectIranianBank } from "@/lib/iran-bank-cards";
 import { BankIcon } from "@/lib/bank-icons";
 import { PaymentMethodSwitcher } from "@/components/PaymentMethodSwitcher";
+import { FileDropzone } from "@/components/FileDropzone";
 import { formatToman } from "@/lib/cart-session";
 import { orderStatusLabels } from "@/lib/seller-utils";
 import { toast } from "sonner";
@@ -218,12 +219,12 @@ function TrackPage() {
             <div className="border-t border-ink/10 pt-4 space-y-3">
               <p className="text-xs text-muted-foreground font-serif">بعد از واریز، عکس رسید یا کد پیگیری بانک را بفرستید (حداقل یکی اجباری):</p>
               <div>
-                <Label className="text-xs font-serif text-ink/80 mb-1.5 block">عکس رسید (JPG/PNG/WebP، حداکثر ۵ مگابایت)</Label>
-                <input
-                  type="file"
+                <Label className="text-xs font-serif text-ink/80 mb-1.5 block">عکس رسید</Label>
+                <FileDropzone
+                  file={file}
+                  onChange={setFile}
                   accept="image/jpeg,image/png,image/webp"
-                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                  className="text-sm font-serif"
+                  hint="JPG، PNG یا WebP، حداکثر ۵ مگابایت"
                 />
               </div>
               <div>
