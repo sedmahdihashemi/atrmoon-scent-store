@@ -231,7 +231,24 @@ function CheckoutPage() {
             <div className="space-y-2 mb-4">
               <div>
                 <Label className="text-xs font-serif text-ink/80">شماره کارت</Label>
-                <p dir="ltr" className="font-serif text-lg text-ink tracking-widest text-left">{formattedCard}</p>
+                <div className="flex items-center gap-2">
+                  <p dir="ltr" className="font-serif text-lg text-ink tracking-widest text-left">{formattedCard}</p>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(cardTransferOrder.cardNumber);
+                        toast.success("شماره کارت کپی شد");
+                      } catch {
+                        toast.error("کپی خودکار کار نکرد؛ شماره را دستی انتخاب و کپی کنید");
+                      }
+                    }}
+                    className="text-ink-soft hover:text-[var(--gold-deep)] transition-colors"
+                    aria-label="کپی شماره کارت"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </button>
+                </div>
                 {detectIranianBank(cardTransferOrder.cardNumber) && (
                   <div className="flex items-center gap-1.5 mt-1">
                     <BankIcon iconKey={detectIranianBank(cardTransferOrder.cardNumber)!.iconKey} size={20} />

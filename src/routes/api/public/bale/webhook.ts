@@ -177,7 +177,10 @@ async function handleLoggedIn(chat_id: number, user_id: string, text: string) {
       }
     }
     const built = await buildInvoiceText((order as any).id, { includeStore: role === "super_admin" });
-    if (built) await sendMessage(chat_id, built.text);
+    if (built) {
+      await sendMessage(chat_id, built.text);
+      if (role === "customer") await maybeOfferBalePayment(chat_id, built.order as any);
+    }
     return;
   }
 
@@ -251,7 +254,7 @@ async function handleLoggedIn(chat_id: number, user_id: string, text: string) {
 async function handlePublicTrack(chat_id: number, code: string) {
   const { data: order, error } = await supabaseAdmin
     .from("orders")
-    .select("order_number, status, created_at, customer_name")
+    .select("id, order_number, status, created_at, customer_name, payment_method, payment_expires_at")
     .eq("order_number", code)
     .maybeSingle();
   logIfError(`handlePublicTrack(${code})`, error);
@@ -263,6 +266,7 @@ async function handlePublicTrack(chat_id: number, code: string) {
     chat_id,
     `🔎 وضعیت سفارش\nشماره: <code>${order.order_number}</code>\nوضعیت: ${statusFa(order.status)}\nتاریخ ثبت: ${fmtTehranDate(order.created_at)}`
   );
+  await maybeOfferBalePayment(chat_id, order as any);
 }
 
 // Triggered by the deep link ble.ir/<bot>?start=pay_<orderId>, which Bale
@@ -304,6 +308,24 @@ async function handlePayDeepLink(chat_id: number, orderId: string) {
     payload: orderId,
     amount_rial: tomanToRial((order as any).total_amount),
   });
+}
+
+// Called after showing an order's invoice/status (both the logged-in
+// /track and the public/guest track) when that order is a still-unpaid
+// Bale order — offers to send the payment invoice right there in the chat
+// instead of making the customer dig up the original checkout link.
+async function maybeOfferBalePayment(
+  chat_id: number,
+  order: { id: string; payment_method?: string | null; status?: string | null; payment_expires_at?: string | null }
+) {
+  if (order.payment_method !== "bale" || order.status !== "pending_payment") return;
+  const expiresAt = order.payment_expires_at ? new Date(order.payment_expires_at).getTime() : 0;
+  if (expiresAt && expiresAt < Date.now()) return; // already expired — nothing useful to offer
+  await upsertSession(chat_id, { state: "awaiting_bale_pay_confirm", state_data: { orderId: order.id } });
+  await sendMessage(
+    chat_id,
+    "این سفارش هنوز پرداخت نشده.\nمی‌خواهید همین الان از طریق بله پرداخت کنید؟ برای بله، عدد <code>1</code> را بفرستید."
+  );
 }
 
 // Bale must respond to the user within 10s of a PreCheckoutQuery, so this
@@ -558,6 +580,18 @@ async function handleUpdate(update: any) {
       welcome = "✅ خوش آمدید!\n\n";
     }
     await sendMessage(chat_id, welcome + helpFor(role));
+    return;
+  }
+
+  if (session.state === "awaiting_bale_pay_confirm") {
+    const orderId: string | undefined = session.state_data?.orderId;
+    const reply = text.trim();
+    await upsertSession(chat_id, { state: "idle", state_data: {} });
+    if (orderId && (reply === "1" || reply === "بله" || reply.toLowerCase() === "yes")) {
+      await handlePayDeepLink(chat_id, orderId);
+    } else {
+      await sendMessage(chat_id, "باشه. هر وقت خواستید می‌توانید دوباره سفارش را پیگیری کنید تا لینک پرداخت را بگیرید.");
+    }
     return;
   }
 
