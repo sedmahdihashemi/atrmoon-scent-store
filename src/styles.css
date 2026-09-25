@@ -197,7 +197,10 @@
       radial-gradient(ellipse at 85% 100%, oklch(0.82 0.05 70 / 0.35), transparent 60%),
       radial-gradient(circle at 50% 50%, transparent 60%, oklch(0.28 0.028 55 / 0.05) 100%),
       url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='4'/><feColorMatrix values='0 0 0 0 0.22  0 0 0 0 0.18  0 0 0 0 0.14  0 0 0 0.045 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-    background-attachment: fixed;
+    /* was background-attachment: fixed — forced the browser to repaint this
+       (filter-heavy) background on every scroll frame. Removing it keeps
+       the same look but scrolls like a normal background (GPU-composited),
+       which is what was making scrolling feel heavy. */
     background-size: auto, auto, auto, 220px 220px;
   }
   html { direction: rtl; }
