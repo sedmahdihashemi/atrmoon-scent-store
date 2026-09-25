@@ -28,7 +28,13 @@ function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState<{ number: string } | null>(null);
   const [pendingPayment, setPendingPayment] = useState<{ orderId: string; number: string } | null>(null);
-  const [cardTransferOrder, setCardTransferOrder] = useState<{ orderId: string; number: string } | null>(null);
+  const [cardTransferOrder, setCardTransferOrder] = useState<{
+    orderId: string;
+    number: string;
+    amount: number;
+    cardNumber: string;
+    cardHolderName: string;
+  } | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "bale" | "card_transfer">("cod");
   const [balePay, setBalePay] = useState<{ enabled: boolean; botUsername: string | null }>({
     enabled: false,
@@ -207,7 +213,7 @@ function CheckoutPage() {
 
   if (cardTransferOrder) {
     const trackUrl = `/track/${cardTransferOrder.orderId}`;
-    const formattedCard = (cardPayment.cardNumber ?? "").replace(/(\d{4})(?=\d)/g, "$1 ");
+    const formattedCard = cardTransferOrder.cardNumber.replace(/(\d{4})(?=\d)/g, "$1 ");
     return (
       <PublicLayout>
         <div className="container mx-auto px-4 py-20 max-w-xl text-center">
@@ -218,7 +224,7 @@ function CheckoutPage() {
 
           <div className="mt-8 paper-card rounded-md p-6 text-right">
             <p className="text-sm font-serif text-ink mb-4">
-              مبلغ <span className="text-[var(--gold-deep)]">{formatToman(subtotal)}</span> را به شماره کارت زیر واریز کنید:
+              مبلغ <span className="text-[var(--gold-deep)]">{formatToman(cardTransferOrder.amount)}</span> را به شماره کارت زیر واریز کنید:
             </p>
             <div className="space-y-2 mb-4">
               <div>
@@ -227,7 +233,7 @@ function CheckoutPage() {
               </div>
               <div>
                 <Label className="text-xs font-serif text-ink/80">به نام</Label>
-                <p className="font-serif text-ink">{cardPayment.cardHolderName}</p>
+                <p className="font-serif text-ink">{cardTransferOrder.cardHolderName}</p>
               </div>
             </div>
             <p className="text-xs text-muted-foreground font-serif leading-relaxed">
@@ -296,6 +302,12 @@ function CheckoutPage() {
     let method: "cod" | "bale" | "card_transfer" = paymentMethod;
     if (method === "bale" && !balePay.enabled) method = "cod";
     if (method === "card_transfer" && !cardPayment.cardNumber) method = "cod";
+    // Snapshot these before resetAfterCheckout() clears the cart/store
+    // state below — the card-transfer confirmation screen needs them, but
+    // reading cardPayment/subtotal live after the reset would show blanks/0.
+    const amountSnapshot = subtotal;
+    const cardNumberSnapshot = cardPayment.cardNumber ?? "";
+    const cardHolderNameSnapshot = cardPayment.cardHolderName ?? "";
     const { data, error } = await supabase.rpc("place_order", {
       p_cart_id: cartId,
       p_session_id: session,
@@ -327,7 +339,13 @@ function CheckoutPage() {
       if (method === "card_transfer" && row?.order_id) {
         // Same reasoning as bale: no notify until a seller actually
         // approves the submitted receipt.
-        setCardTransferOrder({ orderId: row.order_id, number: row.order_number });
+        setCardTransferOrder({
+          orderId: row.order_id,
+          number: row.order_number,
+          amount: amountSnapshot,
+          cardNumber: cardNumberSnapshot,
+          cardHolderName: cardHolderNameSnapshot,
+        });
         return;
       }
       setSuccess({ number: row.order_number });
