@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { LoadingState } from "@/components/ui/loading-state";
 import { toast } from "sonner";
 import { detectIranianBank } from "@/lib/iran-bank-cards";
+import { BankIcon } from "@/lib/bank-icons";
 
 export const Route = createFileRoute("/seller/settings")({ component: SellerSettings });
 
@@ -101,7 +102,10 @@ function SellerSettings() {
           <Field label="شماره کارت (۱۶ رقم)">
             <Input value={s.card_number ?? ""} onChange={set("card_number")} dir="ltr" inputMode="numeric" placeholder="6037XXXXXXXXXXXX" />
             {detectIranianBank(s.card_number) && (
-              <p className="text-xs text-muted-foreground font-serif mt-1">بانک: {detectIranianBank(s.card_number)}</p>
+              <div className="flex items-center gap-1.5 mt-1">
+                <BankIcon iconKey={detectIranianBank(s.card_number)!.iconKey} size={18} />
+                <p className="text-xs text-muted-foreground font-serif">بانک: {detectIranianBank(s.card_number)!.name}</p>
+              </div>
             )}
           </Field>
           <Field label="تکرار شماره کارت">

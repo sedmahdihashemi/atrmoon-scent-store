@@ -1,46 +1,52 @@
 // Well-known Iranian bank card IIN/BIN prefixes (first 6 digits).
-// Informational only — used to show the bank name as a convenience while
-// entering/viewing a card number. An unrecognized prefix is not an error;
-// it just means we don't show a bank name.
-const BIN_TO_BANK: Record<string, string> = {
-  "603799": "بانک ملی ایران",
-  "170019": "بانک مرکزی ایران",
-  "589210": "بانک سپه",
-  "627961": "بانک صنعت و معدن",
-  "603770": "بانک کشاورزی",
-  "628023": "بانک مسکن",
-  "627760": "پست بانک ایران",
-  "502908": "بانک توسعه تعاون",
-  "627648": "بانک توسعه صادرات",
-  "627412": "بانک اقتصاد نوین",
-  "622106": "بانک پارسیان",
-  "639194": "بانک پارسیان",
-  "502229": "بانک پاسارگاد",
-  "639347": "بانک پاسارگاد",
-  "627488": "بانک کارآفرین",
-  "621986": "بانک سامان",
-  "639346": "بانک سینا",
-  "639607": "بانک سرمایه",
-  "636214": "بانک آینده",
-  "502806": "بانک شهر",
-  "504172": "بانک شهر",
-  "502938": "بانک دی",
-  "505785": "بانک ایران زمین",
-  "636795": "بانک مهر ایران",
-  "585983": "بانک تجارت",
-  "585947": "بانک تجارت",
-  "589463": "بانک رفاه کارگران",
-  "505416": "بانک گردشگری",
-  "606256": "بانک اقتصاد نوین",
-  "621663": "بانک تجارت",
-  "639370": "بانک مهر اقتصاد (ادغام‌شده در سپه)",
-  "627381": "بانک انصار (ادغام‌شده در سپه)",
-  "636949": "بانک حکمت ایرانیان (ادغام‌شده در سپه)",
-  "606373": "بانک قوامین (ادغام‌شده در سپه)",
-  "639599": "بانک قوامین (ادغام‌شده در سپه)",
+// Informational only — used to show the bank name/logo as a convenience
+// while entering/viewing a card number. An unrecognized prefix is not an
+// error; it just means we don't show anything.
+//
+// iconKey matches a named export in @snapp-store/iranian-banks-react-icons
+// (that package's own name, e.g. "Melli" -> MelliColorIcon) — see
+// src/lib/bank-icons.tsx for the actual component lookup.
+export type BankInfo = { name: string; iconKey: string };
+
+const BIN_TO_BANK: Record<string, BankInfo> = {
+  "603799": { name: "بانک ملی ایران", iconKey: "Melli" },
+  "610433": { name: "بانک ملت", iconKey: "Mellat" },
+  "589210": { name: "بانک سپه", iconKey: "Sepah" },
+  "627961": { name: "بانک صنعت و معدن", iconKey: "SanatMadan" },
+  "603770": { name: "بانک کشاورزی", iconKey: "Keshavarzi" },
+  "628023": { name: "بانک مسکن", iconKey: "Maskan" },
+  "627760": { name: "پست بانک ایران", iconKey: "Post" },
+  "502908": { name: "بانک توسعه تعاون", iconKey: "ToseeTaavon" },
+  "627648": { name: "بانک توسعه صادرات", iconKey: "ToseeSaderat" },
+  "627412": { name: "بانک اقتصاد نوین", iconKey: "EghtesadNovin" },
+  "606256": { name: "بانک اقتصاد نوین", iconKey: "EghtesadNovin" },
+  "622106": { name: "بانک پارسیان", iconKey: "Parsian" },
+  "639194": { name: "بانک پارسیان", iconKey: "Parsian" },
+  "502229": { name: "بانک پاسارگاد", iconKey: "Pasargad" },
+  "639347": { name: "بانک پاسارگاد", iconKey: "Pasargad" },
+  "627488": { name: "بانک کارآفرین", iconKey: "Karafarin" },
+  "621986": { name: "بانک سامان", iconKey: "Saman" },
+  "639346": { name: "بانک سینا", iconKey: "Sina" },
+  "639607": { name: "بانک سرمایه", iconKey: "Sarmayeh" },
+  "636214": { name: "بانک آینده", iconKey: "Ayandeh" },
+  "502806": { name: "بانک شهر", iconKey: "Shahr" },
+  "504172": { name: "بانک شهر", iconKey: "Shahr" },
+  "502938": { name: "بانک دی", iconKey: "Dey" },
+  "505785": { name: "بانک ایران زمین", iconKey: "IranZamin" },
+  "636795": { name: "بانک مهر ایران", iconKey: "MehrIran" },
+  "585983": { name: "بانک تجارت", iconKey: "Tejarat" },
+  "585947": { name: "بانک تجارت", iconKey: "Tejarat" },
+  "621663": { name: "بانک تجارت", iconKey: "Tejarat" },
+  "589463": { name: "بانک رفاه کارگران", iconKey: "Refah" },
+  "505416": { name: "بانک گردشگری", iconKey: "Gardeshgari" },
+  "639370": { name: "بانک مهر اقتصاد (ادغام‌شده در سپه)", iconKey: "SepahMergedMehrEghtesad" },
+  "627381": { name: "بانک انصار (ادغام‌شده در سپه)", iconKey: "SepahMergedAnsar" },
+  "636949": { name: "بانک حکمت ایرانیان (ادغام‌شده در سپه)", iconKey: "SepahMergedHekmat" },
+  "606373": { name: "بانک قوامین (ادغام‌شده در سپه)", iconKey: "SepahMergedGhavamin" },
+  "639599": { name: "بانک قوامین (ادغام‌شده در سپه)", iconKey: "SepahMergedGhavamin" },
 };
 
-export function detectIranianBank(cardNumber: string | null | undefined): string | null {
+export function detectIranianBank(cardNumber: string | null | undefined): BankInfo | null {
   const digits = (cardNumber ?? "").replace(/\D/g, "");
   if (digits.length < 6) return null;
   return BIN_TO_BANK[digits.slice(0, 6)] ?? null;

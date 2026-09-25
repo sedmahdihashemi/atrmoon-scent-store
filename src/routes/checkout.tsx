@@ -16,6 +16,7 @@ import { getBalePayConfig } from "@/lib/bale-pay-flag.functions";
 import { getOrderStatus } from "@/lib/order-status.functions";
 import { getStoreCardPayment } from "@/lib/card-transfer.functions";
 import { detectIranianBank } from "@/lib/iran-bank-cards";
+import { BankIcon } from "@/lib/bank-icons";
 import { toast } from "sonner";
 import { ShoppingBag, CheckCircle2, Wallet, Copy, Landmark } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -232,7 +233,10 @@ function CheckoutPage() {
                 <Label className="text-xs font-serif text-ink/80">شماره کارت</Label>
                 <p dir="ltr" className="font-serif text-lg text-ink tracking-widest text-left">{formattedCard}</p>
                 {detectIranianBank(cardTransferOrder.cardNumber) && (
-                  <p className="text-xs text-muted-foreground font-serif">بانک: {detectIranianBank(cardTransferOrder.cardNumber)}</p>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <BankIcon iconKey={detectIranianBank(cardTransferOrder.cardNumber)!.iconKey} size={20} />
+                    <p className="text-xs text-muted-foreground font-serif">بانک: {detectIranianBank(cardTransferOrder.cardNumber)!.name}</p>
+                  </div>
                 )}
               </div>
               <div>

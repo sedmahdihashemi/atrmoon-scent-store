@@ -38,6 +38,7 @@
         "@react-email/components": "^1.0.12",
         "@react-three/drei": "^10.7.7",
         "@react-three/fiber": "^9.6.1",
+        "@snapp-store/iranian-banks-react-icons": "^1.1.1",
         "@supabase/supabase-js": "^2.105.4",
         "@tailwindcss/vite": "^4.2.1",
         "@tanstack/react-query": "^5.83.0",
@@ -622,6 +623,8 @@
     "@selderee/plugin-htmlparser2": ["@selderee/plugin-htmlparser2@0.11.0", "", { "dependencies": { "domhandler": "^5.0.3", "selderee": "^0.11.0" } }, "sha512-P33hHGdldxGabLFjPPpaTxVolMrzrcegejx+0GxjrIb9Zv48D8yAIA/QTDR2dFl7Uz7urX8aX6+5bCZslr+gWQ=="],
 
     "@sindresorhus/is": ["@sindresorhus/is@7.2.0", "", {}, "sha512-P1Cz1dWaFfR4IR+U13mqqiGsLFf1KbayybWwdd2vfctdV6hDpUkgCY0nKOLLTMSoRd/jJNjtbqzf13K8DCCXQw=="],
+
+    "@snapp-store/iranian-banks-react-icons": ["@snapp-store/iranian-banks-react-icons@1.1.1", "", { "peerDependencies": { "react": "^16.13.1 || ^17.0.1 || ^18.0.0", "react-dom": "^16.13.1 || ^17.0.1 || ^18.0.0" } }, "sha512-DDJ+LoVOBJGVNX6AWgGiXwBTXuyULVDNndnhVmbB7fzAfoOwrlKYcKyRjWaJW7w0RvCKPur23p8HHa1Wi9/kiA=="],
 
     "@socket.io/component-emitter": ["@socket.io/component-emitter@3.1.2", "", {}, "sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA=="],
 
