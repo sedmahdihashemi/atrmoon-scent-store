@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { formatToman } from "@/lib/cart-session";
 import { orderStatusLabels } from "@/lib/seller-utils";
 import { getBalePayConfig } from "@/lib/bale-pay-flag.functions";
+import { PaymentMethodSwitcher } from "@/components/PaymentMethodSwitcher";
 import { useServerFn } from "@tanstack/react-start";
 import { User as UserIcon, MapPin, Package, Heart, Trash2, Plus, Star, ChevronLeft, Wallet } from "lucide-react";
 
@@ -89,25 +90,28 @@ function OrdersTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
+  const loadOrders = async () => {
     if (!user) return;
-    (async () => {
-      const { data } = await supabase
-        .from("orders")
-        .select("id, order_number, status, payment_method, total_amount, created_at, store_id")
-        .eq("customer_id", user.id)
-        .order("created_at", { ascending: false });
-      const list = data ?? [];
-      setOrders(list);
-      const ids = Array.from(new Set(list.map((o: any) => o.store_id).filter(Boolean)));
-      if (ids.length) {
-        const { data: srows } = await supabase.from("stores").select("id, store_name").in("id", ids as string[]);
-        const map: Record<string, string> = {};
-        (srows ?? []).forEach((s: any) => { map[s.id] = s.store_name; });
-        setStores(map);
-      }
-      setLoading(false);
-    })();
+    const { data } = await supabase
+      .from("orders")
+      .select("id, order_number, status, payment_method, total_amount, created_at, store_id")
+      .eq("customer_id", user.id)
+      .order("created_at", { ascending: false });
+    const list = data ?? [];
+    setOrders(list);
+    const ids = Array.from(new Set(list.map((o: any) => o.store_id).filter(Boolean)));
+    if (ids.length) {
+      const { data: srows } = await supabase.from("stores").select("id, store_name").in("id", ids as string[]);
+      const map: Record<string, string> = {};
+      (srows ?? []).forEach((s: any) => { map[s.id] = s.store_name; });
+      setStores(map);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   if (selected) return <OrderDetail orderId={selected} onBack={() => setSelected(null)} botUsername={botUsername} />;
@@ -120,20 +124,25 @@ function OrdersTab() {
       {orders.map((o) => {
         const payLink = resumePaymentLink(o, botUsername);
         return (
-          <div key={o.id} className="w-full paper-card rounded-md p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-            <button onClick={() => setSelected(o.id)} className="text-right min-w-0 flex-1">
-              <div className="font-serif text-ink truncate">{stores[o.store_id] || "فروشگاه"}</div>
-              <div className="text-xs text-muted-foreground mt-1">کد: {o.order_number}</div>
-            </button>
-            <div className="flex items-center gap-3">
-              <Badge variant="outline" className="font-serif">{ORDER_STATUS_FA[o.status] ?? o.status}</Badge>
-              <span className="font-serif text-ink text-sm">{formatToman(o.total_amount)}</span>
-              {payLink && (
-                <a href={payLink} target={payLink.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer">
-                  <Button size="sm" className="gap-1"><Wallet className="w-3.5 h-3.5" />تکمیل پرداخت</Button>
-                </a>
-              )}
+          <div key={o.id} className="w-full paper-card rounded-md p-4 flex flex-col gap-2">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+              <button onClick={() => setSelected(o.id)} className="text-right min-w-0 flex-1">
+                <div className="font-serif text-ink truncate">{stores[o.store_id] || "فروشگاه"}</div>
+                <div className="text-xs text-muted-foreground mt-1">کد: {o.order_number}</div>
+              </button>
+              <div className="flex items-center gap-3">
+                <Badge variant="outline" className="font-serif">{ORDER_STATUS_FA[o.status] ?? o.status}</Badge>
+                <span className="font-serif text-ink text-sm">{formatToman(o.total_amount)}</span>
+                {payLink && (
+                  <a href={payLink} target={payLink.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer">
+                    <Button size="sm" className="gap-1"><Wallet className="w-3.5 h-3.5" />تکمیل پرداخت</Button>
+                  </a>
+                )}
+              </div>
             </div>
+            {o.status === "pending_payment" && (
+              <PaymentMethodSwitcher orderId={o.id} currentMethod={o.payment_method} onSwitched={loadOrders} />
+            )}
           </div>
         );
       })}
@@ -187,6 +196,15 @@ function OrderDetail({ orderId, onBack, botUsername }: { orderId: string; onBack
           >
             <Button size="sm" className="gap-1"><Wallet className="w-3.5 h-3.5" />تکمیل پرداخت</Button>
           </a>
+        )}
+        {order.status === "pending_payment" && (
+          <div className="mt-4 pt-4 border-t border-ink/10">
+            <PaymentMethodSwitcher
+              orderId={order.id}
+              currentMethod={order.payment_method}
+              onSwitched={() => window.location.reload()}
+            />
+          </div>
         )}
       </div>
       <div className="paper-card rounded-md p-5">

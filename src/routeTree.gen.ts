@@ -41,11 +41,13 @@ import { Route as SellerPendingRouteImport } from './routes/seller.pending'
 import { Route as SellerProductsRouteImport } from './routes/seller.products'
 import { Route as SellerSettingsRouteImport } from './routes/seller.settings'
 import { Route as StoresSlugRouteImport } from './routes/stores.$slug'
+import { Route as TrackOrderIdRouteImport } from './routes/track.$orderId'
 import { Route as SellerOrdersIdRouteImport } from './routes/seller.orders.$id'
 import { Route as SellerProductsIdRouteImport } from './routes/seller.products.$id'
 import { Route as SellerProductsNewRouteImport } from './routes/seller.products.new'
 import { Route as ApiPublicBaleCronExpireRouteImport } from './routes/api/public/bale/cron-expire'
 import { Route as ApiPublicBaleWebhookRouteImport } from './routes/api/public/bale/webhook'
+import { Route as ApiPublicOrdersSubmitReceiptRouteImport } from './routes/api/public/orders/submit-receipt'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 
 const IndexRoute = IndexRouteImport.update({
@@ -208,6 +210,11 @@ const StoresSlugRoute = StoresSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => StoresRoute,
 } as any)
+const TrackOrderIdRoute = TrackOrderIdRouteImport.update({
+  id: '/track/$orderId',
+  path: '/track/$orderId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SellerOrdersIdRoute = SellerOrdersIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -233,6 +240,12 @@ const ApiPublicBaleWebhookRoute = ApiPublicBaleWebhookRouteImport.update({
   path: '/api/public/bale/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicOrdersSubmitReceiptRoute =
+  ApiPublicOrdersSubmitReceiptRouteImport.update({
+    id: '/api/public/orders/submit-receipt',
+    path: '/api/public/orders/submit-receipt',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -271,6 +284,7 @@ export interface FileRoutesByFullPath {
   '/seller/products': typeof SellerProductsRouteWithChildren
   '/seller/settings': typeof SellerSettingsRoute
   '/stores/$slug': typeof StoresSlugRoute
+  '/track/$orderId': typeof TrackOrderIdRoute
   '/admin/': typeof AdminIndexRoute
   '/seller/': typeof SellerIndexRoute
   '/seller/orders/$id': typeof SellerOrdersIdRoute
@@ -278,6 +292,7 @@ export interface FileRoutesByFullPath {
   '/seller/products/new': typeof SellerProductsNewRoute
   '/api/public/bale/cron-expire': typeof ApiPublicBaleCronExpireRoute
   '/api/public/bale/webhook': typeof ApiPublicBaleWebhookRoute
+  '/api/public/orders/submit-receipt': typeof ApiPublicOrdersSubmitReceiptRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
@@ -309,6 +324,7 @@ export interface FileRoutesByTo {
   '/seller/products': typeof SellerProductsRouteWithChildren
   '/seller/settings': typeof SellerSettingsRoute
   '/stores/$slug': typeof StoresSlugRoute
+  '/track/$orderId': typeof TrackOrderIdRoute
   '/admin': typeof AdminIndexRoute
   '/seller': typeof SellerIndexRoute
   '/seller/orders/$id': typeof SellerOrdersIdRoute
@@ -316,6 +332,7 @@ export interface FileRoutesByTo {
   '/seller/products/new': typeof SellerProductsNewRoute
   '/api/public/bale/cron-expire': typeof ApiPublicBaleCronExpireRoute
   '/api/public/bale/webhook': typeof ApiPublicBaleWebhookRoute
+  '/api/public/orders/submit-receipt': typeof ApiPublicOrdersSubmitReceiptRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
@@ -350,6 +367,7 @@ export interface FileRoutesById {
   '/seller/products': typeof SellerProductsRouteWithChildren
   '/seller/settings': typeof SellerSettingsRoute
   '/stores/$slug': typeof StoresSlugRoute
+  '/track/$orderId': typeof TrackOrderIdRoute
   '/admin/': typeof AdminIndexRoute
   '/seller/': typeof SellerIndexRoute
   '/seller/orders/$id': typeof SellerOrdersIdRoute
@@ -357,6 +375,7 @@ export interface FileRoutesById {
   '/seller/products/new': typeof SellerProductsNewRoute
   '/api/public/bale/cron-expire': typeof ApiPublicBaleCronExpireRoute
   '/api/public/bale/webhook': typeof ApiPublicBaleWebhookRoute
+  '/api/public/orders/submit-receipt': typeof ApiPublicOrdersSubmitReceiptRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
@@ -392,6 +411,7 @@ export interface FileRouteTypes {
     | '/seller/products'
     | '/seller/settings'
     | '/stores/$slug'
+    | '/track/$orderId'
     | '/admin/'
     | '/seller/'
     | '/seller/orders/$id'
@@ -399,6 +419,7 @@ export interface FileRouteTypes {
     | '/seller/products/new'
     | '/api/public/bale/cron-expire'
     | '/api/public/bale/webhook'
+    | '/api/public/orders/submit-receipt'
     | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -430,6 +451,7 @@ export interface FileRouteTypes {
     | '/seller/products'
     | '/seller/settings'
     | '/stores/$slug'
+    | '/track/$orderId'
     | '/admin'
     | '/seller'
     | '/seller/orders/$id'
@@ -437,6 +459,7 @@ export interface FileRouteTypes {
     | '/seller/products/new'
     | '/api/public/bale/cron-expire'
     | '/api/public/bale/webhook'
+    | '/api/public/orders/submit-receipt'
     | '/lovable/email/queue/process'
   id:
     | '__root__'
@@ -470,6 +493,7 @@ export interface FileRouteTypes {
     | '/seller/products'
     | '/seller/settings'
     | '/stores/$slug'
+    | '/track/$orderId'
     | '/admin/'
     | '/seller/'
     | '/seller/orders/$id'
@@ -477,6 +501,7 @@ export interface FileRouteTypes {
     | '/seller/products/new'
     | '/api/public/bale/cron-expire'
     | '/api/public/bale/webhook'
+    | '/api/public/orders/submit-receipt'
     | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
@@ -495,8 +520,10 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   SellerRoute: typeof SellerRouteWithChildren
   StoresRoute: typeof StoresRouteWithChildren
+  TrackOrderIdRoute: typeof TrackOrderIdRoute
   ApiPublicBaleCronExpireRoute: typeof ApiPublicBaleCronExpireRoute
   ApiPublicBaleWebhookRoute: typeof ApiPublicBaleWebhookRoute
+  ApiPublicOrdersSubmitReceiptRoute: typeof ApiPublicOrdersSubmitReceiptRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
@@ -726,6 +753,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoresSlugRouteImport
       parentRoute: typeof StoresRoute
     }
+    '/track/$orderId': {
+      id: '/track/$orderId'
+      path: '/track/$orderId'
+      fullPath: '/track/$orderId'
+      preLoaderRoute: typeof TrackOrderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/seller/orders/$id': {
       id: '/seller/orders/$id'
       path: '/$id'
@@ -759,6 +793,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/bale/webhook'
       fullPath: '/api/public/bale/webhook'
       preLoaderRoute: typeof ApiPublicBaleWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/orders/submit-receipt': {
+      id: '/api/public/orders/submit-receipt'
+      path: '/api/public/orders/submit-receipt'
+      fullPath: '/api/public/orders/submit-receipt'
+      preLoaderRoute: typeof ApiPublicOrdersSubmitReceiptRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lovable/email/queue/process': {
@@ -894,8 +935,10 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   SellerRoute: SellerRouteWithChildren,
   StoresRoute: StoresRouteWithChildren,
+  TrackOrderIdRoute: TrackOrderIdRoute,
   ApiPublicBaleCronExpireRoute: ApiPublicBaleCronExpireRoute,
   ApiPublicBaleWebhookRoute: ApiPublicBaleWebhookRoute,
+  ApiPublicOrdersSubmitReceiptRoute: ApiPublicOrdersSubmitReceiptRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
