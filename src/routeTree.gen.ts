@@ -39,6 +39,7 @@ import { Route as SellerIndexRouteImport } from './routes/seller.index'
 import { Route as SellerOrdersRouteImport } from './routes/seller.orders'
 import { Route as SellerPendingRouteImport } from './routes/seller.pending'
 import { Route as SellerProductsRouteImport } from './routes/seller.products'
+import { Route as SellerReceiptsRouteImport } from './routes/seller.receipts'
 import { Route as SellerSettingsRouteImport } from './routes/seller.settings'
 import { Route as StoresSlugRouteImport } from './routes/stores.$slug'
 import { Route as TrackOrderIdRouteImport } from './routes/track.$orderId'
@@ -200,6 +201,11 @@ const SellerProductsRoute = SellerProductsRouteImport.update({
   path: '/products',
   getParentRoute: () => SellerRoute,
 } as any)
+const SellerReceiptsRoute = SellerReceiptsRouteImport.update({
+  id: '/receipts',
+  path: '/receipts',
+  getParentRoute: () => SellerRoute,
+} as any)
 const SellerSettingsRoute = SellerSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -282,6 +288,7 @@ export interface FileRoutesByFullPath {
   '/seller/orders': typeof SellerOrdersRouteWithChildren
   '/seller/pending': typeof SellerPendingRoute
   '/seller/products': typeof SellerProductsRouteWithChildren
+  '/seller/receipts': typeof SellerReceiptsRoute
   '/seller/settings': typeof SellerSettingsRoute
   '/stores/$slug': typeof StoresSlugRoute
   '/track/$orderId': typeof TrackOrderIdRoute
@@ -322,6 +329,7 @@ export interface FileRoutesByTo {
   '/seller/orders': typeof SellerOrdersRouteWithChildren
   '/seller/pending': typeof SellerPendingRoute
   '/seller/products': typeof SellerProductsRouteWithChildren
+  '/seller/receipts': typeof SellerReceiptsRoute
   '/seller/settings': typeof SellerSettingsRoute
   '/stores/$slug': typeof StoresSlugRoute
   '/track/$orderId': typeof TrackOrderIdRoute
@@ -365,6 +373,7 @@ export interface FileRoutesById {
   '/seller/orders': typeof SellerOrdersRouteWithChildren
   '/seller/pending': typeof SellerPendingRoute
   '/seller/products': typeof SellerProductsRouteWithChildren
+  '/seller/receipts': typeof SellerReceiptsRoute
   '/seller/settings': typeof SellerSettingsRoute
   '/stores/$slug': typeof StoresSlugRoute
   '/track/$orderId': typeof TrackOrderIdRoute
@@ -409,6 +418,7 @@ export interface FileRouteTypes {
     | '/seller/orders'
     | '/seller/pending'
     | '/seller/products'
+    | '/seller/receipts'
     | '/seller/settings'
     | '/stores/$slug'
     | '/track/$orderId'
@@ -449,6 +459,7 @@ export interface FileRouteTypes {
     | '/seller/orders'
     | '/seller/pending'
     | '/seller/products'
+    | '/seller/receipts'
     | '/seller/settings'
     | '/stores/$slug'
     | '/track/$orderId'
@@ -491,6 +502,7 @@ export interface FileRouteTypes {
     | '/seller/orders'
     | '/seller/pending'
     | '/seller/products'
+    | '/seller/receipts'
     | '/seller/settings'
     | '/stores/$slug'
     | '/track/$orderId'
@@ -739,6 +751,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SellerProductsRouteImport
       parentRoute: typeof SellerRoute
     }
+    '/seller/receipts': {
+      id: '/seller/receipts'
+      path: '/receipts'
+      fullPath: '/seller/receipts'
+      preLoaderRoute: typeof SellerReceiptsRouteImport
+      parentRoute: typeof SellerRoute
+    }
     '/seller/settings': {
       id: '/seller/settings'
       path: '/settings'
@@ -894,6 +913,7 @@ interface SellerRouteChildren {
   SellerOrdersRoute: typeof SellerOrdersRouteWithChildren
   SellerPendingRoute: typeof SellerPendingRoute
   SellerProductsRoute: typeof SellerProductsRouteWithChildren
+  SellerReceiptsRoute: typeof SellerReceiptsRoute
   SellerSettingsRoute: typeof SellerSettingsRoute
   SellerIndexRoute: typeof SellerIndexRoute
 }
@@ -902,6 +922,7 @@ const SellerRouteChildren: SellerRouteChildren = {
   SellerOrdersRoute: SellerOrdersRouteWithChildren,
   SellerPendingRoute: SellerPendingRoute,
   SellerProductsRoute: SellerProductsRouteWithChildren,
+  SellerReceiptsRoute: SellerReceiptsRoute,
   SellerSettingsRoute: SellerSettingsRoute,
   SellerIndexRoute: SellerIndexRoute,
 }

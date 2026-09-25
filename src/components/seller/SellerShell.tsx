@@ -1,13 +1,14 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
-import { LayoutDashboard, Package, ShoppingBag, Settings, Store } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingBag, Settings, Store, Receipt } from "lucide-react";
 
 type NavItem = { to: string; label: string; Icon: typeof LayoutDashboard; exact?: boolean };
 const nav: NavItem[] = [
   { to: "/seller", label: "نمای کلی", Icon: LayoutDashboard, exact: true },
   { to: "/seller/products", label: "محصولات", Icon: Package },
   { to: "/seller/orders", label: "سفارش‌ها", Icon: ShoppingBag },
+  { to: "/seller/receipts", label: "بررسی مدرک پرداخت", Icon: Receipt },
   { to: "/seller/settings", label: "تنظیمات فروشگاه", Icon: Settings },
 ];
 
