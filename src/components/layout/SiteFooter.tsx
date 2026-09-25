@@ -1,8 +1,20 @@
 import { Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import logoMark from "@/assets/logo-mark.png";
 import { Flourish } from "@/components/visual/PersianOrnament";
+import { getBalePayConfig } from "@/lib/bale-pay-flag.functions";
+import { BaleIcon } from "@/components/BaleIcon";
 
 export function SiteFooter() {
+  const [botUsername, setBotUsername] = useState<string | null>(null);
+  const fetchBalePayConfig = useServerFn(getBalePayConfig);
+
+  useEffect(() => {
+    fetchBalePayConfig().then((c) => setBotUsername(c.botUsername)).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <footer className="mt-32 border-t border-ink/10 bg-paper-deep/40 paper-grain">
       <div className="container mx-auto px-4 pt-16 pb-10">
@@ -34,6 +46,18 @@ export function SiteFooter() {
               <li><Link to="/about" className="hover:text-gold-deep transition-colors duration-700">یادداشت‌ها</Link></li>
               <li><Link to="/register/seller" className="hover:text-gold-deep transition-colors duration-700">گشودنِ عطاریی از آنِ تو</Link></li>
               <li><Link to="/contact" className="hover:text-gold-deep transition-colors duration-700">گفت‌وگو</Link></li>
+              {botUsername && (
+                <li>
+                  <a
+                    href={`https://ble.ir/${botUsername}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 hover:text-gold-deep transition-colors duration-700"
+                  >
+                    <BaleIcon size={16} />پشتیبانی در بله
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
         </div>

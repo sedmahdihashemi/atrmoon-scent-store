@@ -1,14 +1,25 @@
 import { Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
+import { getBalePayConfig } from "@/lib/bale-pay-flag.functions";
 import { Search, ShoppingBag, User, LogOut, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BaleIcon } from "@/components/BaleIcon";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import logoMark from "@/assets/logo-mark.png";
 
 export function SiteHeader() {
   const { user, role, profile, signOut, storeStatus } = useAuth();
   const { count } = useCart();
+  const [botUsername, setBotUsername] = useState<string | null>(null);
+  const fetchBalePayConfig = useServerFn(getBalePayConfig);
+
+  useEffect(() => {
+    fetchBalePayConfig().then((c) => setBotUsername(c.botUsername)).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const dashLink =
     role === "super_admin" ? "/admin"
@@ -34,6 +45,18 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-1">
+          {botUsername && (
+            <a
+              href={`https://ble.ir/${botUsername}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="عطرمون در بله"
+              title="عطرمون در بله"
+              className="p-2 rounded-md hover:bg-ink/5"
+            >
+              <BaleIcon size={20} />
+            </a>
+          )}
           <Link to="/search" aria-label="جستجو" className="p-2 rounded-md hover:bg-ink/5">
             <Search className="w-5 h-5" />
           </Link>

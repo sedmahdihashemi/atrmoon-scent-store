@@ -17,6 +17,7 @@ import { getOrderStatus } from "@/lib/order-status.functions";
 import { getStoreCardPayment } from "@/lib/card-transfer.functions";
 import { detectIranianBank } from "@/lib/iran-bank-cards";
 import { BankIcon } from "@/lib/bank-icons";
+import { BaleIcon } from "@/components/BaleIcon";
 import { toast } from "sonner";
 import { ShoppingBag, CheckCircle2, Wallet, Copy, Landmark } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -176,7 +177,7 @@ function CheckoutPage() {
           </p>
           <div className="mt-8 flex gap-3 justify-center">
             <a href={payUrl} target="_blank" rel="noopener noreferrer">
-              <Button className="h-11 font-serif">پرداخت با بله</Button>
+              <Button className="h-11 font-serif"><BaleIcon size={18} />پرداخت با بله</Button>
             </a>
             {user ? <Link to="/account"><Button variant="outline">پیگیری در حساب من</Button></Link> : null}
           </div>
@@ -475,11 +476,11 @@ function CheckoutPage() {
                     <button
                       type="button"
                       onClick={() => setPaymentMethod("bale")}
-                      className={`rounded-md border px-3 py-2 text-sm font-serif transition-colors ${
+                      className={`rounded-md border px-3 py-2 text-sm font-serif transition-colors inline-flex items-center justify-center gap-1.5 ${
                         paymentMethod === "bale" ? "border-[var(--gold)] text-[var(--gold-deep)] bg-[var(--gold)]/6" : "border-ink/20 text-ink-soft"
                       }`}
                     >
-                      پرداخت با بله
+                      <BaleIcon size={16} />پرداخت با بله
                     </button>
                   )}
                   {cardPayment.cardNumber && (

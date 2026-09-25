@@ -13,6 +13,7 @@ import { detectIranianBank } from "@/lib/iran-bank-cards";
 import { BankIcon } from "@/lib/bank-icons";
 import { PaymentMethodSwitcher } from "@/components/PaymentMethodSwitcher";
 import { FileDropzone } from "@/components/FileDropzone";
+import { BaleIcon } from "@/components/BaleIcon";
 import { formatToman } from "@/lib/cart-session";
 import { orderStatusLabels } from "@/lib/seller-utils";
 import { toast } from "sonner";
@@ -158,7 +159,7 @@ function TrackPage() {
             <p className="text-sm font-serif text-ink">این سفارش هنوز پرداخت نشده است.</p>
             {payUrl && (
               <a href={payUrl} target="_blank" rel="noopener noreferrer">
-                <Button className="h-11 font-serif">پرداخت با بله</Button>
+                <Button className="h-11 font-serif"><BaleIcon size={18} />پرداخت با بله</Button>
               </a>
             )}
             <div className="pt-2 border-t border-ink/10">

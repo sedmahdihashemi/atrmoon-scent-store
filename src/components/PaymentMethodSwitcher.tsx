@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { switchOrderPaymentMethod } from "@/lib/order-payment-method.functions";
 import { Button } from "@/components/ui/button";
+import { BaleIcon } from "@/components/BaleIcon";
 import { toast } from "sonner";
 
 const LABELS: Record<string, string> = {
@@ -53,6 +54,7 @@ export function PaymentMethodSwitcher({
       <span className="text-xs text-muted-foreground font-serif">تغییر روش پرداخت به:</span>
       {options.map((m) => (
         <Button key={m} size="sm" variant="outline" disabled={busy} onClick={() => doSwitch(m)}>
+          {m === "bale" && <BaleIcon size={14} />}
           {LABELS[m]}
         </Button>
       ))}

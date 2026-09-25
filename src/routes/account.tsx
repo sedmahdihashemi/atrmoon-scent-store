@@ -15,6 +15,7 @@ import { formatToman } from "@/lib/cart-session";
 import { orderStatusLabels } from "@/lib/seller-utils";
 import { getBalePayConfig } from "@/lib/bale-pay-flag.functions";
 import { PaymentMethodSwitcher } from "@/components/PaymentMethodSwitcher";
+import { BaleIcon } from "@/components/BaleIcon";
 import { useServerFn } from "@tanstack/react-start";
 import { User as UserIcon, MapPin, Package, Heart, Trash2, Plus, Star, ChevronLeft, Wallet } from "lucide-react";
 
@@ -135,7 +136,10 @@ function OrdersTab() {
                 <span className="font-serif text-ink text-sm">{formatToman(o.total_amount)}</span>
                 {payLink && (
                   <a href={payLink} target={payLink.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer">
-                    <Button size="sm" className="gap-1"><Wallet className="w-3.5 h-3.5" />تکمیل پرداخت</Button>
+                    <Button size="sm" className="gap-1">
+                      {o.payment_method === "bale" ? <BaleIcon size={14} /> : <Wallet className="w-3.5 h-3.5" />}
+                      تکمیل پرداخت
+                    </Button>
                   </a>
                 )}
               </div>
@@ -194,7 +198,10 @@ function OrderDetail({ orderId, onBack, botUsername }: { orderId: string; onBack
             rel="noopener noreferrer"
             className="inline-block mt-4"
           >
-            <Button size="sm" className="gap-1"><Wallet className="w-3.5 h-3.5" />تکمیل پرداخت</Button>
+            <Button size="sm" className="gap-1">
+              {order.payment_method === "bale" ? <BaleIcon size={14} /> : <Wallet className="w-3.5 h-3.5" />}
+              تکمیل پرداخت
+            </Button>
           </a>
         )}
         {order.status === "pending_payment" && (
