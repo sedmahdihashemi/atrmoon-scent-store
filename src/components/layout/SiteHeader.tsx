@@ -54,7 +54,7 @@ export function SiteHeader() {
               title="عطرمون در بله"
               className="p-2 rounded-md hover:bg-ink/5"
             >
-              <BaleIcon size={20} />
+              <BaleIcon size={16} />
             </a>
           )}
           <Link to="/search" aria-label="جستجو" className="p-2 rounded-md hover:bg-ink/5">

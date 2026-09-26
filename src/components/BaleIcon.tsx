@@ -11,7 +11,7 @@ export function BaleIcon({ size = 16, className = "" }: { size?: number; classNa
       width={size}
       height={size}
       style={{ width: size, height: size }}
-      className={`inline-block shrink-0 ${className}`}
+      className={`flex shrink-0 ${className}`}
     />
   );
 }
