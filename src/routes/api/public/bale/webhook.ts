@@ -13,6 +13,7 @@ import {
   fmtTehranDate,
 } from "@/lib/bale.server";
 import { confirmBalePayment } from "@/lib/bale-payment.server";
+import { normalizeIranPhone } from "@/lib/phone";
 
 function authClient() {
   return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
@@ -92,7 +93,42 @@ const WELCOME_START =
   "برای استفاده از بات ابتدا وارد حساب کاربری خود شوید.\n\n" +
   "👈 برای ورود، دستور زیر را بفرستید:\n<code>/login</code>\n\n" +
   "سپس از شما ابتدا <b>ایمیل</b> و بعد <b>رمز عبور</b> پرسیده می‌شود.\n\n" +
+  "🔑 رمز عبور را فراموش کرده‌اید؟ دستور <code>/forgot</code> را بفرستید.\n\n" +
   "🔎 برای پیگیری سریع یک سفارش بدون ورود:\n<code>/track ATR-XXXXXX-XXXXX</code>";
+
+function generateTempPassword(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+  const bytes = crypto.getRandomValues(new Uint8Array(10));
+  return Array.from(bytes, (b) => chars[b % chars.length]).join("");
+}
+
+async function handleForgotPasswordContact(chat_id: number, contact: any) {
+  await upsertSession(chat_id, { state: "idle", state_data: {} });
+  const phone = normalizeIranPhone(String(contact?.phone_number ?? ""));
+  if (!phone) {
+    await sendMessage(chat_id, "شماره ارسالی معتبر نبود. برای تلاش دوباره: /forgot", { reply_markup: { remove_keyboard: true } });
+    return;
+  }
+  const { data: profile, error } = await supabaseAdmin.from("profiles").select("id").eq("phone", phone).maybeSingle();
+  logIfError(`handleForgotPasswordContact lookup(${phone})`, error);
+  if (!profile) {
+    await sendMessage(chat_id, "حسابی با این شماره موبایل در عطرمون پیدا نشد.", { reply_markup: { remove_keyboard: true } });
+    return;
+  }
+  const newPassword = generateTempPassword();
+  const { error: updErr } = await supabaseAdmin.auth.admin.updateUserById(profile.id, { password: newPassword });
+  if (updErr) {
+    console.error("[bale forgot] updateUserById failed", updErr);
+    await sendMessage(chat_id, "خطایی رخ داد، لطفاً کمی بعد دوباره تلاش کنید.", { reply_markup: { remove_keyboard: true } });
+    return;
+  }
+  await sendMessage(
+    chat_id,
+    "✅ رمز عبور موقت شما:\n\n<code>" + newPassword + "</code>\n\n" +
+      "با همین رمز وارد سایت عطرمون شوید و از بخش «حساب کاربری من ← تغییر رمز عبور» یک رمز دلخواه جدید بگذارید.",
+    { reply_markup: { remove_keyboard: true } }
+  );
+}
 
 async function handleLoggedIn(chat_id: number, user_id: string, text: string) {
   const role = await getRole(user_id);
@@ -486,6 +522,11 @@ async function handleUpdate(update: any) {
     session = { chat_id, user_id: null, state: "idle", state_data: {} };
   }
 
+  if (msg.contact && session.state === "awaiting_forgot_contact") {
+    await handleForgotPasswordContact(chat_id, msg.contact);
+    return;
+  }
+
   // Deep link from checkout: ble.ir/<bot>?start=pay_<orderId> arrives as
   // "/start pay_<orderId>". Works regardless of bot login — the order id
   // (a UUID) is unguessable, so it acts as its own bearer token; a guest
@@ -526,9 +567,27 @@ async function handleUpdate(update: any) {
     return;
   }
 
+  // Forgot-password flow — verified via Bale's own "share my contact"
+  // button, so the phone number can't be spoofed as someone else's.
+  if (text === "/forgot") {
+    await upsertSession(chat_id, { state: "awaiting_forgot_contact", state_data: {} });
+    await sendMessage(
+      chat_id,
+      "برای بازیابی رمز عبور، لطفاً با زدن دکمه زیر شماره موبایل خودتان را با ربات به اشتراک بگذارید:",
+      {
+        reply_markup: {
+          keyboard: [[{ text: "📱 اشتراک‌گذاری شماره من", request_contact: true }]],
+          resize_keyboard: true,
+          one_time_keyboard: true,
+        },
+      }
+    );
+    return;
+  }
+
   if (text === "/cancel") {
     await upsertSession(chat_id, { state: "idle", state_data: {} });
-    await sendMessage(chat_id, "عملیات لغو شد.");
+    await sendMessage(chat_id, "عملیات لغو شد.", { reply_markup: { remove_keyboard: true } });
     return;
   }
 
@@ -559,7 +618,7 @@ async function handleUpdate(update: any) {
     const { data: auth, error } = await authClient().auth.signInWithPassword({ email, password });
     if (error || !auth?.user) {
       await upsertSession(chat_id, { state: "idle", state_data: {} });
-      await sendMessage(chat_id, "❌ ایمیل یا رمز نادرست است. برای تلاش دوباره: /login");
+      await sendMessage(chat_id, "❌ ایمیل یا رمز نادرست است. برای تلاش دوباره: /login\nرمز عبور را فراموش کرده‌اید؟ /forgot");
       return;
     }
     const role = await getRole(auth.user.id);

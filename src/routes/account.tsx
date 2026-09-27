@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,7 @@ import { orderStatusLabels } from "@/lib/seller-utils";
 import { getBalePayConfig } from "@/lib/bale-pay-flag.functions";
 import { PaymentMethodSwitcher } from "@/components/PaymentMethodSwitcher";
 import { BaleIcon } from "@/components/BaleIcon";
+import { normalizeIranPhone } from "@/lib/phone";
 import { useServerFn } from "@tanstack/react-start";
 import { User as UserIcon, MapPin, Package, Heart, Trash2, Plus, Star, ChevronLeft, Wallet } from "lucide-react";
 
@@ -395,6 +397,7 @@ function FavoritesTab() {
 function ProfileTab() {
   const { user, profile, refresh } = useAuth();
   const [form, setForm] = useState({ full_name: "", phone: "" });
+  const [phoneErr, setPhoneErr] = useState("");
   const [saving, setSaving] = useState(false);
   useEffect(() => {
     if (profile) setForm({ full_name: profile.full_name || "", phone: profile.phone || "" });
@@ -402,20 +405,63 @@ function ProfileTab() {
 
   const save = async () => {
     if (!user) return;
+    let phone: string | null = null;
+    if (form.phone.trim()) {
+      phone = normalizeIranPhone(form.phone);
+      if (!phone) { setPhoneErr("شماره موبایل معتبر نیست (مثال: ۰۹۱۲۳۴۵۶۷۸۹)"); return; }
+    }
+    setPhoneErr("");
     setSaving(true);
-    const { error } = await supabase.from("profiles").update({ full_name: form.full_name, phone: form.phone }).eq("id", user.id);
+    const { error } = await supabase.from("profiles").update({ full_name: form.full_name, phone }).eq("id", user.id);
     setSaving(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message.includes("profiles_phone") ? "این شماره موبایل قبلاً برای حساب دیگری ثبت شده" : error.message);
+      return;
+    }
     toast.success("پروفایل به‌روزرسانی شد");
     refresh();
   };
 
   return (
-    <div className="paper-card rounded-md p-5 space-y-3 max-w-xl">
-      <div><Label>نام و نام خانوادگی</Label><Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} /></div>
-      <div><Label>ایمیل</Label><Input value={profile?.email || ""} disabled /></div>
-      <div><Label>تلفن</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
-      <Button onClick={save} loading={saving} loadingText="در حال ذخیره…">ذخیره تغییرات</Button>
+    <div className="space-y-4 max-w-xl">
+      <div className="paper-card rounded-md p-5 space-y-3">
+        <div><Label>نام و نام خانوادگی</Label><Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} /></div>
+        <div><Label>ایمیل</Label><Input value={profile?.email || ""} disabled /></div>
+        <div>
+          <Label>شماره موبایل</Label>
+          <Input dir="ltr" placeholder="09123456789" value={form.phone} onChange={(e) => { setForm({ ...form, phone: e.target.value }); setPhoneErr(""); }} />
+          {phoneErr && <p className="text-xs text-destructive mt-1">{phoneErr}</p>}
+          <p className="text-xs text-muted-foreground mt-1">با ثبت شماره موبایل، می‌توانید با آن هم وارد حساب‌تان شوید.</p>
+        </div>
+        <Button onClick={save} loading={saving} loadingText="در حال ذخیره…">ذخیره تغییرات</Button>
+      </div>
+      <ChangePasswordCard />
+    </div>
+  );
+}
+
+function ChangePasswordCard() {
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    if (password.length < 8) { toast.error("رمز عبور باید حداقل ۸ نویسه باشد"); return; }
+    if (password !== confirm) { toast.error("تکرار رمز عبور با رمز اصلی یکسان نیست"); return; }
+    setSaving(true);
+    const { error } = await supabase.auth.updateUser({ password });
+    setSaving(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("رمز عبور تغییر کرد");
+    setPassword(""); setConfirm("");
+  };
+
+  return (
+    <div className="paper-card rounded-md p-5 space-y-3">
+      <h3 className="font-serif text-ink">تغییر رمز عبور</h3>
+      <div><Label>رمز عبور جدید</Label><PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} maxLength={72} autoComplete="new-password" /></div>
+      <div><Label>تکرار رمز عبور جدید</Label><PasswordInput value={confirm} onChange={(e) => setConfirm(e.target.value)} maxLength={72} autoComplete="new-password" /></div>
+      <Button onClick={save} loading={saving} loadingText="در حال ذخیره…">ذخیره رمز جدید</Button>
     </div>
   );
 }

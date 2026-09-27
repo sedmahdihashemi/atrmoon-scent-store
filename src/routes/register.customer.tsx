@@ -1,12 +1,15 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
+import { normalizeIranPhone, isValidIranPhone } from "@/lib/phone";
+import { checkPhoneAvailable } from "@/lib/phone-availability.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/register/customer")({
@@ -26,7 +29,7 @@ export const Route = createFileRoute("/register/customer")({
 const schema = z.object({
   full_name: z.string().trim().min(2, "نام را وارد کنید").max(100),
   email: z.string().email("ایمیل معتبر"),
-  phone: z.string().trim().min(8).max(20),
+  phone: z.string().trim().refine(isValidIranPhone, "شماره موبایل معتبر نیست (مثال: ۰۹۱۲۳۴۵۶۷۸۹)"),
   password: z.string().min(8, "رمز عبور باید حداقل ۸ نویسه باشد").max(72, "رمز عبور نمی‌تواند بیشتر از ۷۲ نویسه باشد"),
   confirm: z.string().min(1, "تکرار رمز عبور را وارد کنید"),
 }).refine((d) => d.password === d.confirm, { message: "تکرار رمز عبور با رمز اصلی یکسان نیست", path: ["confirm"] });
@@ -35,6 +38,7 @@ function CustomerRegister() {
   const nav = useNavigate();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const fetchCheckPhoneAvailable = useServerFn(checkPhoneAvailable);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -47,12 +51,19 @@ function CustomerRegister() {
     }
     setErrors({});
     setLoading(true);
+    const phone = normalizeIranPhone(parsed.data.phone)!;
+    const phoneCheck = await fetchCheckPhoneAvailable({ data: { phone } });
+    if (!phoneCheck.available) {
+      setLoading(false);
+      setErrors({ phone: phoneCheck.reason === "taken" ? "این شماره موبایل قبلاً ثبت شده" : "شماره موبایل معتبر نیست" });
+      return;
+    }
     const { error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: { full_name: parsed.data.full_name, phone: parsed.data.phone, role: "customer" },
+        data: { full_name: parsed.data.full_name, phone, role: "customer" },
       },
     });
     setLoading(false);
