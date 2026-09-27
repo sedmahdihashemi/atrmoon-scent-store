@@ -25,7 +25,10 @@ export const loginWithPhone = createServerFn({ method: "POST" })
       auth: { persistSession: false, autoRefreshToken: false },
     });
     const { data: authData, error: authError } = await anon.auth.signInWithPassword({ email: profile.email, password: data.password });
-    if (authError || !authData.session) return { ok: false as const, reason: "invalid_credentials" as const };
+    if (authError || !authData.session) {
+      if (authError) console.error("[loginWithPhone] signInWithPassword failed", authError.status, authError.message);
+      return { ok: false as const, reason: "invalid_credentials" as const };
+    }
 
     return {
       ok: true as const,
