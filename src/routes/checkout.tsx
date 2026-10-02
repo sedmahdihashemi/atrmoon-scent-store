@@ -16,6 +16,7 @@ import { getBalePayConfig } from "@/lib/bale-pay-flag.functions";
 import { getOrderStatus } from "@/lib/order-status.functions";
 import { getStoreCardPayment } from "@/lib/card-transfer.functions";
 import { detectIranianBank } from "@/lib/iran-bank-cards";
+import { isValidIranPostalCode, normalizePostalCode } from "@/lib/postal-code";
 import { BankIcon } from "@/lib/bank-icons";
 import { BaleIcon } from "@/components/BaleIcon";
 import { toast } from "sonner";
@@ -321,6 +322,10 @@ function CheckoutPage() {
     if (!form.customer_name.trim() || !form.customer_phone.trim() || !form.shipping_address.trim() || !form.city.trim()) {
       toast.error("لطفاً نام، تلفن، نشانی و شهر را تکمیل کنید"); return;
     }
+    const postal = form.postal_code.trim();
+    if (postal && !isValidIranPostalCode(postal)) {
+      toast.error("کد پستی باید ۱۰ رقم و مطابق استاندارد ایران باشد"); return;
+    }
     setSubmitting(true);
     // Always send the session id if available — handles the case where the cart
     // was created as a guest and the user logged in afterwards (customer_id is null).
@@ -342,7 +347,7 @@ function CheckoutPage() {
       p_customer_email: form.customer_email.trim() || null,
       p_shipping_address: form.shipping_address.trim(),
       p_city: form.city.trim(),
-      p_postal_code: form.postal_code.trim() || null,
+      p_postal_code: postal ? normalizePostalCode(postal) : null,
       p_customer_note: form.customer_note.trim() || null,
       p_payment_method: method,
     } as any);
@@ -433,7 +438,7 @@ function CheckoutPage() {
               <div className="md:col-span-2">
                 <Field label="نشانی کامل *"><Textarea value={form.shipping_address} onChange={set("shipping_address")} required rows={3} /></Field>
               </div>
-              <Field label="کد پستی"><Input value={form.postal_code} onChange={set("postal_code")} dir="ltr" /></Field>
+              <Field label="کد پستی (اختیاری)"><Input value={form.postal_code} onChange={set("postal_code")} dir="ltr" inputMode="numeric" placeholder="۱۰ رقم" /></Field>
             </div>
             <Field label="یادداشت برای فروشنده (اختیاری)">
               <Textarea value={form.customer_note} onChange={set("customer_note")} rows={2} />

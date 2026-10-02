@@ -18,6 +18,7 @@ import { getBalePayConfig } from "@/lib/bale-pay-flag.functions";
 import { PaymentMethodSwitcher } from "@/components/PaymentMethodSwitcher";
 import { BaleIcon } from "@/components/BaleIcon";
 import { normalizeIranPhone } from "@/lib/phone";
+import { isValidIranPostalCode, normalizePostalCode } from "@/lib/postal-code";
 import { useServerFn } from "@tanstack/react-start";
 import { User as UserIcon, MapPin, Package, Heart, Trash2, Plus, Star, ChevronLeft, Wallet } from "lucide-react";
 
@@ -253,6 +254,7 @@ function AddressesTab() {
   const { user } = useAuth();
   const [list, setList] = useState<any[]>([]);
   const [form, setForm] = useState({ full_name: "", phone: "", city: "", address: "", postal_code: "" });
+  const [postalErr, setPostalErr] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -266,8 +268,20 @@ function AddressesTab() {
   const submit = async () => {
     if (!user) return;
     if (!form.full_name || !form.phone || !form.city || !form.address) { toast.error("لطفاً همه فیلدها را پر کنید"); return; }
+    // Postal code is optional, but if given it must be a valid Iranian code.
+    const postal = form.postal_code.trim();
+    if (postal && !isValidIranPostalCode(postal)) {
+      setPostalErr("کد پستی باید ۱۰ رقم و مطابق استاندارد ایران باشد");
+      return;
+    }
+    setPostalErr("");
     setSaving(true);
-    const { error } = await supabase.from("customer_addresses").insert({ ...form, customer_id: user.id, is_default: list.length === 0 });
+    const { error } = await supabase.from("customer_addresses").insert({
+      ...form,
+      postal_code: postal ? normalizePostalCode(postal) : null,
+      customer_id: user.id,
+      is_default: list.length === 0,
+    });
     setSaving(false);
     if (error) { toast.error(error.message); return; }
     toast.success("آدرس ذخیره شد");
@@ -313,7 +327,11 @@ function AddressesTab() {
             <div><Label>نام گیرنده</Label><Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} /></div>
             <div><Label>تلفن</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
             <div><Label>شهر</Label><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
-            <div><Label>کد پستی</Label><Input value={form.postal_code} onChange={(e) => setForm({ ...form, postal_code: e.target.value })} /></div>
+            <div>
+              <Label>کد پستی (اختیاری)</Label>
+              <Input dir="ltr" inputMode="numeric" placeholder="۱۰ رقم" value={form.postal_code} onChange={(e) => { setForm({ ...form, postal_code: e.target.value }); setPostalErr(""); }} />
+              {postalErr && <p className="text-xs text-destructive mt-1">{postalErr}</p>}
+            </div>
           </div>
           <div><Label>آدرس کامل</Label><Textarea rows={3} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
           <div className="flex gap-2">
