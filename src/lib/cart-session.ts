@@ -11,6 +11,19 @@ export function getOrCreateCartSession(): string {
   return id;
 }
 
+// Read the guest session id without creating one — used on login to find a
+// guest cart to merge into the newly authenticated user's cart.
+export function getCartSessionId(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(KEY);
+}
+
+// After a guest cart is merged into the user's account, drop only the guest
+// session key (the cart-id key is reset to the merged user cart separately).
+export function clearGuestSessionKey() {
+  if (typeof window !== "undefined") localStorage.removeItem(KEY);
+}
+
 export function clearCartSession() {
   if (typeof window !== "undefined") {
     localStorage.removeItem(KEY);

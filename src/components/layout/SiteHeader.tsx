@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,18 +8,30 @@ import { Search, ShoppingBag, User, LogOut, LayoutDashboard } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { BaleIcon } from "@/components/BaleIcon";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter,
+  AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import logoMark from "@/assets/logo-mark.png";
 
 export function SiteHeader() {
   const { user, role, profile, signOut, storeStatus } = useAuth();
   const { count } = useCart();
+  const navigate = useNavigate();
   const [botUsername, setBotUsername] = useState<string | null>(null);
+  const [confirmLogout, setConfirmLogout] = useState(false);
   const fetchBalePayConfig = useServerFn(getBalePayConfig);
 
   useEffect(() => {
     fetchBalePayConfig().then((c) => setBotUsername(c.botUsername)).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  async function handleLogout() {
+    setConfirmLogout(false);
+    await signOut();
+    navigate({ to: "/" });
+  }
 
   const dashLink =
     role === "super_admin" ? "/admin"
@@ -81,7 +93,7 @@ export function SiteHeader() {
                 <DropdownMenuItem asChild>
                   <Link to={dashLink}><LayoutDashboard className="w-4 h-4 ml-2" /> پیشخوان</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={signOut}>
+                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setConfirmLogout(true); }}>
                   <LogOut className="w-4 h-4 ml-2" /> خروج
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -93,6 +105,19 @@ export function SiteHeader() {
           )}
         </div>
       </div>
+
+      <AlertDialog open={confirmLogout} onOpenChange={setConfirmLogout}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-serif">خروج از حساب</AlertDialogTitle>
+            <AlertDialogDescription>آیا می‌خواهید از حساب کاربری خود خارج شوید؟</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>انصراف</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout}>خروج</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </header>
   );
 }

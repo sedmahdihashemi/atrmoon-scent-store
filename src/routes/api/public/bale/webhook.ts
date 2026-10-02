@@ -96,6 +96,21 @@ const WELCOME_START =
   "🔑 رمز عبور را فراموش کرده‌اید؟ دستور <code>/forgot</code> را بفرستید.\n\n" +
   "🔎 برای پیگیری سریع یک سفارش بدون ورود:\n<code>/track ATR-XXXXXX-XXXXX</code>";
 
+async function promptForgotContact(chat_id: number) {
+  await upsertSession(chat_id, { state: "awaiting_forgot_contact", state_data: {} });
+  await sendMessage(
+    chat_id,
+    "برای بازیابی رمز عبور، لطفاً با زدن دکمه زیر شماره موبایل خودتان را با ربات به اشتراک بگذارید:",
+    {
+      reply_markup: {
+        keyboard: [[{ text: "📱 اشتراک‌گذاری شماره من", request_contact: true }]],
+        resize_keyboard: true,
+        one_time_keyboard: true,
+      },
+    }
+  );
+}
+
 function generateTempPassword(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
   const bytes = crypto.getRandomValues(new Uint8Array(10));
@@ -537,6 +552,13 @@ async function handleUpdate(update: any) {
     return;
   }
 
+  // Deep link from the login page's "forgot password" link:
+  // ble.ir/<bot>?start=forgot → "/start forgot" → jump straight into the flow.
+  if (text.trim() === "/start forgot") {
+    await promptForgotContact(chat_id);
+    return;
+  }
+
   // Public /track works without login
   const trimmed = text.trim();
   const bareCode = /^ATR-[0-9]{6}-[0-9]{4,6}$/i.test(trimmed);
@@ -570,18 +592,7 @@ async function handleUpdate(update: any) {
   // Forgot-password flow — verified via Bale's own "share my contact"
   // button, so the phone number can't be spoofed as someone else's.
   if (text === "/forgot") {
-    await upsertSession(chat_id, { state: "awaiting_forgot_contact", state_data: {} });
-    await sendMessage(
-      chat_id,
-      "برای بازیابی رمز عبور، لطفاً با زدن دکمه زیر شماره موبایل خودتان را با ربات به اشتراک بگذارید:",
-      {
-        reply_markup: {
-          keyboard: [[{ text: "📱 اشتراک‌گذاری شماره من", request_contact: true }]],
-          resize_keyboard: true,
-          one_time_keyboard: true,
-        },
-      }
-    );
+    await promptForgotContact(chat_id);
     return;
   }
 

@@ -1,9 +1,10 @@
-import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, useCallback, ReactNode } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { getOrCreateCartSession, getStoredCartId, setStoredCartId, clearCartSession } from "@/lib/cart-session";
+import { getOrCreateCartSession, getCartSessionId, getStoredCartId, setStoredCartId, clearCartSession, clearGuestSessionKey } from "@/lib/cart-session";
+import { mergeGuestCart } from "@/lib/cart-merge.functions";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { useNavigate } from "@tanstack/react-router";
 
 export type CartItem = {
   id: string;
@@ -45,7 +46,7 @@ const CartCtx = createContext<Ctx | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const mergeCart = useServerFn(mergeGuestCart);
   const [cartId, setCartId] = useState<string | null>(null);
   const [storeId, setStoreId] = useState<string | null>(null);
   const [items, setItems] = useState<CartItem[]>([]);
@@ -56,10 +57,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const session = user ? null : getOrCreateCartSession();
     // RLS for guest carts requires this header to match the cart's session_id.
     // Authenticated users are matched by customer_id and don't need it.
-    const rest = (supabase as any).rest;
-    if (rest?.headers) {
-      if (session) rest.headers["x-cart-session"] = session;
-      else delete rest.headers["x-cart-session"];
+    // NOTE: supabase-js stores rest.headers as a Headers object, so plain
+    // `headers["x"] = v` / `delete headers["x"]` are silently ignored (that
+    // bug meant guest carts never actually sent the header → RLS rejected
+    // every guest insert). Use .set()/.delete(), with a plain-object fallback.
+    const headers = (supabase as any).rest?.headers;
+    if (headers) {
+      if (session) {
+        if (typeof headers.set === "function") headers.set("x-cart-session", session);
+        else headers["x-cart-session"] = session;
+      } else {
+        if (typeof headers.delete === "function") headers.delete("x-cart-session");
+        else delete headers["x-cart-session"];
+      }
     }
     // try existing
     let q = supabase.from("carts").select("id, store_id").limit(1);
@@ -105,15 +115,41 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   }, [ensureCart, loadItems]);
 
-  useEffect(() => { void refresh(); }, [refresh]);
+  // Pull a guest cart (built before login) into the just-authenticated
+  // user's account, then load the merged cart. Done server-side because RLS
+  // hides the session-based guest cart from the logged-in user.
+  const mergeThenLoad = useCallback(async () => {
+    setLoading(true);
+    // Only a real guest session has this key; a reload of an already
+    // logged-in user cleared it on the prior login, so we skip the server
+    // round-trip in that case and just load the user's cart.
+    const sessionId = getCartSessionId();
+    if (sessionId) {
+      try {
+        const res = await mergeCart({ data: { sessionId, guestCartId: getStoredCartId() } });
+        if (res?.cartId) setStoredCartId(res.cartId);
+      } catch (e) {
+        console.error("[cart] merge on login failed", e);
+      }
+      clearGuestSessionKey();
+    }
+    const c = await ensureCart();
+    if (c) await loadItems(c.id);
+    setLoading(false);
+  }, [ensureCart, loadItems, mergeCart]);
+
+  // Run merge once on the guest→user transition; otherwise just (re)load.
+  const prevUserRef = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    const prev = prevUserRef.current;
+    const curr = user?.id ?? null;
+    prevUserRef.current = curr;
+    if (prev === undefined) { void refresh(); return; }      // first run
+    if (!prev && curr) { void mergeThenLoad(); return; }      // just logged in
+    void refresh();                                            // logout / user switch
+  }, [user, refresh, mergeThenLoad]);
 
   const addItem = useCallback(async (productId: string, variantId: string, itemStoreId: string, qty = 1) => {
-    if (!user) {
-      toast.info("برای افزودن به سبد ابتدا وارد شوید");
-      const redirect = typeof window !== "undefined" ? window.location.pathname + window.location.search : "/";
-      navigate({ to: "/login", search: { redirect } as any });
-      return;
-    }
     const c = await ensureCart();
     if (!c) { toast.error("سبد در دسترس نیست"); return; }
     // single-store rule: if cart has a different store, ask to clear
@@ -136,7 +172,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setStoreId(itemStoreId);
     await loadItems(c.id);
     toast.success("به سبد افزوده شد");
-  }, [ensureCart, loadItems, storeId, user, navigate]);
+  }, [ensureCart, loadItems, storeId]);
 
   const updateQty = useCallback(async (itemId: string, qty: number) => {
     if (qty < 1) return;

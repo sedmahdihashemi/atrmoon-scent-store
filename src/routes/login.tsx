@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { loginWithPhone } from "@/lib/phone-login.functions";
+import { getBalePayConfig } from "@/lib/bale-pay-flag.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/login")({
@@ -42,7 +43,14 @@ function LoginPage() {
   const [mode, setMode] = useState<"email" | "phone">("email");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [botUsername, setBotUsername] = useState<string | null>(null);
   const fetchLoginWithPhone = useServerFn(loginWithPhone);
+  const fetchBalePayConfig = useServerFn(getBalePayConfig);
+
+  useEffect(() => {
+    fetchBalePayConfig().then((c) => setBotUsername(c.botUsername)).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function afterLogin() {
     toast.success("خوش‌آمدید");
@@ -155,7 +163,19 @@ function LoginPage() {
           )}
 
           <p className="mt-4 text-center text-xs text-muted-foreground font-serif">
-            رمز عبور را فراموش کرده‌اید؟ از ربات بله عطرمون دستور <span dir="ltr" className="inline-block">/forgot</span> را بفرستید.
+            رمز عبور را فراموش کرده‌اید؟{" "}
+            {botUsername ? (
+              <a
+                href={`https://ble.ir/${botUsername}?start=forgot`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--gold)] hover:underline"
+              >
+                بازیابی از طریق ربات بله
+              </a>
+            ) : (
+              <span>از ربات بله عطرمون دستور <span dir="ltr" className="inline-block">/forgot</span> را بفرستید.</span>
+            )}
           </p>
           <p className="mt-6 text-center text-sm text-muted-foreground">
             هنوز عضو نیستید؟ <Link to="/register" className="text-[var(--gold)] hover:underline">ثبت‌نام</Link>

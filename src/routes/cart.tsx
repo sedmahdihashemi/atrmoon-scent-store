@@ -34,27 +34,29 @@ function CartPage() {
             {items.map((it) => {
               const price = Number(it.variant?.discount_price ?? it.variant?.price ?? 0);
               return (
-                <div key={it.id} className="paper-card rounded-md p-4 flex gap-4 items-center">
-                  <div className="w-20 h-20 bg-[var(--moon)]/40 rounded-sm shrink-0 flex items-center justify-center text-[var(--gold)]/60 overflow-hidden">
+                <div key={it.id} className="paper-card rounded-md p-4 flex flex-wrap items-center gap-x-4 gap-y-3">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[var(--moon)]/40 rounded-sm shrink-0 flex items-center justify-center text-[var(--gold)]/60 overflow-hidden">
                     {it.product.main_image_url
                       ? <img src={it.product.main_image_url} alt={it.product.name} className="w-full h-full object-cover" />
                       : <Sparkles className="w-7 h-7" />}
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-[40%]">
                     <Link to="/products/$slug" params={{ slug: it.product.slug }} className="font-serif text-ink hover:text-[var(--gold)] truncate block">{it.product.name}</Link>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {it.variant?.volume_ml.toLocaleString("fa-IR")} میلی‌لیتر · {it.variant?.bottle_types?.name}
                     </p>
                     <p className="font-serif text-[var(--gold)] mt-1 text-sm">{formatToman(price)}</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => updateQty(it.id, it.quantity - 1)} className="w-8 h-8 rounded-sm border border-ink/15 flex items-center justify-center"><Minus className="w-3.5 h-3.5" /></button>
-                    <span className="font-serif w-6 text-center text-sm">{it.quantity.toLocaleString("fa-IR")}</span>
-                    <button onClick={() => updateQty(it.id, it.quantity + 1)} className="w-8 h-8 rounded-sm border border-ink/15 flex items-center justify-center"><Plus className="w-3.5 h-3.5" /></button>
+                  <div className="flex items-center gap-2 ms-auto">
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => updateQty(it.id, it.quantity - 1)} className="w-8 h-8 rounded-sm border border-ink/15 flex items-center justify-center shrink-0"><Minus className="w-3.5 h-3.5" /></button>
+                      <span className="font-serif w-6 text-center text-sm">{it.quantity.toLocaleString("fa-IR")}</span>
+                      <button onClick={() => updateQty(it.id, it.quantity + 1)} className="w-8 h-8 rounded-sm border border-ink/15 flex items-center justify-center shrink-0"><Plus className="w-3.5 h-3.5" /></button>
+                    </div>
+                    <button onClick={() => removeItem(it.id)} aria-label="حذف" className="p-2 text-muted-foreground hover:text-destructive shrink-0">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
-                  <button onClick={() => removeItem(it.id)} aria-label="حذف" className="p-2 text-muted-foreground hover:text-destructive">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
                 </div>
               );
             })}
