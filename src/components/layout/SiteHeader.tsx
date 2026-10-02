@@ -112,7 +112,7 @@ export function SiteHeader() {
             <AlertDialogTitle className="font-serif">خروج از حساب</AlertDialogTitle>
             <AlertDialogDescription>آیا می‌خواهید از حساب کاربری خود خارج شوید؟</AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className="gap-2">
             <AlertDialogCancel>انصراف</AlertDialogCancel>
             <AlertDialogAction onClick={handleLogout}>خروج</AlertDialogAction>
           </AlertDialogFooter>
