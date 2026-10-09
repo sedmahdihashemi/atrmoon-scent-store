@@ -31,7 +31,7 @@ function ProductDetail() {
           stores(id, store_name, slug, city),
           brands(name),
           product_images(image_url, sort_order),
-          product_variants(id, volume_ml, price, discount_price, status, bottle_types(name, image_url)),
+          product_variants(id, volume_ml, price, discount_price, status, bottle_name, bottle_photo_url),
           product_scent_notes(scent_notes(name, type))`)
         .eq("slug", slug)
         .eq("status", "active")
@@ -102,21 +102,21 @@ function ProductDetail() {
                   return (
                     <button key={v.id} onClick={() => { setSelectedVariantId(v.id); setQty(1); }}
                       className={`px-4 py-2 rounded-sm border text-sm font-serif transition ${active ? "bg-ink text-[var(--paper)] border-ink" : "border-ink/15 text-ink hover:border-[var(--gold)]"}`}>
-                      {v.volume_ml.toLocaleString("fa-IR")} میلی‌لیتر · {v.bottle_types?.name}
+                      {v.volume_ml.toLocaleString("fa-IR")} میلی‌لیتر · {v.bottle_name}
                     </button>
                   );
                 })}
                 {variants.length === 0 && <p className="text-sm text-muted-foreground">حجمی برای این رایحه ثبت نشده.</p>}
               </div>
 
-              {sel?.bottle_types?.image_url && (
+              {sel?.bottle_photo_url && (
                 <div className="mt-4 flex items-center gap-3">
                   <img
-                    src={sel.bottle_types.image_url}
-                    alt={sel.bottle_types.name ?? "بطری"}
+                    src={sel.bottle_photo_url}
+                    alt={sel.bottle_name ?? "بطری"}
                     className="w-16 h-16 object-cover rounded-sm border border-ink/10"
                   />
-                  <p className="text-xs text-muted-foreground font-serif">بطری: {sel.bottle_types.name}</p>
+                  <p className="text-xs text-muted-foreground font-serif">بطری: {sel.bottle_name}</p>
                 </div>
               )}
             </div>

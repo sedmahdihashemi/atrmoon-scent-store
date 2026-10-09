@@ -43,7 +43,7 @@ function CartPage() {
                   <div className="flex-1 min-w-[40%]">
                     <Link to="/products/$slug" params={{ slug: it.product.slug }} className="font-serif text-ink hover:text-[var(--gold)] truncate block">{it.product.name}</Link>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {it.variant?.volume_ml.toLocaleString("fa-IR")} میلی‌لیتر · {it.variant?.bottle_types?.name}
+                      {it.variant?.volume_ml.toLocaleString("fa-IR")} میلی‌لیتر · {it.variant?.bottle_name}
                     </p>
                     <p className="font-serif text-[var(--gold)] mt-1 text-sm">{formatToman(price)}</p>
                   </div>

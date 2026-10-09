@@ -24,7 +24,7 @@ export type CartItem = {
     volume_ml: number;
     price: number;
     discount_price: number | null;
-    bottle_types: { name: string };
+    bottle_name: string | null;
   };
 };
 
@@ -103,7 +103,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       .from("cart_items")
       .select(`id, product_id, product_variant_id, quantity,
         product:products(id, name, slug, main_image_url, store_id, brands(name)),
-        variant:product_variants(id, volume_ml, price, discount_price, bottle_types(name))`)
+        variant:product_variants(id, volume_ml, price, discount_price, bottle_name)`)
       .eq("cart_id", id);
     setItems((data as any) ?? []);
   }, []);
