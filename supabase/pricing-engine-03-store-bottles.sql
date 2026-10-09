@@ -62,7 +62,7 @@ ALTER TABLE public.product_variants ALTER COLUMN bottle_type_id DROP NOT NULL;
 -- create a matching store-owned bottle (cost left blank for the seller to
 -- fill), then repoint the variants and fill their denormalized fields.
 INSERT INTO public.store_bottles (store_id, name, volume_ml, photo_url, cost_toman, profit_percent, is_active)
-SELECT DISTINCT p.store_id, bt.name, bt.volume_ml, bt.image_url, NULL, 0, true
+SELECT DISTINCT p.store_id, bt.name, bt.volume_ml, bt.image_url, NULL::numeric(12, 2), 0::numeric(6, 2), true
 FROM public.product_variants v
 JOIN public.products p ON p.id = v.product_id
 JOIN public.bottle_types bt ON bt.id = v.bottle_type_id
