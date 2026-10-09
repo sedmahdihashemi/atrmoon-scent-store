@@ -60,16 +60,16 @@ export const recomputeProductPrices = createServerFn({ method: "POST" })
 
     const { data: variants } = await supabaseAdmin
       .from("product_variants")
-      .select("id, volume_ml, bottle_type_id")
+      .select("id, volume_ml, store_bottle_id")
       .eq("product_id", data.productId);
 
-    const { data: bottlePricing } = await supabaseAdmin
-      .from("store_bottle_pricing")
-      .select("bottle_type_id, cost_toman, profit_percent")
+    const { data: storeBottles } = await supabaseAdmin
+      .from("store_bottles")
+      .select("id, cost_toman, profit_percent")
       .eq("store_id", storeId);
     const bottleMap = new Map<string, { cost: number | null; profit: number }>();
-    for (const b of (bottlePricing ?? []) as any[]) {
-      bottleMap.set(b.bottle_type_id, { cost: b.cost_toman, profit: Number(b.profit_percent) });
+    for (const b of (storeBottles ?? []) as any[]) {
+      bottleMap.set(b.id, { cost: b.cost_toman, profit: Number(b.profit_percent) });
     }
 
     const results: { variantId: string; price: number }[] = [];
@@ -80,7 +80,7 @@ export const recomputeProductPrices = createServerFn({ method: "POST" })
         skipped.push({ variantId: v.id, reason: "no_product_cost" });
         continue;
       }
-      const bottle = bottleMap.get(v.bottle_type_id);
+      const bottle = v.store_bottle_id ? bottleMap.get(v.store_bottle_id) : undefined;
       if (!bottle || bottle.cost == null) {
         skipped.push({ variantId: v.id, reason: "no_bottle_pricing" });
         continue;

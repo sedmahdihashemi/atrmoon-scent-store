@@ -153,6 +153,45 @@ export type Database = {
         }
         Relationships: []
       }
+      store_bottles: {
+        Row: {
+          cost_toman: number | null
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          photo_url: string | null
+          profit_percent: number
+          store_id: string
+          updated_at: string
+          volume_ml: number
+        }
+        Insert: {
+          cost_toman?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          photo_url?: string | null
+          profit_percent?: number
+          store_id: string
+          updated_at?: string
+          volume_ml: number
+        }
+        Update: {
+          cost_toman?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          photo_url?: string | null
+          profit_percent?: number
+          store_id?: string
+          updated_at?: string
+          volume_ml?: number
+        }
+        Relationships: []
+      }
       store_bottle_pricing: {
         Row: {
           bottle_type_id: string
@@ -906,7 +945,9 @@ export type Database = {
       }
       product_variants: {
         Row: {
-          bottle_type_id: string
+          bottle_name: string | null
+          bottle_photo_url: string | null
+          bottle_type_id: string | null
           created_at: string
           discount_price: number | null
           id: string
@@ -914,11 +955,14 @@ export type Database = {
           product_id: string
           sku: string | null
           status: Database["public"]["Enums"]["variant_status"]
+          store_bottle_id: string | null
           updated_at: string
           volume_ml: number
         }
         Insert: {
-          bottle_type_id: string
+          bottle_name?: string | null
+          bottle_photo_url?: string | null
+          bottle_type_id?: string | null
           created_at?: string
           discount_price?: number | null
           id?: string
@@ -926,11 +970,14 @@ export type Database = {
           product_id: string
           sku?: string | null
           status?: Database["public"]["Enums"]["variant_status"]
+          store_bottle_id?: string | null
           updated_at?: string
           volume_ml: number
         }
         Update: {
-          bottle_type_id?: string
+          bottle_name?: string | null
+          bottle_photo_url?: string | null
+          bottle_type_id?: string | null
           created_at?: string
           discount_price?: number | null
           id?: string
@@ -938,6 +985,7 @@ export type Database = {
           product_id?: string
           sku?: string | null
           status?: Database["public"]["Enums"]["variant_status"]
+          store_bottle_id?: string | null
           updated_at?: string
           volume_ml?: number
         }
