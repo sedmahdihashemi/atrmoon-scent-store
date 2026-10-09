@@ -31,7 +31,7 @@ function ProductDetail() {
           stores(id, store_name, slug, city),
           brands(name),
           product_images(image_url, sort_order),
-          product_variants(id, volume_ml, price, discount_price, status, bottle_types(name)),
+          product_variants(id, volume_ml, price, discount_price, status, bottle_types(name, image_url)),
           product_scent_notes(scent_notes(name, type))`)
         .eq("slug", slug)
         .eq("status", "active")
@@ -108,6 +108,17 @@ function ProductDetail() {
                 })}
                 {variants.length === 0 && <p className="text-sm text-muted-foreground">حجمی برای این رایحه ثبت نشده.</p>}
               </div>
+
+              {sel?.bottle_types?.image_url && (
+                <div className="mt-4 flex items-center gap-3">
+                  <img
+                    src={sel.bottle_types.image_url}
+                    alt={sel.bottle_types.name ?? "بطری"}
+                    className="w-16 h-16 object-cover rounded-sm border border-ink/10"
+                  />
+                  <p className="text-xs text-muted-foreground font-serif">بطری: {sel.bottle_types.name}</p>
+                </div>
+              )}
             </div>
 
             {sel && (

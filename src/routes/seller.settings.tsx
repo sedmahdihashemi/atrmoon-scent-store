@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { detectIranianBank } from "@/lib/iran-bank-cards";
 import { BankIcon } from "@/lib/bank-icons";
+import { BottlePricingCard } from "@/components/seller/BottlePricingCard";
 
 const WEEKDAYS = [
   { value: "6", label: "شنبه" },
@@ -239,6 +240,8 @@ function SellerSettings() {
           )}
         </div>
       </div>
+
+      {storeId && <BottlePricingCard storeId={storeId} />}
 
       <div className="flex justify-end">
         <Button onClick={save} loading={saving} loadingText="ذخیره…">ذخیره</Button>
