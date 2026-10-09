@@ -192,33 +192,6 @@ export type Database = {
         }
         Relationships: []
       }
-      store_bottle_pricing: {
-        Row: {
-          bottle_type_id: string
-          cost_toman: number | null
-          created_at: string
-          profit_percent: number
-          store_id: string
-          updated_at: string
-        }
-        Insert: {
-          bottle_type_id: string
-          cost_toman?: number | null
-          created_at?: string
-          profit_percent?: number
-          store_id: string
-          updated_at?: string
-        }
-        Update: {
-          bottle_type_id?: string
-          cost_toman?: number | null
-          created_at?: string
-          profit_percent?: number
-          store_id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       store_pricing_settings: {
         Row: {
           created_at: string

@@ -36,6 +36,7 @@ import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
 import { Route as RegisterCustomerRouteImport } from './routes/register.customer'
 import { Route as RegisterSellerRouteImport } from './routes/register.seller'
 import { Route as SellerIndexRouteImport } from './routes/seller.index'
+import { Route as SellerBottlesRouteImport } from './routes/seller.bottles'
 import { Route as SellerOrdersRouteImport } from './routes/seller.orders'
 import { Route as SellerPendingRouteImport } from './routes/seller.pending'
 import { Route as SellerProductsRouteImport } from './routes/seller.products'
@@ -186,6 +187,11 @@ const SellerIndexRoute = SellerIndexRouteImport.update({
   path: '/',
   getParentRoute: () => SellerRoute,
 } as any)
+const SellerBottlesRoute = SellerBottlesRouteImport.update({
+  id: '/bottles',
+  path: '/bottles',
+  getParentRoute: () => SellerRoute,
+} as any)
 const SellerOrdersRoute = SellerOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
@@ -285,6 +291,7 @@ export interface FileRoutesByFullPath {
   '/products/$slug': typeof ProductsSlugRoute
   '/register/customer': typeof RegisterCustomerRoute
   '/register/seller': typeof RegisterSellerRoute
+  '/seller/bottles': typeof SellerBottlesRoute
   '/seller/orders': typeof SellerOrdersRouteWithChildren
   '/seller/pending': typeof SellerPendingRoute
   '/seller/products': typeof SellerProductsRouteWithChildren
@@ -326,6 +333,7 @@ export interface FileRoutesByTo {
   '/products/$slug': typeof ProductsSlugRoute
   '/register/customer': typeof RegisterCustomerRoute
   '/register/seller': typeof RegisterSellerRoute
+  '/seller/bottles': typeof SellerBottlesRoute
   '/seller/orders': typeof SellerOrdersRouteWithChildren
   '/seller/pending': typeof SellerPendingRoute
   '/seller/products': typeof SellerProductsRouteWithChildren
@@ -370,6 +378,7 @@ export interface FileRoutesById {
   '/products/$slug': typeof ProductsSlugRoute
   '/register/customer': typeof RegisterCustomerRoute
   '/register/seller': typeof RegisterSellerRoute
+  '/seller/bottles': typeof SellerBottlesRoute
   '/seller/orders': typeof SellerOrdersRouteWithChildren
   '/seller/pending': typeof SellerPendingRoute
   '/seller/products': typeof SellerProductsRouteWithChildren
@@ -415,6 +424,7 @@ export interface FileRouteTypes {
     | '/products/$slug'
     | '/register/customer'
     | '/register/seller'
+    | '/seller/bottles'
     | '/seller/orders'
     | '/seller/pending'
     | '/seller/products'
@@ -456,6 +466,7 @@ export interface FileRouteTypes {
     | '/products/$slug'
     | '/register/customer'
     | '/register/seller'
+    | '/seller/bottles'
     | '/seller/orders'
     | '/seller/pending'
     | '/seller/products'
@@ -499,6 +510,7 @@ export interface FileRouteTypes {
     | '/products/$slug'
     | '/register/customer'
     | '/register/seller'
+    | '/seller/bottles'
     | '/seller/orders'
     | '/seller/pending'
     | '/seller/products'
@@ -730,6 +742,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SellerIndexRouteImport
       parentRoute: typeof SellerRoute
     }
+    '/seller/bottles': {
+      id: '/seller/bottles'
+      path: '/bottles'
+      fullPath: '/seller/bottles'
+      preLoaderRoute: typeof SellerBottlesRouteImport
+      parentRoute: typeof SellerRoute
+    }
     '/seller/orders': {
       id: '/seller/orders'
       path: '/orders'
@@ -910,6 +929,7 @@ const SellerProductsRouteWithChildren = SellerProductsRoute._addFileChildren(
 )
 
 interface SellerRouteChildren {
+  SellerBottlesRoute: typeof SellerBottlesRoute
   SellerOrdersRoute: typeof SellerOrdersRouteWithChildren
   SellerPendingRoute: typeof SellerPendingRoute
   SellerProductsRoute: typeof SellerProductsRouteWithChildren
@@ -919,6 +939,7 @@ interface SellerRouteChildren {
 }
 
 const SellerRouteChildren: SellerRouteChildren = {
+  SellerBottlesRoute: SellerBottlesRoute,
   SellerOrdersRoute: SellerOrdersRouteWithChildren,
   SellerPendingRoute: SellerPendingRoute,
   SellerProductsRoute: SellerProductsRouteWithChildren,
