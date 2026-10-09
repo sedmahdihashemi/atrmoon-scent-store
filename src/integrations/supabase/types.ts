@@ -126,6 +126,93 @@ export type Database = {
           },
         ]
       }
+      product_pricing_settings: {
+        Row: {
+          concentration_percent: number
+          cost_per_gram_toman: number | null
+          created_at: string
+          oil_profit_percent: number
+          product_id: string
+          updated_at: string
+        }
+        Insert: {
+          concentration_percent?: number
+          cost_per_gram_toman?: number | null
+          created_at?: string
+          oil_profit_percent?: number
+          product_id: string
+          updated_at?: string
+        }
+        Update: {
+          concentration_percent?: number
+          cost_per_gram_toman?: number | null
+          created_at?: string
+          oil_profit_percent?: number
+          product_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      store_bottle_pricing: {
+        Row: {
+          bottle_type_id: string
+          cost_toman: number | null
+          created_at: string
+          profit_percent: number
+          store_id: string
+          updated_at: string
+        }
+        Insert: {
+          bottle_type_id: string
+          cost_toman?: number | null
+          created_at?: string
+          profit_percent?: number
+          store_id: string
+          updated_at?: string
+        }
+        Update: {
+          bottle_type_id?: string
+          cost_toman?: number | null
+          created_at?: string
+          profit_percent?: number
+          store_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      store_pricing_settings: {
+        Row: {
+          created_at: string
+          pricing_mode: string
+          store_id: string
+          updated_at: string
+          usd_auto_update_enabled: boolean
+          usd_auto_update_max_change_percent: number
+          usd_rate_toman: number | null
+          usd_update_day_of_week: number | null
+        }
+        Insert: {
+          created_at?: string
+          pricing_mode?: string
+          store_id: string
+          updated_at?: string
+          usd_auto_update_enabled?: boolean
+          usd_auto_update_max_change_percent?: number
+          usd_rate_toman?: number | null
+          usd_update_day_of_week?: number | null
+        }
+        Update: {
+          created_at?: string
+          pricing_mode?: string
+          store_id?: string
+          updated_at?: string
+          usd_auto_update_enabled?: boolean
+          usd_auto_update_max_change_percent?: number
+          usd_rate_toman?: number | null
+          usd_update_day_of_week?: number | null
+        }
+        Relationships: []
+      }
       bottle_types: {
         Row: {
           created_at: string
