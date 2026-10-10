@@ -117,8 +117,26 @@ function generateTempPassword(): string {
   return Array.from(bytes, (b) => chars[b % chars.length]).join("");
 }
 
-async function handleForgotPasswordContact(chat_id: number, contact: any) {
+async function handleForgotPasswordContact(chat_id: number, contact: any, fromId: number | undefined) {
   await upsertSession(chat_id, { state: "idle", state_data: {} });
+
+  // SECURITY: the phone number in a `contact` can be ANY number — a user can
+  // manually attach someone else's contact. Per Bale's own advisory, only
+  // trust it as verified when the contact belongs to the sender, i.e.
+  // contact.user_id === message.from.id. Without this, anyone could reset
+  // another account's password by sending a crafted contact with that
+  // account's phone number. Only the "share my contact" button produces a
+  // contact whose user_id matches the sender.
+  const contactUserId = contact?.user_id != null ? Number(contact.user_id) : null;
+  if (contactUserId == null || fromId == null || contactUserId !== Number(fromId)) {
+    await sendMessage(
+      chat_id,
+      "برای امنیت حساب شما، باید حتماً از دکمه‌ی «📱 اشتراک‌گذاری شماره من» استفاده کنید (نه ارسال دستی یک مخاطب). برای تلاش دوباره: /forgot",
+      { reply_markup: { remove_keyboard: true } }
+    );
+    return;
+  }
+
   const phone = normalizeIranPhone(String(contact?.phone_number ?? ""));
   if (!phone) {
     await sendMessage(chat_id, "شماره ارسالی معتبر نبود. برای تلاش دوباره: /forgot", { reply_markup: { remove_keyboard: true } });
@@ -538,7 +556,7 @@ async function handleUpdate(update: any) {
   }
 
   if (msg.contact && session.state === "awaiting_forgot_contact") {
-    await handleForgotPasswordContact(chat_id, msg.contact);
+    await handleForgotPasswordContact(chat_id, msg.contact, msg.from?.id);
     return;
   }
 
