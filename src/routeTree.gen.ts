@@ -44,6 +44,7 @@ import { Route as SellerReceiptsRouteImport } from './routes/seller.receipts'
 import { Route as SellerSettingsRouteImport } from './routes/seller.settings'
 import { Route as StoresSlugRouteImport } from './routes/stores.$slug'
 import { Route as TrackOrderIdRouteImport } from './routes/track.$orderId'
+import { Route as ApiPublicCronCartSummaryRouteImport } from './routes/api/public/cron-cart-summary'
 import { Route as SellerOrdersIdRouteImport } from './routes/seller.orders.$id'
 import { Route as SellerProductsIdRouteImport } from './routes/seller.products.$id'
 import { Route as SellerProductsNewRouteImport } from './routes/seller.products.new'
@@ -227,6 +228,12 @@ const TrackOrderIdRoute = TrackOrderIdRouteImport.update({
   path: '/track/$orderId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicCronCartSummaryRoute =
+  ApiPublicCronCartSummaryRouteImport.update({
+    id: '/api/public/cron-cart-summary',
+    path: '/api/public/cron-cart-summary',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const SellerOrdersIdRoute = SellerOrdersIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -301,6 +308,7 @@ export interface FileRoutesByFullPath {
   '/track/$orderId': typeof TrackOrderIdRoute
   '/admin/': typeof AdminIndexRoute
   '/seller/': typeof SellerIndexRoute
+  '/api/public/cron-cart-summary': typeof ApiPublicCronCartSummaryRoute
   '/seller/orders/$id': typeof SellerOrdersIdRoute
   '/seller/products/$id': typeof SellerProductsIdRoute
   '/seller/products/new': typeof SellerProductsNewRoute
@@ -343,6 +351,7 @@ export interface FileRoutesByTo {
   '/track/$orderId': typeof TrackOrderIdRoute
   '/admin': typeof AdminIndexRoute
   '/seller': typeof SellerIndexRoute
+  '/api/public/cron-cart-summary': typeof ApiPublicCronCartSummaryRoute
   '/seller/orders/$id': typeof SellerOrdersIdRoute
   '/seller/products/$id': typeof SellerProductsIdRoute
   '/seller/products/new': typeof SellerProductsNewRoute
@@ -388,6 +397,7 @@ export interface FileRoutesById {
   '/track/$orderId': typeof TrackOrderIdRoute
   '/admin/': typeof AdminIndexRoute
   '/seller/': typeof SellerIndexRoute
+  '/api/public/cron-cart-summary': typeof ApiPublicCronCartSummaryRoute
   '/seller/orders/$id': typeof SellerOrdersIdRoute
   '/seller/products/$id': typeof SellerProductsIdRoute
   '/seller/products/new': typeof SellerProductsNewRoute
@@ -434,6 +444,7 @@ export interface FileRouteTypes {
     | '/track/$orderId'
     | '/admin/'
     | '/seller/'
+    | '/api/public/cron-cart-summary'
     | '/seller/orders/$id'
     | '/seller/products/$id'
     | '/seller/products/new'
@@ -476,6 +487,7 @@ export interface FileRouteTypes {
     | '/track/$orderId'
     | '/admin'
     | '/seller'
+    | '/api/public/cron-cart-summary'
     | '/seller/orders/$id'
     | '/seller/products/$id'
     | '/seller/products/new'
@@ -520,6 +532,7 @@ export interface FileRouteTypes {
     | '/track/$orderId'
     | '/admin/'
     | '/seller/'
+    | '/api/public/cron-cart-summary'
     | '/seller/orders/$id'
     | '/seller/products/$id'
     | '/seller/products/new'
@@ -545,6 +558,7 @@ export interface RootRouteChildren {
   SellerRoute: typeof SellerRouteWithChildren
   StoresRoute: typeof StoresRouteWithChildren
   TrackOrderIdRoute: typeof TrackOrderIdRoute
+  ApiPublicCronCartSummaryRoute: typeof ApiPublicCronCartSummaryRoute
   ApiPublicBaleCronExpireRoute: typeof ApiPublicBaleCronExpireRoute
   ApiPublicBaleWebhookRoute: typeof ApiPublicBaleWebhookRoute
   ApiPublicOrdersSubmitReceiptRoute: typeof ApiPublicOrdersSubmitReceiptRoute
@@ -798,6 +812,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrackOrderIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/cron-cart-summary': {
+      id: '/api/public/cron-cart-summary'
+      path: '/api/public/cron-cart-summary'
+      fullPath: '/api/public/cron-cart-summary'
+      preLoaderRoute: typeof ApiPublicCronCartSummaryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/seller/orders/$id': {
       id: '/seller/orders/$id'
       path: '/$id'
@@ -978,6 +999,7 @@ const rootRouteChildren: RootRouteChildren = {
   SellerRoute: SellerRouteWithChildren,
   StoresRoute: StoresRouteWithChildren,
   TrackOrderIdRoute: TrackOrderIdRoute,
+  ApiPublicCronCartSummaryRoute: ApiPublicCronCartSummaryRoute,
   ApiPublicBaleCronExpireRoute: ApiPublicBaleCronExpireRoute,
   ApiPublicBaleWebhookRoute: ApiPublicBaleWebhookRoute,
   ApiPublicOrdersSubmitReceiptRoute: ApiPublicOrdersSubmitReceiptRoute,
