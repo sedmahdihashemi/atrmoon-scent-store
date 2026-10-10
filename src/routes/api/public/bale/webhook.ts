@@ -96,6 +96,27 @@ const WELCOME_START =
   "🔑 رمز عبور را فراموش کرده‌اید؟ دستور <code>/forgot</code> را بفرستید.\n\n" +
   "🔎 برای پیگیری سریع یک سفارش بدون ورود:\n<code>/track ATR-XXXXXX-XXXXX</code>";
 
+// Persistent bottom menu. Button labels arrive as plain text messages, which
+// handleUpdate maps back to the matching action. (Typing "/" shows the command
+// list separately, registered via setMyCommands.)
+const MENU = {
+  orders: "📦 سفارش‌های من",
+  track: "🔎 پیگیری سفارش",
+  forgot: "🔑 فراموشی رمز",
+  help: "❓ راهنما",
+};
+function mainMenu() {
+  return {
+    reply_markup: {
+      keyboard: [
+        [{ text: MENU.orders }, { text: MENU.track }],
+        [{ text: MENU.forgot }, { text: MENU.help }],
+      ],
+      resize_keyboard: true,
+    },
+  };
+}
+
 async function promptForgotContact(chat_id: number) {
   await upsertSession(chat_id, { state: "awaiting_forgot_contact", state_data: {} });
   await sendMessage(
@@ -132,34 +153,34 @@ async function handleForgotPasswordContact(chat_id: number, contact: any, fromId
     await sendMessage(
       chat_id,
       "برای امنیت حساب شما، باید حتماً از دکمه‌ی «📱 اشتراک‌گذاری شماره من» استفاده کنید (نه ارسال دستی یک مخاطب). برای تلاش دوباره: /forgot",
-      { reply_markup: { remove_keyboard: true } }
+      mainMenu()
     );
     return;
   }
 
   const phone = normalizeIranPhone(String(contact?.phone_number ?? ""));
   if (!phone) {
-    await sendMessage(chat_id, "شماره ارسالی معتبر نبود. برای تلاش دوباره: /forgot", { reply_markup: { remove_keyboard: true } });
+    await sendMessage(chat_id, "شماره ارسالی معتبر نبود. برای تلاش دوباره: /forgot", mainMenu());
     return;
   }
   const { data: profile, error } = await supabaseAdmin.from("profiles").select("id").eq("phone", phone).maybeSingle();
   logIfError(`handleForgotPasswordContact lookup(${phone})`, error);
   if (!profile) {
-    await sendMessage(chat_id, "حسابی با این شماره موبایل در عطرمون پیدا نشد.", { reply_markup: { remove_keyboard: true } });
+    await sendMessage(chat_id, "حسابی با این شماره موبایل در عطرمون پیدا نشد.", mainMenu());
     return;
   }
   const newPassword = generateTempPassword();
   const { error: updErr } = await supabaseAdmin.auth.admin.updateUserById(profile.id, { password: newPassword });
   if (updErr) {
     console.error("[bale forgot] updateUserById failed", updErr);
-    await sendMessage(chat_id, "خطایی رخ داد، لطفاً کمی بعد دوباره تلاش کنید.", { reply_markup: { remove_keyboard: true } });
+    await sendMessage(chat_id, "خطایی رخ داد، لطفاً کمی بعد دوباره تلاش کنید.", mainMenu());
     return;
   }
   await sendMessage(
     chat_id,
     "✅ رمز عبور موقت شما:\n\n<code>" + newPassword + "</code>\n\n" +
       "با همین رمز وارد سایت عطرمون شوید و از بخش «حساب کاربری من ← تغییر رمز عبور» یک رمز دلخواه جدید بگذارید.",
-    { reply_markup: { remove_keyboard: true } }
+    mainMenu()
   );
 }
 
@@ -308,7 +329,7 @@ async function handleLoggedIn(chat_id: number, user_id: string, text: string) {
 
   if (t === "/logout") {
     await upsertSession(chat_id, { user_id: null, state: "idle", state_data: {} });
-    await sendMessage(chat_id, "✅ از حساب خارج شدید.\n\nبرای ورود مجدد با حساب دیگر: <code>/login</code>");
+    await sendMessage(chat_id, "✅ از حساب خارج شدید.\n\nبرای ورود مجدد با حساب دیگر: <code>/login</code>", mainMenu());
     return;
   }
 
@@ -568,6 +589,23 @@ async function handleUpdate(update: any) {
     return;
   }
 
+  // Bottom-menu buttons send their label as plain text — route them.
+  if (text === MENU.help) {
+    const role = session.user_id ? await getRole(session.user_id) : null;
+    await sendMessage(chat_id, helpFor(role), mainMenu());
+    return;
+  }
+  if (text === MENU.forgot) { await promptForgotContact(chat_id); return; }
+  if (text === MENU.track) {
+    await sendMessage(chat_id, "کد پیگیری سفارش را بفرستید (مثلاً <code>ATR-261010-12345</code>).");
+    return;
+  }
+  if (text === MENU.orders) {
+    if (session.user_id) await handleLoggedIn(chat_id, session.user_id, "/orders");
+    else await sendMessage(chat_id, "برای دیدن سفارش‌هایتان ابتدا وارد شوید: /login", mainMenu());
+    return;
+  }
+
   // Deep link from checkout: ble.ir/<bot>?start=pay_<orderId> arrives as
   // "/start pay_<orderId>". Works regardless of bot login — the order id
   // (a UUID) is unguessable, so it acts as its own bearer token; a guest
@@ -601,9 +639,9 @@ async function handleUpdate(update: any) {
   if (text === "/start" || text === "/help") {
     if (session.user_id) {
       const role = await getRole(session.user_id);
-      await sendMessage(chat_id, "سلام دوباره! 🌹\n\n" + helpFor(role));
+      await sendMessage(chat_id, "سلام دوباره! 🌹\n\n" + helpFor(role), mainMenu());
     } else {
-      await sendMessage(chat_id, WELCOME_START);
+      await sendMessage(chat_id, WELCOME_START, mainMenu());
     }
     return;
   }
@@ -624,7 +662,7 @@ async function handleUpdate(update: any) {
 
   if (text === "/cancel") {
     await upsertSession(chat_id, { state: "idle", state_data: {} });
-    await sendMessage(chat_id, "عملیات لغو شد.", { reply_markup: { remove_keyboard: true } });
+    await sendMessage(chat_id, "عملیات لغو شد.", mainMenu());
     return;
   }
 
@@ -675,7 +713,7 @@ async function handleUpdate(update: any) {
     } else {
       welcome = "✅ خوش آمدید!\n\n";
     }
-    await sendMessage(chat_id, welcome + helpFor(role));
+    await sendMessage(chat_id, welcome + helpFor(role), mainMenu());
     return;
   }
 
