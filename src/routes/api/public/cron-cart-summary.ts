@@ -34,8 +34,12 @@ export const Route = createFileRoute("/api/public/cron-cart-summary")({
           const chatId = chatBySeller.get(store.seller_id);
           if (!chatId) continue; // seller not in the bot — nothing to send to
 
-          const { data: carts } = await supabaseAdmin.from("carts").select("id").eq("store_id", store.id);
-          const cartIds = (carts ?? []).map((c: any) => c.id);
+          const { data: carts } = await supabaseAdmin
+            .from("carts")
+            .select("id, customer_id")
+            .eq("store_id", store.id);
+          const cartList = (carts ?? []) as any[];
+          const cartIds = cartList.map((c) => c.id);
           if (cartIds.length === 0) continue;
 
           const { data: items } = await supabaseAdmin
@@ -44,29 +48,50 @@ export const Route = createFileRoute("/api/public/cron-cart-summary")({
             .in("cart_id", cartIds);
           if (!items || items.length === 0) continue;
 
-          // group by product + variant
-          const map = new Map<string, { label: string; qty: number; carts: Set<string> }>();
+          // group the items under each cart
+          const byCart = new Map<string, string[]>();
           for (const it of items as any[]) {
             const name = it.products?.name ?? "محصول";
             const vol = it.product_variants?.volume_ml;
             const bottle = it.product_variants?.bottle_name;
-            const label = `${name}${vol ? ` — ${vol} میلی‌لیتر` : ""}${bottle ? ` (${bottle})` : ""}`;
-            const key = label;
-            if (!map.has(key)) map.set(key, { label, qty: 0, carts: new Set() });
-            const e = map.get(key)!;
-            e.qty += Number(it.quantity) || 0;
-            e.carts.add(it.cart_id);
+            const line = `   • ${name}${vol ? ` — ${vol} میلی‌لیتر` : ""}${bottle ? ` (${bottle})` : ""} × ${(Number(it.quantity) || 0).toLocaleString("fa-IR")}`;
+            if (!byCart.has(it.cart_id)) byCart.set(it.cart_id, []);
+            byCart.get(it.cart_id)!.push(line);
           }
 
-          const lines = [...map.values()]
-            .sort((a, b) => b.qty - a.qty)
-            .map((e) => `• ${e.label} — ${e.qty.toLocaleString("fa-IR")} عدد در ${e.carts.size.toLocaleString("fa-IR")} سبد`);
-          const totalCarts = new Set((items as any[]).map((i) => i.cart_id)).size;
+          // look up who owns each (logged-in) cart
+          const customerIds = [...new Set(cartList.filter((c) => c.customer_id).map((c) => c.customer_id))];
+          const profById = new Map<string, any>();
+          if (customerIds.length) {
+            const { data: profs } = await supabaseAdmin
+              .from("profiles")
+              .select("id, full_name, email, phone")
+              .in("id", customerIds);
+            for (const p of (profs ?? []) as any[]) profById.set(p.id, p);
+          }
+
+          const blocks: string[] = [];
+          for (const cart of cartList) {
+            const lines = byCart.get(cart.id);
+            if (!lines || lines.length === 0) continue;
+            let who: string;
+            if (cart.customer_id) {
+              const p = profById.get(cart.customer_id);
+              who =
+                `👤 ${p?.full_name || "کاربر"}\n` +
+                `   ایمیل: ${p?.email || "—"}\n` +
+                `   تلفن: ${p?.phone || "—"}`;
+            } else {
+              who = "👤 مهمان (بدون حساب)";
+            }
+            blocks.push(`${who}\n${lines.join("\n")}`);
+          }
+          if (blocks.length === 0) continue;
 
           const text =
-            `📊 <b>خلاصه‌ی هفتگی سبدهای خرید — ${store.store_name}</b>\n\n` +
-            lines.join("\n") +
-            `\n\nمجموع: ${totalCarts.toLocaleString("fa-IR")} سبد فعال`;
+            `📊 خلاصه‌ی هفتگی سبدهای خرید — ${store.store_name}\n\n` +
+            blocks.join("\n\n") +
+            `\n\nمجموع: ${blocks.length.toLocaleString("fa-IR")} سبد فعال`;
 
           await sendMessage(chatId, text);
           sent++;
