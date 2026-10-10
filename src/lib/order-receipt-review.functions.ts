@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin, logIfError } from "@/lib/bale.server";
-import { notifyOrder } from "@/lib/bale-notify.functions";
+import { notifyOrderStatus } from "@/lib/bale-notify.functions";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 // Unlike the customer-facing order functions (bearer-token-by-UUID), the
@@ -90,9 +90,9 @@ export const reviewCardTransferReceipt = createServerFn({ method: "POST" })
         return { ok: false as const, reason: "error" as const };
       }
       try {
-        await notifyOrder({ data: { orderId: data.orderId } });
+        await notifyOrderStatus({ data: { orderId: data.orderId } });
       } catch (e) {
-        console.error("[reviewCardTransferReceipt] notifyOrder failed", e);
+        console.error("[reviewCardTransferReceipt] notifyOrderStatus failed", e);
       }
       return { ok: true as const };
     }

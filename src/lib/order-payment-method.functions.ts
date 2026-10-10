@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/bale.server";
-import { notifyOrder } from "@/lib/bale-notify.functions";
+import { notifyOrderStatus } from "@/lib/bale-notify.functions";
 
 // Lets a customer (logged in or guest — the order id is the only
 // credential needed, same bearer-token reasoning as the rest of the
@@ -69,9 +69,9 @@ export const switchOrderPaymentMethod = createServerFn({ method: "POST" })
 
     if (data.method === "cod") {
       try {
-        await notifyOrder({ data: { orderId: data.orderId } });
+        await notifyOrderStatus({ data: { orderId: data.orderId } });
       } catch (e) {
-        console.error("[switchOrderPaymentMethod] notifyOrder failed", e);
+        console.error("[switchOrderPaymentMethod] notifyOrderStatus failed", e);
       }
     }
 

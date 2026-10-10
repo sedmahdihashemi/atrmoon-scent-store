@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { notifyOrderStatus } from "@/lib/bale-notify.functions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -20,6 +22,7 @@ function OrderDetail() {
   const [status, setStatus] = useState<string>("");
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
+  const notifyStatus = useServerFn(notifyOrderStatus);
 
   const load = async () => {
     const { data: o } = await supabase.from("orders").select("*").eq("id", id).single();
@@ -33,10 +36,14 @@ function OrderDetail() {
 
   const save = async () => {
     setSaving(true);
+    const statusChanged = order && status !== order.status;
     const { error } = await supabase.from("orders").update({ status: status as any, seller_note: note || null }).eq("id", id);
     setSaving(false);
     if (error) { toast.error(error.message); return; }
     toast.success("به‌روزرسانی شد");
+    if (statusChanged) {
+      notifyStatus({ data: { orderId: id } }).catch((e) => console.error("notifyOrderStatus failed", e));
+    }
     load();
   };
 

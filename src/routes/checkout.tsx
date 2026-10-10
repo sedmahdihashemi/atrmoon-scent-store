@@ -369,16 +369,16 @@ function CheckoutPage() {
     const row = Array.isArray(data) ? data[0] : data;
     if (row?.order_number) {
       resetAfterCheckout();
+      // Notify seller + admin the moment the order is placed, for EVERY
+      // payment method (even bale / card-to-card that start pending_payment).
+      if (row?.order_id) {
+        notify({ data: { orderId: row.order_id } }).catch((e) => console.error("notify failed", e));
+      }
       if (method === "bale" && row?.order_id) {
-        // Order is pending_payment — notifyOrder self-guards against this
-        // status anyway, but we simply don't call it yet: the payment
-        // webhook (successful_payment) is what notifies everyone once paid.
         setPendingPayment({ orderId: row.order_id, number: row.order_number });
         return;
       }
       if (method === "card_transfer" && row?.order_id) {
-        // Same reasoning as bale: no notify until a seller actually
-        // approves the submitted receipt.
         setCardTransferOrder({
           orderId: row.order_id,
           number: row.order_number,
@@ -389,9 +389,6 @@ function CheckoutPage() {
         return;
       }
       setSuccess({ number: row.order_number });
-      if (row?.order_id) {
-        notify({ data: { orderId: row.order_id } }).catch((e) => console.error("notify failed", e));
-      }
     } else {
       toast.error("پاسخی از سرور دریافت نشد");
     }

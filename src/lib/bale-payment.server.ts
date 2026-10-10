@@ -6,7 +6,7 @@ import {
   tomanToRial,
   logIfError,
 } from "@/lib/bale.server";
-import { notifyOrder } from "@/lib/bale-notify.functions";
+import { notifyOrderStatus } from "@/lib/bale-notify.functions";
 
 export type ConfirmBalePaymentResult =
   | "confirmed"
@@ -103,9 +103,9 @@ export async function confirmBalePayment(params: {
   }
 
   try {
-    await notifyOrder({ data: { orderId } });
+    await notifyOrderStatus({ data: { orderId } });
   } catch (e) {
-    console.error("[bale] notifyOrder after payment failed", orderId, e);
+    console.error("[bale] notifyOrderStatus after payment failed", orderId, e);
   }
 
   return "confirmed";
