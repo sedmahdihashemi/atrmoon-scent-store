@@ -33,16 +33,17 @@ export function WishlistButton({
         type="button"
         onClick={onClick}
         aria-pressed={active}
+        aria-label={active ? "در علاقه‌مندی‌هاست" : "افزودن به علاقه‌مندی"}
         className={cn(
-          "inline-flex items-center justify-center gap-2 h-12 px-5 rounded-md border font-serif text-sm transition",
+          "inline-flex items-center justify-center gap-2 h-12 px-4 sm:px-5 rounded-md border font-serif text-sm transition",
           active
             ? "border-[var(--gold)] bg-[var(--gold)]/10 text-[var(--gold-deep)]"
             : "border-ink/15 text-ink hover:border-[var(--gold)]",
           className,
         )}
       >
-        <Heart className={cn("w-5 h-5", active && "fill-current")} />
-        {active ? "در علاقه‌مندی‌هاست" : "افزودن به علاقه‌مندی"}
+        <Heart className={cn("w-5 h-5 shrink-0", active && "fill-current")} />
+        <span className="hidden sm:inline">{active ? "در علاقه‌مندی‌هاست" : "افزودن به علاقه‌مندی"}</span>
       </button>
     );
   }

@@ -60,6 +60,15 @@ function CheckoutPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // After placing an order, the confirmation screen renders at the top but the
+  // page was scrolled down to the submit button — jump back up so the customer
+  // sees the result instead of landing on the footer.
+  useEffect(() => {
+    if (success || pendingPayment || cardTransferOrder) {
+      window.scrollTo({ top: 0, behavior: "auto" });
+    }
+  }, [success, pendingPayment, cardTransferOrder]);
+
   useEffect(() => {
     if (!storeId) {
       setCardPayment({ cardNumber: null, cardHolderName: null });
