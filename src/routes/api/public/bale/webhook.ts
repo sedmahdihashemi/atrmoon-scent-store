@@ -370,13 +370,21 @@ async function handlePayDeepLink(chat_id: number, orderId: string) {
   }
 
   const storeName = (order as any).stores?.store_name;
-  await sendInvoice({
+  const invoiceRes = await sendInvoice({
     chat_id,
     title: `سفارش ${(order as any).order_number}`,
     description: (storeName ? `عطرفروشی ${storeName} — ` : "") + "پرداخت سفارش عطرمون",
     payload: orderId,
     amount_rial: tomanToRial((order as any).total_amount),
   });
+  // Don't leave the user staring at a silent chat when Bale rejects the
+  // invoice (e.g. amount below the minimum, or a bad provider token).
+  if (!invoiceRes || invoiceRes.ok === false) {
+    await sendMessage(
+      chat_id,
+      "متأسفانه در ساخت فاکتور پرداخت مشکلی پیش آمد. لطفاً از حساب کاربری خود روش پرداخت را تغییر دهید یا با پشتیبانی تماس بگیرید."
+    );
+  }
 }
 
 // Called after showing an order's invoice/status (both the logged-in
