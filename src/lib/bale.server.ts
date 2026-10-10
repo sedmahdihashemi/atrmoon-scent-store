@@ -40,6 +40,31 @@ function stripHtml(s: string) {
     .replace(/<br\s*\/?>/gi, "\n");
 }
 
+// Per-chat command lists (shown when the user types "/"). The global default
+// (set via setMyCommands once) is the logged-out set; on login/logout we swap
+// the commands for just that chat so /logout only appears when actually logged
+// in, and /login/forgot only when logged out.
+const CMD_LOGGED_OUT = [
+  { command: "start", description: "شروع و راهنما" },
+  { command: "login", description: "ورود به حساب" },
+  { command: "forgot", description: "فراموشی رمز عبور" },
+  { command: "track", description: "پیگیری سفارش با کد" },
+  { command: "help", description: "راهنما" },
+];
+const CMD_LOGGED_IN = [
+  { command: "start", description: "شروع و راهنما" },
+  { command: "orders", description: "سفارش‌های من" },
+  { command: "track", description: "پیگیری سفارش با کد" },
+  { command: "logout", description: "خروج از حساب" },
+  { command: "help", description: "راهنما" },
+];
+export async function setChatCommands(chat_id: number, loggedIn: boolean) {
+  await baleCall("setMyCommands", {
+    commands: loggedIn ? CMD_LOGGED_IN : CMD_LOGGED_OUT,
+    scope: { type: "chat", chat_id },
+  });
+}
+
 export { supabaseAdmin };
 
 // Supabase queries in the bot code often ignore the `error` field and just

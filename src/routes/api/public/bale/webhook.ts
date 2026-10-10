@@ -11,6 +11,7 @@ import {
   sendToAdmins,
   tomanToRial,
   fmtTehranDate,
+  setChatCommands,
 } from "@/lib/bale.server";
 import { confirmBalePayment } from "@/lib/bale-payment.server";
 import { normalizeIranPhone } from "@/lib/phone";
@@ -329,6 +330,7 @@ async function handleLoggedIn(chat_id: number, user_id: string, text: string) {
 
   if (t === "/logout") {
     await upsertSession(chat_id, { user_id: null, state: "idle", state_data: {} });
+    await setChatCommands(chat_id, false);
     await sendMessage(chat_id, "✅ از حساب خارج شدید.\n\nبرای ورود مجدد با حساب دیگر: <code>/login</code>", mainMenu());
     return;
   }
@@ -698,6 +700,7 @@ async function handleUpdate(update: any) {
     }
     const role = await getRole(auth.user.id);
     await upsertSession(chat_id, { user_id: auth.user.id, state: "idle", state_data: {} });
+    await setChatCommands(chat_id, true);
     const roleLabel =
       role === "super_admin" ? "سوپر ادمین 👑"
       : role === "seller" ? "فروشنده 🏬"
