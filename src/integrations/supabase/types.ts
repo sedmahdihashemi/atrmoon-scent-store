@@ -202,6 +202,7 @@ export type Database = {
           usd_auto_update_max_change_percent: number
           usd_rate_toman: number | null
           usd_update_day_of_week: number | null
+          wholesale_oil_profit_percent: number | null
         }
         Insert: {
           created_at?: string
@@ -212,6 +213,7 @@ export type Database = {
           usd_auto_update_max_change_percent?: number
           usd_rate_toman?: number | null
           usd_update_day_of_week?: number | null
+          wholesale_oil_profit_percent?: number | null
         }
         Update: {
           created_at?: string
@@ -222,6 +224,46 @@ export type Database = {
           usd_auto_update_max_change_percent?: number
           usd_rate_toman?: number | null
           usd_update_day_of_week?: number | null
+          wholesale_oil_profit_percent?: number | null
+        }
+        Relationships: []
+      }
+      wholesale_memberships: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          oil_profit_percent: number | null
+          requested_at: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          store_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          oil_profit_percent?: number | null
+          requested_at?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          store_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          oil_profit_percent?: number | null
+          requested_at?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          store_id?: string
+          updated_at?: string
         }
         Relationships: []
       }
