@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
-import { LayoutDashboard, Package, ShoppingBag, Settings, Store, Receipt, Wine } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingBag, Settings, Store, Receipt, Wine, BadgePercent } from "lucide-react";
 
 type NavItem = { to: string; label: string; Icon: typeof LayoutDashboard; exact?: boolean };
 const nav: NavItem[] = [
@@ -10,6 +10,7 @@ const nav: NavItem[] = [
   { to: "/seller/bottles", label: "شیشه‌ها", Icon: Wine },
   { to: "/seller/orders", label: "سفارش‌ها", Icon: ShoppingBag },
   { to: "/seller/receipts", label: "بررسی مدرک پرداخت", Icon: Receipt },
+  { to: "/seller/wholesale", label: "خریداران عمده", Icon: BadgePercent },
   { to: "/seller/settings", label: "تنظیمات فروشگاه", Icon: Settings },
 ];
 

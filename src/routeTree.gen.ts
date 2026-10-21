@@ -42,6 +42,7 @@ import { Route as SellerPendingRouteImport } from './routes/seller.pending'
 import { Route as SellerProductsRouteImport } from './routes/seller.products'
 import { Route as SellerReceiptsRouteImport } from './routes/seller.receipts'
 import { Route as SellerSettingsRouteImport } from './routes/seller.settings'
+import { Route as SellerWholesaleRouteImport } from './routes/seller.wholesale'
 import { Route as StoresSlugRouteImport } from './routes/stores.$slug'
 import { Route as TrackOrderIdRouteImport } from './routes/track.$orderId'
 import { Route as ApiPublicCronCartSummaryRouteImport } from './routes/api/public/cron-cart-summary'
@@ -218,6 +219,11 @@ const SellerSettingsRoute = SellerSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => SellerRoute,
 } as any)
+const SellerWholesaleRoute = SellerWholesaleRouteImport.update({
+  id: '/wholesale',
+  path: '/wholesale',
+  getParentRoute: () => SellerRoute,
+} as any)
 const StoresSlugRoute = StoresSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -304,6 +310,7 @@ export interface FileRoutesByFullPath {
   '/seller/products': typeof SellerProductsRouteWithChildren
   '/seller/receipts': typeof SellerReceiptsRoute
   '/seller/settings': typeof SellerSettingsRoute
+  '/seller/wholesale': typeof SellerWholesaleRoute
   '/stores/$slug': typeof StoresSlugRoute
   '/track/$orderId': typeof TrackOrderIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -347,6 +354,7 @@ export interface FileRoutesByTo {
   '/seller/products': typeof SellerProductsRouteWithChildren
   '/seller/receipts': typeof SellerReceiptsRoute
   '/seller/settings': typeof SellerSettingsRoute
+  '/seller/wholesale': typeof SellerWholesaleRoute
   '/stores/$slug': typeof StoresSlugRoute
   '/track/$orderId': typeof TrackOrderIdRoute
   '/admin': typeof AdminIndexRoute
@@ -393,6 +401,7 @@ export interface FileRoutesById {
   '/seller/products': typeof SellerProductsRouteWithChildren
   '/seller/receipts': typeof SellerReceiptsRoute
   '/seller/settings': typeof SellerSettingsRoute
+  '/seller/wholesale': typeof SellerWholesaleRoute
   '/stores/$slug': typeof StoresSlugRoute
   '/track/$orderId': typeof TrackOrderIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -440,6 +449,7 @@ export interface FileRouteTypes {
     | '/seller/products'
     | '/seller/receipts'
     | '/seller/settings'
+    | '/seller/wholesale'
     | '/stores/$slug'
     | '/track/$orderId'
     | '/admin/'
@@ -483,6 +493,7 @@ export interface FileRouteTypes {
     | '/seller/products'
     | '/seller/receipts'
     | '/seller/settings'
+    | '/seller/wholesale'
     | '/stores/$slug'
     | '/track/$orderId'
     | '/admin'
@@ -528,6 +539,7 @@ export interface FileRouteTypes {
     | '/seller/products'
     | '/seller/receipts'
     | '/seller/settings'
+    | '/seller/wholesale'
     | '/stores/$slug'
     | '/track/$orderId'
     | '/admin/'
@@ -798,6 +810,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SellerSettingsRouteImport
       parentRoute: typeof SellerRoute
     }
+    '/seller/wholesale': {
+      id: '/seller/wholesale'
+      path: '/wholesale'
+      fullPath: '/seller/wholesale'
+      preLoaderRoute: typeof SellerWholesaleRouteImport
+      parentRoute: typeof SellerRoute
+    }
     '/stores/$slug': {
       id: '/stores/$slug'
       path: '/$slug'
@@ -956,6 +975,7 @@ interface SellerRouteChildren {
   SellerProductsRoute: typeof SellerProductsRouteWithChildren
   SellerReceiptsRoute: typeof SellerReceiptsRoute
   SellerSettingsRoute: typeof SellerSettingsRoute
+  SellerWholesaleRoute: typeof SellerWholesaleRoute
   SellerIndexRoute: typeof SellerIndexRoute
 }
 
@@ -966,6 +986,7 @@ const SellerRouteChildren: SellerRouteChildren = {
   SellerProductsRoute: SellerProductsRouteWithChildren,
   SellerReceiptsRoute: SellerReceiptsRoute,
   SellerSettingsRoute: SellerSettingsRoute,
+  SellerWholesaleRoute: SellerWholesaleRoute,
   SellerIndexRoute: SellerIndexRoute,
 }
 

@@ -38,6 +38,7 @@ function SellerSettings() {
     usd_auto_update_enabled: false,
     usd_update_day_of_week: "6",
     usd_auto_update_max_change_percent: "15",
+    wholesale_oil_profit_percent: "",
   });
 
   useEffect(() => {
@@ -56,6 +57,7 @@ function SellerSettings() {
           usd_auto_update_enabled: !!d.usd_auto_update_enabled,
           usd_update_day_of_week: d.usd_update_day_of_week == null ? "6" : String(d.usd_update_day_of_week),
           usd_auto_update_max_change_percent: d.usd_auto_update_max_change_percent ?? "15",
+          wholesale_oil_profit_percent: d.wholesale_oil_profit_percent == null ? "" : String(d.wholesale_oil_profit_percent),
         });
       }
       setLoading(false);
@@ -97,6 +99,14 @@ function SellerSettings() {
       toast.error("سقف درصد تغییر باید یک عدد معتبر باشد");
       return;
     }
+    const wsProfit =
+      ps.wholesale_oil_profit_percent === "" || ps.wholesale_oil_profit_percent == null
+        ? null
+        : Number(ps.wholesale_oil_profit_percent);
+    if (wsProfit != null && (!Number.isFinite(wsProfit) || wsProfit < 0)) {
+      toast.error("درصد سود عمده باید یک عدد معتبر (۰ یا بیشتر) باشد");
+      return;
+    }
 
     setSaving(true);
     // editable subset (status changes are admin-only)
@@ -117,6 +127,7 @@ function SellerSettings() {
       usd_auto_update_enabled: !!ps.usd_auto_update_enabled,
       usd_update_day_of_week: Number(ps.usd_update_day_of_week),
       usd_auto_update_max_change_percent: maxChange,
+      wholesale_oil_profit_percent: wsProfit,
     }, { onConflict: "store_id" });
     setSaving(false);
     if (psErr) toast.error(psErr.message); else toast.success("ذخیره شد");
@@ -237,6 +248,31 @@ function SellerSettings() {
               </Field>
             </div>
           )}
+        </div>
+      </div>
+
+      <div className="paper-card rounded-md p-5 space-y-3">
+        <div>
+          <h3 className="font-serif text-base text-ink mb-1">قیمت‌گذاری عمده (خریداران تأییدشده)</h3>
+          <p className="text-xs text-muted-foreground font-serif">
+            درصد سودِ عطر برای خریداران عمده‌ای که تأیید می‌کنید. مثلاً اگر برای همه ۱۰۰٪ سود می‌گیرید و این را ۲۰ بگذارید،
+            خریدار عمده عطر را با ۲۰٪ سود می‌بیند (قیمت پایین‌تر). برای هر خریدار می‌توانید در صفحه‌ی «خریداران عمده» عددی جدا هم بگذارید.
+          </p>
+        </div>
+        <div className="grid md:grid-cols-2 gap-4">
+          <Field label="درصد سود عمده (پیش‌فرض فروشگاه)">
+            <Input
+              value={ps.wholesale_oil_profit_percent ?? ""}
+              onChange={(e) => setPs({ ...ps, wholesale_oil_profit_percent: e.target.value })}
+              dir="ltr"
+              inputMode="numeric"
+              placeholder="مثلاً ۲۰"
+            />
+            <p className="text-[11px] text-muted-foreground mt-1 font-serif">
+              خالی = هنوز نرخ عمده ندارید؛ تا وقتی عددی نگذارید، خریدار تأییدشده هم همان قیمت خرده را می‌بیند.
+              این فقط روی محصولات «فرمول‌محور» اثر دارد.
+            </p>
+          </Field>
         </div>
       </div>
 
