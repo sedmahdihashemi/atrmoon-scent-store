@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useCart } from "@/hooks/useCart";
+import { useCart, effectiveUnitPrice } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { formatToman, getOrCreateCartSession } from "@/lib/cart-session";
 import { supabase } from "@/integrations/supabase/client";
@@ -461,7 +461,7 @@ function CheckoutPage() {
               {items.map((it) => (
                 <div key={it.id} className="flex justify-between text-sm text-ink/80">
                   <span className="truncate">{it.product.name} × {it.quantity.toLocaleString("fa-IR")}</span>
-                  <span className="shrink-0">{formatToman(Number(it.variant?.discount_price ?? it.variant?.price ?? 0) * it.quantity)}</span>
+                  <span className="shrink-0">{formatToman(effectiveUnitPrice(it) * it.quantity)}</span>
                 </div>
               ))}
             </div>

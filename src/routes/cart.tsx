@@ -3,7 +3,7 @@ import { PublicLayout } from "@/components/layout/PublicLayout";
 import { EmptyState, LoadingState } from "@/components/ui/loading-state";
 import { ShoppingBag, Trash2, Minus, Plus, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/hooks/useCart";
+import { useCart, effectiveUnitPrice } from "@/hooks/useCart";
 import { formatToman } from "@/lib/cart-session";
 
 export const Route = createFileRoute("/cart")({ component: CartPage });
@@ -32,7 +32,9 @@ function CartPage() {
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-3">
             {items.map((it) => {
-              const price = Number(it.variant?.discount_price ?? it.variant?.price ?? 0);
+              const price = effectiveUnitPrice(it);
+              const listPrice = Number(it.variant?.discount_price ?? it.variant?.price ?? 0);
+              const isWholesale = it.wholesalePrice != null && price < listPrice;
               return (
                 <div key={it.id} className="paper-card rounded-md p-4 flex flex-wrap items-center gap-x-4 gap-y-3">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[var(--moon)]/40 rounded-sm shrink-0 flex items-center justify-center text-[var(--gold)]/60 overflow-hidden">
@@ -45,7 +47,15 @@ function CartPage() {
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {it.variant?.volume_ml.toLocaleString("fa-IR")} میلی‌لیتر · {it.variant?.bottle_name}
                     </p>
-                    <p className="font-serif text-[var(--gold)] mt-1 text-sm">{formatToman(price)}</p>
+                    <div className="mt-1 flex items-center gap-2 flex-wrap">
+                      <p className="font-serif text-[var(--gold)] text-sm">{formatToman(price)}</p>
+                      {isWholesale && (
+                        <>
+                          <span className="text-xs text-muted-foreground line-through">{formatToman(listPrice)}</span>
+                          <span className="text-[10px] bg-[var(--gold)]/15 text-[var(--gold-deep)] rounded-sm px-1.5 py-0.5 font-serif">عمده</span>
+                        </>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center gap-2 ms-auto">
                     <div className="flex items-center gap-2">

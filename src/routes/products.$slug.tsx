@@ -1,11 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { LoadingState, EmptyState } from "@/components/ui/loading-state";
 import { Button } from "@/components/ui/button";
 import { formatToman } from "@/lib/cart-session";
 import { useCart } from "@/hooks/useCart";
+import { useAuth } from "@/hooks/useAuth";
+import { getWholesaleVariantPrices } from "@/lib/wholesale.functions";
 import { Sparkles, ShoppingBag, Minus, Plus } from "lucide-react";
 import { WishlistButton } from "@/components/WishlistButton";
 
@@ -14,11 +17,14 @@ export const Route = createFileRoute("/products/$slug")({ component: ProductDeta
 function ProductDetail() {
   const { slug } = Route.useParams();
   const { addItem } = useCart();
+  const { user } = useAuth();
+  const wholesalePrices = useServerFn(getWholesaleVariantPrices);
   const [product, setProduct] = useState<any>(null);
   const [variants, setVariants] = useState<any[]>([]);
   const [notes, setNotes] = useState<any[]>([]);
   const [inventory, setInventory] = useState<any>(null);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
+  const [wholesaleById, setWholesaleById] = useState<Record<string, number>>({});
   const [qty, setQty] = useState(1);
   const [loading, setLoading] = useState(true);
 
@@ -41,19 +47,33 @@ function ProductDetail() {
         const vs = (data.product_variants ?? []).filter((v: any) => v.status === "active").sort((a: any, b: any) => a.volume_ml - b.volume_ml);
         setVariants(vs);
         if (vs[0]) setSelectedVariantId(vs[0].id);
+        // Approved wholesale buyers see their wholesale price (server-computed).
+        if (user && vs.length) {
+          try {
+            const res = await wholesalePrices({ data: { variantIds: vs.map((v: any) => v.id) } });
+            if (res.ok && res.prices) setWholesaleById(res.prices as Record<string, number>);
+          } catch (e) {
+            console.error("[product] wholesale price lookup failed", e);
+          }
+        } else {
+          setWholesaleById({});
+        }
         setNotes((data.product_scent_notes ?? []).map((p: any) => p.scent_notes).filter(Boolean));
         const { data: inv } = await supabase.from("product_inventory").select("available_stock_ml").eq("product_id", data.id).maybeSingle();
         setInventory(inv);
       }
       setLoading(false);
     })();
-  }, [slug]);
+  }, [slug, user, wholesalePrices]);
 
   if (loading) return <PublicLayout><LoadingState label="گشودن عطاری این رایحه…" /></PublicLayout>;
   if (!product) return <PublicLayout><div className="container mx-auto px-4 py-16"><EmptyState title="این رایحه یافت نشد" /></div></PublicLayout>;
 
   const sel = variants.find((v) => v.id === selectedVariantId);
-  const price = sel ? Number(sel.discount_price ?? sel.price) : 0;
+  const listPrice = sel ? Number(sel.discount_price ?? sel.price) : 0;
+  const wholesale = sel ? wholesaleById[sel.id] : undefined;
+  const isWholesale = wholesale != null && wholesale < listPrice;
+  const price = isWholesale ? wholesale! : listPrice;
   const available = inventory?.available_stock_ml ?? 0;
   const maxQty = sel ? Math.max(0, Math.floor(available / sel.volume_ml)) : 0;
   const inStock = maxQty > 0;
@@ -124,8 +144,15 @@ function ProductDetail() {
             {sel && (
               <div className="mt-6 flex items-end justify-between gap-4">
                 <div>
-                  {sel.discount_price && Number(sel.discount_price) < Number(sel.price) && (
-                    <p className="text-xs text-muted-foreground line-through">{formatToman(sel.price)}</p>
+                  {isWholesale ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground line-through">{formatToman(listPrice)}</span>
+                      <span className="text-[10px] bg-[var(--gold)]/15 text-[var(--gold-deep)] rounded-sm px-1.5 py-0.5 font-serif">قیمت عمده‌ی شما</span>
+                    </div>
+                  ) : (
+                    sel.discount_price && Number(sel.discount_price) < Number(sel.price) && (
+                      <p className="text-xs text-muted-foreground line-through">{formatToman(sel.price)}</p>
+                    )
                   )}
                   <p className="font-serif text-2xl text-[var(--gold)]">{formatToman(price)}</p>
                   <p className="text-xs text-muted-foreground mt-1">

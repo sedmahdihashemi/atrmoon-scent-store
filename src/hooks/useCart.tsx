@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { getOrCreateCartSession, getCartSessionId, getStoredCartId, setStoredCartId, clearCartSession, clearGuestSessionKey } from "@/lib/cart-session";
 import { mergeGuestCart } from "@/lib/cart-merge.functions";
+import { getWholesaleVariantPrices } from "@/lib/wholesale.functions";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
@@ -26,7 +27,15 @@ export type CartItem = {
     discount_price: number | null;
     bottle_name: string | null;
   };
+  // Set only for approved wholesale buyers of this item's store; the effective
+  // unit price the buyer will actually be charged (computed server-side).
+  wholesalePrice?: number | null;
 };
+
+// The price actually used for this line: wholesale (if any) else discount else list.
+export function effectiveUnitPrice(it: CartItem): number {
+  return Number(it.wholesalePrice ?? it.variant?.discount_price ?? it.variant?.price ?? 0);
+}
 
 type Ctx = {
   cartId: string | null;
@@ -47,6 +56,7 @@ const CartCtx = createContext<Ctx | null>(null);
 export function CartProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const mergeCart = useServerFn(mergeGuestCart);
+  const wholesalePrices = useServerFn(getWholesaleVariantPrices);
   const [cartId, setCartId] = useState<string | null>(null);
   const [storeId, setStoreId] = useState<string | null>(null);
   const [items, setItems] = useState<CartItem[]>([]);
@@ -105,8 +115,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
         product:products(id, name, slug, main_image_url, store_id, brands(name)),
         variant:product_variants(id, volume_ml, price, discount_price, bottle_name)`)
       .eq("cart_id", id);
-    setItems((data as any) ?? []);
-  }, []);
+    const rows = ((data as any) ?? []) as CartItem[];
+
+    // For a logged-in buyer, ask the server which lines get a wholesale price
+    // (approved stores only). Best-effort: on any failure we keep retail.
+    if (user && rows.length) {
+      try {
+        const res = await wholesalePrices({ data: { variantIds: rows.map((r) => r.product_variant_id) } });
+        if (res.ok && res.prices) {
+          for (const r of rows) {
+            const wp = (res.prices as Record<string, number>)[r.product_variant_id];
+            r.wholesalePrice = wp ?? null;
+          }
+        }
+      } catch (e) {
+        console.error("[cart] wholesale price lookup failed", e);
+      }
+    }
+    setItems(rows);
+  }, [user, wholesalePrices]);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -193,7 +220,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setTimeout(() => { void refresh(); }, 0);
   }, [refresh]);
 
-  const subtotal = items.reduce((s, it) => s + Number(it.variant?.discount_price ?? it.variant?.price ?? 0) * it.quantity, 0);
+  const subtotal = items.reduce((s, it) => s + effectiveUnitPrice(it) * it.quantity, 0);
   const count = items.reduce((s, it) => s + it.quantity, 0);
 
   return (

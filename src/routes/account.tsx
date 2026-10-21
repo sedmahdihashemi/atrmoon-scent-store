@@ -20,7 +20,8 @@ import { BaleIcon } from "@/components/BaleIcon";
 import { normalizeIranPhone } from "@/lib/phone";
 import { isValidIranPostalCode, normalizePostalCode } from "@/lib/postal-code";
 import { useServerFn } from "@tanstack/react-start";
-import { User as UserIcon, MapPin, Package, Heart, Trash2, Plus, Star, ChevronLeft, Wallet } from "lucide-react";
+import { getMyWholesaleMemberships } from "@/lib/wholesale.functions";
+import { User as UserIcon, MapPin, Package, Heart, Trash2, Plus, Star, ChevronLeft, Wallet, BadgePercent } from "lucide-react";
 
 export const Route = createFileRoute("/account")({ component: AccountPage });
 
@@ -49,16 +50,18 @@ function AccountInner() {
       </header>
       <Tabs dir="rtl" defaultValue="orders" className="w-full">
         <div dir="rtl" className="overflow-x-auto -mx-4 px-4 mb-4 scrollbar-thin">
-          <TabsList className="inline-flex h-auto w-full justify-start md:grid md:grid-cols-4 gap-1">
+          <TabsList className="inline-flex h-auto w-full justify-start md:grid md:grid-cols-5 gap-1">
             <TabsTrigger value="orders" className="whitespace-nowrap gap-1.5"><Package className="w-4 h-4" />سفارش‌ها</TabsTrigger>
             <TabsTrigger value="addresses" className="whitespace-nowrap gap-1.5"><MapPin className="w-4 h-4" />آدرس‌ها</TabsTrigger>
             <TabsTrigger value="favorites" className="whitespace-nowrap gap-1.5"><Heart className="w-4 h-4" />علاقه‌مندی‌ها</TabsTrigger>
+            <TabsTrigger value="wholesale" className="whitespace-nowrap gap-1.5"><BadgePercent className="w-4 h-4" />عمده‌فروشی</TabsTrigger>
             <TabsTrigger value="profile" className="whitespace-nowrap gap-1.5"><UserIcon className="w-4 h-4" />پروفایل</TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="orders"><OrdersTab /></TabsContent>
         <TabsContent value="addresses"><AddressesTab /></TabsContent>
         <TabsContent value="favorites"><FavoritesTab /></TabsContent>
+        <TabsContent value="wholesale"><WholesaleTab /></TabsContent>
         <TabsContent value="profile"><ProfileTab /></TabsContent>
       </Tabs>
     </div>
@@ -405,6 +408,53 @@ function FavoritesTab() {
             </Link>
           )}
           <Button size="sm" variant="ghost" onClick={() => remove(w.id)}><Trash2 className="w-4 h-4" /></Button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ---------------- Wholesale memberships ---------------- */
+function WholesaleTab() {
+  const { user } = useAuth();
+  const getMemberships = useServerFn(getMyWholesaleMemberships);
+  const [rows, setRows] = useState<any[] | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    getMemberships().then((r) => setRows(r.ok ? r.memberships : [])).catch(() => setRows([]));
+  }, [user, getMemberships]);
+
+  if (rows === null) return <p className="text-muted-foreground text-sm">در حال بارگذاری…</p>;
+  if (!rows.length)
+    return (
+      <p className="paper-card rounded-md p-6 text-muted-foreground text-sm">
+        هنوز درخواست خرید عمده‌ای ندارید. از صفحه‌ی هر عطاری می‌توانید درخواست بدهید.
+      </p>
+    );
+
+  const label = (s: string) =>
+    s === "approved" ? "تأییدشده" : s === "pending" ? "در انتظار بررسی" : "ردشده";
+
+  return (
+    <div className="space-y-3">
+      {rows.map((m) => (
+        <div key={m.id} className="paper-card rounded-md p-4 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            {m.storeSlug ? (
+              <Link to="/stores/$slug" params={{ slug: m.storeSlug }} className="font-serif text-ink hover:text-[var(--gold)] truncate block">
+                {m.storeName}
+              </Link>
+            ) : (
+              <span className="font-serif text-ink truncate block">{m.storeName}</span>
+            )}
+            <span className="text-xs text-muted-foreground">
+              درخواست: {new Date(m.requestedAt).toLocaleDateString("fa-IR", { timeZone: "Asia/Tehran" })}
+            </span>
+          </div>
+          <Badge variant={m.status === "approved" ? "default" : "outline"} className="font-serif shrink-0">
+            {label(m.status)}
+          </Badge>
         </div>
       ))}
     </div>

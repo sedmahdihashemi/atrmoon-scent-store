@@ -1,13 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { LoadingState, EmptyState } from "@/components/ui/loading-state";
-import { Store, Sparkles, MapPin, ShoppingBag } from "lucide-react";
+import { Store, Sparkles, MapPin, ShoppingBag, BadgePercent } from "lucide-react";
 import { formatToman } from "@/lib/cart-session";
 import { WishlistButton } from "@/components/WishlistButton";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/useCart";
+import { useAuth } from "@/hooks/useAuth";
+import { getMyWholesaleStatusForStore, requestWholesaleMembership } from "@/lib/wholesale.functions";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/stores/$slug")({ component: StoreDetail });
 
@@ -57,6 +61,7 @@ function StoreDetail() {
               </p>
             )}
             {store.description && <p className="text-sm text-ink/70 mt-3 leading-7">{store.description}</p>}
+            <WholesaleRequest storeId={store.id} />
           </div>
         </div>
 
@@ -70,6 +75,49 @@ function StoreDetail() {
          </div>}
       </div>
     </PublicLayout>
+  );
+}
+
+function WholesaleRequest({ storeId }: { storeId: string }) {
+  const { user } = useAuth();
+  const getStatus = useServerFn(getMyWholesaleStatusForStore);
+  const request = useServerFn(requestWholesaleMembership);
+  const [status, setStatus] = useState<"pending" | "approved" | "rejected" | null | undefined>(undefined);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!user) { setStatus(undefined); return; }
+    getStatus({ data: { storeId } }).then((r) => setStatus(r.ok ? r.status : null)).catch(() => setStatus(null));
+  }, [user, storeId, getStatus]);
+
+  if (!user || status === undefined) return null; // guests: hidden (login first)
+
+  if (status === "approved")
+    return (
+      <p className="mt-4 inline-flex items-center gap-1.5 text-xs font-serif text-[var(--gold-deep)] bg-[var(--gold)]/10 rounded-sm px-2.5 py-1.5">
+        <BadgePercent className="w-3.5 h-3.5" /> شما خریدار عمده‌ی تأییدشده‌ی این عطاری هستید؛ قیمت‌های عمده را می‌بینید.
+      </p>
+    );
+
+  if (status === "pending")
+    return <p className="mt-4 text-xs font-serif text-muted-foreground">درخواست خرید عمده‌ی شما ثبت شد و در انتظار تأیید فروشنده است.</p>;
+
+  const send = async () => {
+    setBusy(true);
+    const res = await request({ data: { storeId } });
+    setBusy(false);
+    if (!res.ok) { toast.error("ثبت درخواست ناموفق بود"); return; }
+    setStatus("pending");
+    toast.success("درخواست شما ارسال شد");
+  };
+
+  return (
+    <div className="mt-4">
+      <Button size="sm" variant="outline" onClick={send} loading={busy} loadingText="در حال ارسال…" className="gap-1.5">
+        <BadgePercent className="w-4 h-4" /> {status === "rejected" ? "ارسال دوباره‌ی درخواست عمده" : "درخواست خرید عمده"}
+      </Button>
+      {status === "rejected" && <p className="mt-1.5 text-[11px] text-muted-foreground">درخواست قبلی رد شده بود؛ می‌توانید دوباره بفرستید.</p>}
+    </div>
   );
 }
 

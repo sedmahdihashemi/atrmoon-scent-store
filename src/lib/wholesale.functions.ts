@@ -45,6 +45,75 @@ async function chatIdForUser(userId: string | null | undefined): Promise<number 
   return chat?.chat_id ? Number(chat.chat_id) : null;
 }
 
+// --- Customer: wholesale price for a set of variants -----------------------
+// Returns, per variant, the wholesale price — ONLY for variants whose store
+// has approved this buyer AND has a wholesale rate AND a formula cost. Same
+// math as place_order (the authority); this is purely for display, so the
+// numbers the buyer sees match what they'll be charged. No cost/profit inputs
+// are ever returned — only the final price.
+export const getWholesaleVariantPrices = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({ variantIds: z.array(z.string().uuid()).min(1).max(200) }).parse(input)
+  )
+  .handler(async ({ data, context }) => {
+    const userId = context.userId;
+
+    const { data: variants } = await supabaseAdmin
+      .from("product_variants")
+      .select("id, price, volume_ml, product_id, products(id, store_id)")
+      .in("id", data.variantIds);
+    const vs = (variants ?? []) as any[];
+    if (vs.length === 0) return { ok: true as const, prices: {} as Record<string, number> };
+
+    const storeIds = [...new Set(vs.map((v) => v.products?.store_id).filter(Boolean))];
+    const productIds = [...new Set(vs.map((v) => v.product_id).filter(Boolean))];
+
+    // Which of these stores has approved this buyer, and at what override rate.
+    const { data: memberships } = await supabaseAdmin
+      .from("wholesale_memberships")
+      .select("store_id, oil_profit_percent")
+      .eq("customer_id", userId)
+      .eq("status", "approved")
+      .in("store_id", storeIds);
+    const overrideByStore = new Map<string, number | null>();
+    for (const m of (memberships ?? []) as any[]) overrideByStore.set(m.store_id, m.oil_profit_percent);
+    if (overrideByStore.size === 0) return { ok: true as const, prices: {} as Record<string, number> };
+
+    const { data: sps } = await supabaseAdmin
+      .from("store_pricing_settings")
+      .select("store_id, wholesale_oil_profit_percent")
+      .in("store_id", [...overrideByStore.keys()]);
+    const storeDefault = new Map<string, number | null>();
+    for (const s of (sps ?? []) as any[]) storeDefault.set(s.store_id, s.wholesale_oil_profit_percent);
+
+    const { data: pps } = await supabaseAdmin
+      .from("product_pricing_settings")
+      .select("product_id, cost_per_gram_toman, concentration_percent, oil_profit_percent")
+      .in("product_id", productIds);
+    const pricingByProduct = new Map<string, any>();
+    for (const p of (pps ?? []) as any[]) pricingByProduct.set(p.product_id, p);
+
+    const prices: Record<string, number> = {};
+    for (const v of vs) {
+      const storeId = v.products?.store_id;
+      if (!storeId || !overrideByStore.has(storeId)) continue; // not approved here
+      const wsProfit = overrideByStore.get(storeId) ?? storeDefault.get(storeId) ?? null;
+      if (wsProfit == null) continue; // no wholesale rate → retail
+      const pr = pricingByProduct.get(v.product_id);
+      if (!pr || pr.cost_per_gram_toman == null) continue; // not formula-priced → retail
+
+      const retail = Number(v.price);
+      const oilBase =
+        Number(v.volume_ml) * (Number(pr.concentration_percent) / 100) * Number(pr.cost_per_gram_toman);
+      const raw = retail - oilBase * ((Number(pr.oil_profit_percent) - Number(wsProfit)) / 100);
+      const ws = Math.round(raw / 1000) * 1000;
+      prices[v.id] = Math.min(ws, retail); // never above retail
+    }
+
+    return { ok: true as const, prices };
+  });
+
 // --- Customer: request wholesale access to a store -------------------------
 // Re-requesting after a rejection is allowed (flips it back to pending). An
 // already-pending or already-approved membership is a no-op (no spam notice).
