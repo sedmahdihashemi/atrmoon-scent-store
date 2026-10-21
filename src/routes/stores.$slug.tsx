@@ -7,6 +7,7 @@ import { LoadingState, EmptyState } from "@/components/ui/loading-state";
 import { Store, Sparkles, MapPin, ShoppingBag, BadgePercent } from "lucide-react";
 import { formatToman } from "@/lib/cart-session";
 import { WishlistButton } from "@/components/WishlistButton";
+import { StockBadge } from "@/components/StockBadge";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
@@ -34,7 +35,7 @@ function StoreDetail() {
       if (s) {
         const { data: ps } = await supabase
           .from("products")
-          .select("id, slug, name, main_image_url, gender, store_id, brands(name), product_variants(id, price, discount_price, status)")
+          .select("id, slug, name, main_image_url, gender, store_id, stock_badge, brands(name), product_variants(id, price, discount_price, status)")
           .eq("store_id", s.id)
           .eq("status", "active");
         setProducts(ps ?? []);
@@ -150,6 +151,7 @@ function ProductCard({ product: p, storeId }: { product: any; storeId: string })
         <h3 className="font-serif text-ink truncate">{p.name}</h3>
         <p className="text-xs text-muted-foreground mt-1 truncate">{p.brands?.name ?? "—"}</p>
         {Number.isFinite(minPrice) && <p className="text-sm text-[var(--gold)] mt-2 font-serif">{formatToman(minPrice)}</p>}
+        {p.stock_badge && <div className="mt-1.5"><StockBadge text={p.stock_badge} /></div>}
       </Link>
       <Button
         type="button"

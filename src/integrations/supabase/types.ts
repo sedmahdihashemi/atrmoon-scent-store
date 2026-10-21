@@ -1034,6 +1034,7 @@ export type Database = {
           name: string
           slug: string
           status: Database["public"]["Enums"]["product_status"]
+          stock_badge: string | null
           store_id: string
           updated_at: string
         }
@@ -1049,6 +1050,7 @@ export type Database = {
           name: string
           slug: string
           status?: Database["public"]["Enums"]["product_status"]
+          stock_badge?: string | null
           store_id: string
           updated_at?: string
         }
@@ -1064,6 +1066,7 @@ export type Database = {
           name?: string
           slug?: string
           status?: Database["public"]["Enums"]["product_status"]
+          stock_badge?: string | null
           store_id?: string
           updated_at?: string
         }

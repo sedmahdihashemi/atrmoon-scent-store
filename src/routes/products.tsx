@@ -7,6 +7,7 @@ import { Sparkles } from "lucide-react";
 import { formatToman } from "@/lib/cart-session";
 import { Link } from "@tanstack/react-router";
 import { WishlistButton } from "@/components/WishlistButton";
+import { StockBadge } from "@/components/StockBadge";
 
 export const Route = createFileRoute("/products")({ component: ProductsLayout });
 
@@ -19,7 +20,7 @@ function ProductsLayout() {
 function ProductsListing() {
   const [items, setItems] = useState<any[] | null>(null);
   useEffect(() => {
-    supabase.from("products").select("id, slug, name, main_image_url, gender, store_id, stores(store_name), product_variants(price, status)").eq("status", "active").limit(60).then(({ data }) => setItems(data ?? []));
+    supabase.from("products").select("id, slug, name, main_image_url, gender, store_id, stock_badge, stores(store_name), product_variants(price, status)").eq("status", "active").limit(60).then(({ data }) => setItems(data ?? []));
   }, []);
   return (
     <PublicLayout>
@@ -42,6 +43,7 @@ function ProductsListing() {
                  <h3 className="font-serif text-ink truncate">{p.name}</h3>
                  <p className="text-xs text-muted-foreground mt-1 truncate">{p.stores?.store_name}</p>
                  {Number.isFinite(minPrice) && <p className="text-sm text-[var(--gold)] mt-2 font-serif">{formatToman(minPrice)}</p>}
+                 {p.stock_badge && <div className="mt-1.5"><StockBadge text={p.stock_badge} /></div>}
                </Link>
              );
            })}

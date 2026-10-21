@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { formatToman } from "@/lib/cart-session";
 import { WishlistButton } from "@/components/WishlistButton";
+import { StockBadge } from "@/components/StockBadge";
 import { Search as SearchIcon, Sparkles, X, SlidersHorizontal } from "lucide-react";
 
 const sortValues = ["newest", "price_asc", "price_desc", "name"] as const;
@@ -71,7 +72,7 @@ function SearchPage() {
       let qb = supabase
         .from("products")
         .select(`id, slug, name, description, gender, concentration, main_image_url,
-                  brand_id, store_id,
+                  brand_id, store_id, stock_badge,
                   brands(name),
                   stores(store_name),
                   product_variants(price, discount_price, status),
@@ -251,6 +252,7 @@ function SearchPage() {
                           : <span className="text-xs text-muted-foreground">—</span>}
                         {p._onSale && <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-[var(--gold)]/15 text-[var(--gold-deep)] font-serif">تخفیف</span>}
                       </div>
+                      {p.stock_badge && <div className="mt-1.5"><StockBadge text={p.stock_badge} /></div>}
                     </Link>
                   ))}
                 </div>

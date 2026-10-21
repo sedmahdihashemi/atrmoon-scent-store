@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { getWholesaleVariantPrices } from "@/lib/wholesale.functions";
 import { Sparkles, ShoppingBag, Minus, Plus } from "lucide-react";
 import { WishlistButton } from "@/components/WishlistButton";
+import { StockBadge } from "@/components/StockBadge";
 
 export const Route = createFileRoute("/products/$slug")({ component: ProductDetail });
 
@@ -33,7 +34,7 @@ function ProductDetail() {
       setLoading(true);
       const { data } = await supabase
         .from("products")
-        .select(`id, name, slug, description, gender, concentration, main_image_url, store_id,
+        .select(`id, name, slug, description, gender, concentration, main_image_url, store_id, stock_badge,
           stores(id, store_name, slug, city),
           brands(name),
           product_images(image_url, sort_order),
@@ -99,6 +100,7 @@ function ProductDetail() {
             <Link to="/stores" className="text-sm text-muted-foreground hover:text-[var(--gold)]">
               از عطاری <span className="font-serif text-ink">{product.stores?.store_name}</span>
             </Link>
+            {product.stock_badge && <div className="mt-3"><StockBadge text={product.stock_badge} /></div>}
             {product.description && (
               <p className="mt-6 text-ink/80 leading-loose font-serif text-[15px] whitespace-pre-line">{product.description}</p>
             )}
