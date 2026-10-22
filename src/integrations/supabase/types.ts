@@ -746,6 +746,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          bale_reference_id: string | null
           bale_transaction_id: string | null
           card_transfer_attempt_count: number
           card_transfer_note: string | null
@@ -776,6 +777,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          bale_reference_id?: string | null
           bale_transaction_id?: string | null
           card_transfer_attempt_count?: number
           card_transfer_note?: string | null
@@ -806,6 +808,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          bale_reference_id?: string | null
           bale_transaction_id?: string | null
           card_transfer_attempt_count?: number
           card_transfer_note?: string | null

@@ -36,7 +36,7 @@ export const Route = createFileRoute("/api/public/bale/cron-expire")({
         const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString();
         const { data: unresolved, error: unresolvedErr } = await supabaseAdmin
           .from("bale_payment_events")
-          .select("order_id, chat_id, transaction_id, amount_rial")
+          .select("order_id, chat_id, transaction_id, amount_rial, raw_payload")
           .eq("matched", false)
           .not("order_id", "is", null)
           .not("transaction_id", "is", null)
@@ -52,6 +52,7 @@ export const Route = createFileRoute("/api/public/bale/cron-expire")({
             transactionId: (ev as any).transaction_id,
             chatId: (ev as any).chat_id ?? null,
             amountRial: Number((ev as any).amount_rial) || 0,
+            referenceId: (ev as any).raw_payload?.provider_payment_charge_id ?? null,
           });
           if (result === "confirmed") retriedConfirmed++;
         }

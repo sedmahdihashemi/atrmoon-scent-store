@@ -4,7 +4,7 @@ import { supabaseAdmin, sendMessage, buildInvoiceText, statusFa, logIfError } fr
 
 // Chat ids of everyone who should hear about an order: the store's seller,
 // all super-admins, and the customer — but only those who have a bot session.
-async function orderRecipientChatIds(orderId: string, storeId: string, customerId: string | null) {
+export async function orderRecipientChatIds(orderId: string, storeId: string, customerId: string | null) {
   const { data: admins } = await supabaseAdmin.from("user_roles").select("user_id").eq("role", "super_admin");
   const adminIds = (admins ?? []).map((r: any) => r.user_id);
   const { data: store } = await supabaseAdmin.from("stores").select("seller_id").eq("id", storeId).maybeSingle();
@@ -13,6 +13,18 @@ async function orderRecipientChatIds(orderId: string, storeId: string, customerI
   if (ids.length === 0) return [];
   const { data: sessions } = await supabaseAdmin.from("bot_sessions").select("chat_id").in("user_id", ids);
   return (sessions ?? []).map((s: any) => Number(s.chat_id));
+}
+
+// Bot chat ids of the store's seller + all super-admins (not the customer).
+// Used to deliver the official payment receipt to the shop side.
+export async function sellerAdminChatIds(storeId: string): Promise<number[]> {
+  const { data: admins } = await supabaseAdmin.from("user_roles").select("user_id").eq("role", "super_admin");
+  const adminIds = (admins ?? []).map((r: any) => r.user_id);
+  const { data: store } = await supabaseAdmin.from("stores").select("seller_id").eq("id", storeId).maybeSingle();
+  const ids = [...new Set([...adminIds, (store as any)?.seller_id].filter(Boolean))];
+  if (ids.length === 0) return [];
+  const { data: sessions } = await supabaseAdmin.from("bot_sessions").select("chat_id").in("user_id", ids);
+  return [...new Set((sessions ?? []).map((s: any) => Number(s.chat_id)))];
 }
 
 export const notifyOrder = createServerFn({ method: "POST" })

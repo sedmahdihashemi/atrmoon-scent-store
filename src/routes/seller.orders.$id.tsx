@@ -86,6 +86,17 @@ function OrderDetail() {
             {order.customer_note && <p className="pt-2 border-t border-ink/5"><span className="text-muted-foreground">یادداشت مشتری: </span>{order.customer_note}</p>}
           </div>
 
+          {order.payment_method === "bale" && order.paid_at && (
+            <div className="paper-card rounded-md p-5 space-y-2 text-sm border border-[var(--gold)]/30">
+              <h3 className="font-serif text-base text-ink mb-1 flex items-center gap-1.5">✅ رسید پرداخت (بله)</h3>
+              <p><span className="text-muted-foreground">مبلغ: </span>{order.paid_amount_rial ? `${new Intl.NumberFormat("fa-IR").format(Math.round(order.paid_amount_rial / 10))} تومان` : formatToman(order.total_amount)}</p>
+              <p dir="ltr" className="text-right break-all"><span className="text-muted-foreground">شماره پیگیری: </span>{order.bale_transaction_id ?? "—"}</p>
+              <p dir="ltr" className="text-right break-all"><span className="text-muted-foreground">شماره مرجع: </span>{order.bale_reference_id ?? "—"}</p>
+              <p><span className="text-muted-foreground">تاریخ: </span>{new Date(order.paid_at).toLocaleString("fa-IR", { timeZone: "Asia/Tehran" })}</p>
+              <p className="text-[11px] text-muted-foreground pt-1 border-t border-ink/5">این رسید از سیستم ثبت شده و معتبر است؛ فیشِ دستیِ مشتری ملاک نیست.</p>
+            </div>
+          )}
+
           <div className="paper-card rounded-md p-5 space-y-3">
             <h3 className="font-serif text-base text-ink">به‌روزرسانی وضعیت</h3>
             <div>

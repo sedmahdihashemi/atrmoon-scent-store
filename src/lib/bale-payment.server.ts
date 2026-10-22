@@ -6,7 +6,42 @@ import {
   tomanToRial,
   logIfError,
 } from "@/lib/bale.server";
-import { notifyOrderStatus } from "@/lib/bale-notify.functions";
+import { sellerAdminChatIds } from "@/lib/bale-notify.functions";
+
+// Official system payment receipt — sent by the bot itself to the customer and
+// to the shop side (seller + super-admins). Because it comes from the bot (not
+// forwarded by the buyer) and carries Bale's own tracking/reference numbers, a
+// customer can't fake it. storeName + bot username anchor it to this shop.
+function buildPaymentReceipt(o: {
+  storeName: string;
+  orderNumber: string;
+  totalToman: number;
+  trackingId: string | null; // telegram_payment_charge_id — "شماره پیگیری"
+  referenceId: string | null; // provider_payment_charge_id — "شماره مرجع"
+}): string {
+  const fa = (n: number) => new Intl.NumberFormat("fa-IR").format(Math.round(n));
+  let when = "";
+  try {
+    when = new Date().toLocaleString("fa-IR-u-ca-persian", {
+      timeZone: "Asia/Tehran",
+      dateStyle: "full",
+      timeStyle: "medium",
+    });
+  } catch {
+    when = new Date().toLocaleString("fa-IR", { timeZone: "Asia/Tehran" });
+  }
+  const bot = process.env.BALE_BOT_USERNAME ? `@${process.env.BALE_BOT_USERNAME}` : "";
+  return (
+    "✅ پرداخت با موفقیت انجام شد\n\n" +
+    `🏪 فروشگاه: ${o.storeName}\n` +
+    `🧾 شماره سفارش: ${o.orderNumber}\n` +
+    `💰 مبلغ واریزی: ${fa(o.totalToman)} تومان (${fa(tomanToRial(o.totalToman))} ریال)\n` +
+    `🔖 شماره پیگیری: ${o.trackingId ?? "—"}\n` +
+    `🔖 شماره مرجع: ${o.referenceId ?? "—"}\n` +
+    `🗓 تاریخ: ${when}\n\n` +
+    (bot ? `بابت: پرداخت در عطرمون — ${bot}\n` : "")
+  );
+}
 
 export type ConfirmBalePaymentResult =
   | "confirmed"
@@ -24,12 +59,13 @@ export async function confirmBalePayment(params: {
   transactionId: string;
   chatId: number | null;
   amountRial: number;
+  referenceId?: string | null; // provider_payment_charge_id ("شماره مرجع")
 }): Promise<ConfirmBalePaymentResult> {
-  const { orderId, transactionId, chatId, amountRial } = params;
+  const { orderId, transactionId, chatId, amountRial, referenceId = null } = params;
 
   const { data: order, error: orderErr } = await supabaseAdmin
     .from("orders")
-    .select("id, status, payment_method, total_amount")
+    .select("id, status, payment_method, total_amount, order_number, store_id, customer_id, stores(store_name)")
     .eq("id", orderId)
     .maybeSingle();
   logIfError(`confirmBalePayment order(${orderId})`, orderErr);
@@ -64,6 +100,7 @@ export async function confirmBalePayment(params: {
     .update({
       status: "pending_contact",
       bale_transaction_id: transactionId,
+      bale_reference_id: referenceId,
       paid_amount_rial: amountRial,
       paid_at: new Date().toISOString(),
     })
@@ -98,14 +135,28 @@ export async function confirmBalePayment(params: {
     .eq("order_id", orderId)
     .eq("transaction_id", transactionId);
 
-  if (chatId) {
-    await sendMessage(chatId, "✅ پرداخت شما با موفقیت تأیید شد. فروشنده به‌زودی برای هماهنگی ارسال با شما تماس می‌گیرد.");
-  }
+  // Official receipt: identical facts to the customer and to the shop side, so
+  // the seller has a trustworthy, bot-delivered record (no fake slips).
+  const o = order as any;
+  const receipt = buildPaymentReceipt({
+    storeName: o.stores?.store_name ?? "عطرمون",
+    orderNumber: o.order_number,
+    totalToman: Number(o.total_amount),
+    trackingId: transactionId,
+    referenceId,
+  });
 
   try {
-    await notifyOrderStatus({ data: { orderId } });
+    if (chatId) {
+      await sendMessage(chatId, receipt + "\nفروشنده به‌زودی برای هماهنگی ارسال با شما تماس می‌گیرد.");
+    }
+    const shopChats = await sellerAdminChatIds(o.store_id);
+    for (const c of shopChats) {
+      if (c === chatId) continue; // avoid a duplicate if seller == buyer
+      await sendMessage(c, "📥 پرداخت تأییدشده برای سفارش شما\n\n" + receipt + "\nاین رسید رسمیِ سیستم است؛ نیازی به فیشِ دستی نیست.");
+    }
   } catch (e) {
-    console.error("[bale] notifyOrderStatus after payment failed", orderId, e);
+    console.error("[bale] sending payment receipt failed", orderId, e);
   }
 
   return "confirmed";

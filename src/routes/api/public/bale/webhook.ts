@@ -547,6 +547,7 @@ async function handleSuccessfulPayment(chat_id: number, sp: any) {
     transactionId,
     chatId: chat_id,
     amountRial: Number.isFinite(amountRial) ? amountRial : 0,
+    referenceId: sp.provider_payment_charge_id ?? null,
   });
 
   // "mismatch" and "already_processed" already message the user inside
