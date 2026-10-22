@@ -483,8 +483,12 @@ async function handleSuccessfulPayment(chat_id: number, sp: any) {
   console.log("[bale successful_payment]", JSON.stringify(sp).slice(0, 1000));
 
   const orderId: string | undefined = sp.invoice_payload;
+  // Bale's inquireTransaction keys on telegram_payment_charge_id. With a real
+  // wallet token the payload also carries provider_payment_charge_id, but that
+  // id returns 404 from inquireTransaction — so the telegram id must come
+  // first, or real payments never get confirmed (order stays pending_payment).
   const transactionId: string | null =
-    sp.provider_payment_charge_id || sp.telegram_payment_charge_id || null;
+    sp.telegram_payment_charge_id || sp.provider_payment_charge_id || null;
   const amountRial = Number(sp.total_amount);
 
   if (!orderId) {
