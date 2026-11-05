@@ -494,7 +494,7 @@ function ProfileTab() {
     <div className="space-y-4 max-w-xl">
       <div className="paper-card rounded-md p-5 space-y-3">
         <div><Label>نام و نام خانوادگی</Label><Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} /></div>
-        <div><Label>ایمیل</Label><Input value={profile?.email || ""} disabled /></div>
+        <div><Label>ایمیل</Label><Input value={profile?.email?.endsWith("@phone.atrmoon.top") ? "" : (profile?.email || "")} disabled placeholder="ثبت نشده" /></div>
         <div>
           <Label>شماره موبایل</Label>
           <Input dir="ltr" placeholder="09123456789" value={form.phone} onChange={(e) => { setForm({ ...form, phone: e.target.value }); setPhoneErr(""); }} />

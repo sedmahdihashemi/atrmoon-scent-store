@@ -26,9 +26,19 @@ export const Route = createFileRoute("/register/customer")({
   }),
 });
 
+// Accounts still need an email for Supabase Auth, but the customer doesn't
+// have to provide one: when left blank we synthesize a non-routable address
+// from their (unique) phone. Phone login already resolves phone → email, so
+// these customers sign in with phone + password and never see the address.
+export const SYNTHETIC_EMAIL_DOMAIN = "phone.atrmoon.top";
+
 const schema = z.object({
   full_name: z.string().trim().min(2, "نام را وارد کنید").max(100),
-  email: z.string().email("ایمیل معتبر"),
+  email: z
+    .string()
+    .trim()
+    .optional()
+    .refine((v) => !v || z.string().email().safeParse(v).success, { message: "ایمیل معتبر نیست" }),
   phone: z.string().trim().refine(isValidIranPhone, "شماره موبایل معتبر نیست (مثال: ۰۹۱۲۳۴۵۶۷۸۹)"),
   password: z.string().min(8, "رمز عبور باید حداقل ۸ نویسه باشد").max(72, "رمز عبور نمی‌تواند بیشتر از ۷۲ نویسه باشد"),
   confirm: z.string().min(1, "تکرار رمز عبور را وارد کنید"),
@@ -58,8 +68,9 @@ function CustomerRegister() {
       setErrors({ phone: phoneCheck.reason === "taken" ? "این شماره موبایل قبلاً ثبت شده" : "شماره موبایل معتبر نیست" });
       return;
     }
+    const email = parsed.data.email?.trim() || `${phone}@${SYNTHETIC_EMAIL_DOMAIN}`;
     const { error } = await supabase.auth.signUp({
-      email: parsed.data.email,
+      email,
       password: parsed.data.password,
       options: {
         emailRedirectTo: window.location.origin,
@@ -80,7 +91,7 @@ function CustomerRegister() {
           <p className="text-center text-muted-foreground text-sm mb-8 font-serif italic">با ما به بازار رایحه‌ها وارد شوید.</p>
           <form onSubmit={onSubmit} className="space-y-4">
             <Field name="full_name" label="نام و نام خانوادگی" err={errors.full_name} />
-            <Field name="email" label="ایمیل" type="email" err={errors.email} />
+            <Field name="email" label="ایمیل (اختیاری)" type="email" err={errors.email} required={false} />
             <Field name="phone" label="شماره موبایل" type="tel" err={errors.phone} />
             <PasswordField name="password" label="رمز عبور" err={errors.password} hint="حداقل ۸ و حداکثر ۷۲ نویسه" autoComplete="new-password" />
             <PasswordField name="confirm" label="تکرار رمز عبور" err={errors.confirm} autoComplete="new-password" />
@@ -97,11 +108,11 @@ function CustomerRegister() {
   );
 }
 
-function Field({ name, label, type = "text", err }: { name: string; label: string; type?: string; err?: string }) {
+function Field({ name, label, type = "text", err, required = true }: { name: string; label: string; type?: string; err?: string; required?: boolean }) {
   return (
     <div>
       <Label htmlFor={name}>{label}</Label>
-      <Input id={name} name={name} type={type} required />
+      <Input id={name} name={name} type={type} required={required} />
       {err && <p className="text-xs text-destructive mt-1">{err}</p>}
     </div>
   );
