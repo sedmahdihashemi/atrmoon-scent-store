@@ -129,14 +129,18 @@ export function ProductEditor({ productId }: { productId?: string }) {
   const save = async () => {
     if (!storeId) return;
     if (!form.name.trim()) { toast.error("نام رایحه ضروری است"); return; }
-    if (selected.length === 0) { toast.error("حداقل یک شیشه برای این عطر انتخاب کنید"); return; }
+    const formulaMode = pricingMode === "formula";
+    // Formula stores: every active bottle is applied + priced automatically by
+    // DB triggers (on product_pricing_settings), so no per-product bottle pick.
+    // Manual stores still choose bottles and type their prices here.
+    if (!formulaMode && selected.length === 0) { toast.error("حداقل یک شیشه برای این عطر انتخاب کنید"); return; }
 
     const bottleById = new Map((storeBottles ?? []).map((b) => [b.id, b]));
 
-    // Build variant rows, computing price in formula mode with the shared formula.
+    // Manual mode only: build the variant rows from the seller's typed prices.
     const rows: any[] = [];
     const uncomputable: string[] = [];
-    for (const sel of selected) {
+    for (const sel of (formulaMode ? [] : selected)) {
       const b = bottleById.get(sel.store_bottle_id);
       if (!b) continue;
       let price: number;
@@ -162,7 +166,7 @@ export function ProductEditor({ productId }: { productId?: string }) {
       toast.error("قیمت این شیشه‌ها محاسبه نشد (هزینه‌ی شیشه در تب شیشه‌ها یا هزینه‌ی هر گرم عطر خالی است): " + uncomputable.join("، "));
       return;
     }
-    if (rows.length === 0) { toast.error("هیچ شیشه‌ی قابل‌ذخیره‌ای نیست"); return; }
+    if (!formulaMode && rows.length === 0) { toast.error("هیچ شیشه‌ی قابل‌ذخیره‌ای نیست"); return; }
 
     setSaving(true);
     const slug = (form.slug || slugify(form.name)).trim();
@@ -190,10 +194,14 @@ export function ProductEditor({ productId }: { productId?: string }) {
     }, { onConflict: "product_id" });
     if (ppsErr) { setSaving(false); toast.error(ppsErr.message); return; }
 
-    // Variants: simplest reliable approach = delete all & re-insert.
-    await supabase.from("product_variants").delete().eq("product_id", pid);
-    const r = await supabase.from("product_variants").insert(rows.map((x) => ({ ...x, product_id: pid })));
-    if (r.error) { setSaving(false); toast.error(r.error.message); return; }
+    // Formula mode: product_variants are created/updated automatically by the
+    // DB trigger on the product_pricing_settings upsert above (every active
+    // store bottle). Manual mode: replace the set with the seller's prices.
+    if (!formulaMode) {
+      await supabase.from("product_variants").delete().eq("product_id", pid);
+      const r = await supabase.from("product_variants").insert(rows.map((x) => ({ ...x, product_id: pid })));
+      if (r.error) { setSaving(false); toast.error(r.error.message); return; }
+    }
 
     await supabase.from("product_scent_notes").delete().eq("product_id", pid);
     if (selectedNotes.size) {
@@ -323,18 +331,37 @@ export function ProductEditor({ productId }: { productId?: string }) {
             <p className="text-sm font-serif text-ink">هنوز شیشه‌ای نساخته‌اید. اول باید شیشه‌های فروشگاه را تعریف کنید.</p>
             <Link to="/seller/bottles"><Button variant="outline" className="gap-1"><Plus className="w-4 h-4" />ساخت شیشه</Button></Link>
           </div>
+        ) : pricingMode === "formula" ? (
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground font-serif">
+              این عطر به‌طور خودکار در همه‌ی شیشه‌های فعالِ فروشگاه ارائه می‌شود و قیمتِ هر شیشه از روی هزینه‌ی عطر و خودِ شیشه حساب می‌شود. برای فعال/غیرفعال‌کردن یا تغییر قیمتِ شیشه‌ها، به بخش «شیشه‌ها» بروید — تغییرات خودکار روی همه‌ی عطرها اعمال می‌شود.
+            </p>
+            {storeBottles.map((b) => {
+              const bd = computeFor(b);
+              return (
+                <div key={b.id} className="flex items-center gap-3 rounded-md border border-ink/15 p-3">
+                  <div className="w-10 h-10 rounded-sm bg-[var(--moon)]/40 border border-ink/10 overflow-hidden flex items-center justify-center text-ink/30 shrink-0">
+                    {b.photo_url ? <img src={b.photo_url} alt={b.name} className="w-full h-full object-cover" /> : <Wine className="w-5 h-5" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-serif text-ink text-sm truncate">{b.name}</p>
+                    <p className="text-xs text-muted-foreground">{b.volume_ml.toLocaleString("fa-IR")} میلی‌لیتر</p>
+                  </div>
+                  {bd
+                    ? <span className="font-serif text-[var(--gold-deep)] text-sm shrink-0">{formatToman(bd.finalPrice)}</span>
+                    : <span className="text-destructive text-[11px] font-serif shrink-0">هزینه‌ی هر گرم عطر را وارد کنید</span>}
+                </div>
+              );
+            })}
+          </div>
         ) : (
           <div className="space-y-2">
             <p className="text-xs text-muted-foreground font-serif">
-              شیشه‌هایی که این عطر در آن‌ها ارائه می‌شود را انتخاب کنید.
-              {pricingMode === "manual"
-                ? " قیمت هر شیشه را خودتان وارد کنید."
-                : " قیمت هر شیشه خودکار محاسبه و نمایش داده می‌شود."}
+              شیشه‌هایی که این عطر در آن‌ها ارائه می‌شود را انتخاب کنید. قیمت هر شیشه را خودتان وارد کنید.
             </p>
             {storeBottles.map((b) => {
               const sel = selected.find((s) => s.store_bottle_id === b.id);
               const on = !!sel;
-              const bd = on && pricingMode === "formula" ? computeFor(b) : null;
               return (
                 <div key={b.id} className={`rounded-md border p-3 transition-colors ${on ? "border-[var(--gold)] bg-[var(--gold)]/5" : "border-ink/15"}`}>
                   <div className="flex items-center gap-3">
@@ -346,20 +373,13 @@ export function ProductEditor({ productId }: { productId?: string }) {
                       <p className="font-serif text-ink text-sm truncate">{b.name}</p>
                       <p className="text-xs text-muted-foreground">{b.volume_ml.toLocaleString("fa-IR")} میلی‌لیتر</p>
                     </div>
-                    {on && pricingMode === "formula" && (
-                      bd
-                        ? <span className="font-serif text-[var(--gold-deep)] text-sm shrink-0">{formatToman(bd.finalPrice)}</span>
-                        : <span className="text-destructive text-[11px] font-serif shrink-0 text-left">محاسبه نشد؛ هزینه‌ی شیشه یا عطر خالی است</span>
-                    )}
                   </div>
                   {on && (
                     <div className="grid sm:grid-cols-2 gap-2 mt-3 ps-7">
-                      {pricingMode === "manual" && (
-                        <div>
-                          <Label className="text-xs font-serif text-ink/80 mb-1 block">قیمت (تومان)</Label>
-                          <Input dir="ltr" inputMode="numeric" value={sel!.price} onChange={(e) => updateSel(b.id, { price: e.target.value })} />
-                        </div>
-                      )}
+                      <div>
+                        <Label className="text-xs font-serif text-ink/80 mb-1 block">قیمت (تومان)</Label>
+                        <Input dir="ltr" inputMode="numeric" value={sel!.price} onChange={(e) => updateSel(b.id, { price: e.target.value })} />
+                      </div>
                       <div>
                         <Label className="text-xs font-serif text-ink/80 mb-1 block">قیمت تخفیف (اختیاری)</Label>
                         <Input dir="ltr" inputMode="numeric" value={sel!.discount_price} onChange={(e) => updateSel(b.id, { discount_price: e.target.value })} />
