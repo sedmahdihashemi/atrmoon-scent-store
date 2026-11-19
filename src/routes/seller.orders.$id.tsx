@@ -63,7 +63,7 @@ function OrderDetail() {
               <div key={it.id} className="flex justify-between text-sm border-b border-ink/5 last:border-0 py-2">
                 <div>
                   <p className="font-serif text-ink">{it.product_name}</p>
-                  <p className="text-xs text-muted-foreground">{it.volume_ml} میلی‌لیتر · {it.bottle_name} × {it.quantity}</p>
+                  <p className="text-xs text-muted-foreground">{it.volume_ml} میلی‌لیتر · {it.no_bottle ? "بدون شیشه" : it.bottle_name} × {it.quantity}</p>
                 </div>
                 <span className="font-serif text-[var(--gold)]">{formatToman(it.total_price)}</span>
               </div>

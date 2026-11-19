@@ -227,7 +227,7 @@ function OrderDetail({ orderId, onBack, botUsername }: { orderId: string; onBack
             <div key={i.id} className="flex items-center justify-between text-sm border-b border-ink/5 pb-2 last:border-0">
               <div className="min-w-0">
                 <div className="font-serif text-ink truncate">{i.product_name}</div>
-                <div className="text-xs text-muted-foreground">{i.brand_name} · {i.bottle_name} · {i.volume_ml}ml × {i.quantity}</div>
+                <div className="text-xs text-muted-foreground">{i.brand_name} · {i.no_bottle ? "بدون شیشه" : i.bottle_name} · {i.volume_ml}ml × {i.quantity}</div>
               </div>
               <div className="font-serif">{formatToman(i.total_price)}</div>
             </div>

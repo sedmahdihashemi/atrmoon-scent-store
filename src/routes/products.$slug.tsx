@@ -26,6 +26,7 @@ function ProductDetail() {
   const [inventory, setInventory] = useState<any>(null);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const [wholesaleById, setWholesaleById] = useState<Record<string, number>>({});
+  const [noBottle, setNoBottle] = useState(false);
   const [qty, setQty] = useState(1);
   const [loading, setLoading] = useState(true);
 
@@ -38,7 +39,7 @@ function ProductDetail() {
           stores(id, store_name, slug, city),
           brands(name),
           product_images(image_url, sort_order),
-          product_variants(id, volume_ml, price, discount_price, status, bottle_name, bottle_photo_url),
+          product_variants(id, volume_ml, price, discount_price, price_without_bottle, status, bottle_name, bottle_photo_url),
           product_scent_notes(scent_notes(name, type))`)
         .eq("slug", slug)
         .eq("status", "active")
@@ -74,7 +75,11 @@ function ProductDetail() {
   const listPrice = sel ? Number(sel.discount_price ?? sel.price) : 0;
   const wholesale = sel ? wholesaleById[sel.id] : undefined;
   const isWholesale = wholesale != null && wholesale < listPrice;
-  const price = isWholesale ? wholesale! : listPrice;
+  // The bottle's share (public: list price − oil-only price). Shown as the
+  // discount when the customer brings their own bottle.
+  const bottlePart = sel && sel.price_without_bottle != null ? Math.max(0, Number(sel.price) - Number(sel.price_without_bottle)) : 0;
+  const basePrice = isWholesale ? wholesale! : listPrice;
+  const price = Math.max(0, basePrice - (noBottle ? bottlePart : 0));
   const available = inventory?.available_stock_ml ?? 0;
   const maxQty = sel ? Math.max(0, Math.floor(available / sel.volume_ml)) : 0;
   const inStock = maxQty > 0;
@@ -131,7 +136,7 @@ function ProductDetail() {
                 {variants.length === 0 && <p className="text-sm text-muted-foreground">حجمی برای این رایحه ثبت نشده.</p>}
               </div>
 
-              {sel?.bottle_photo_url && (
+              {sel?.bottle_photo_url && !noBottle && (
                 <div className="mt-4 flex items-center gap-3">
                   <img
                     src={sel.bottle_photo_url}
@@ -140,6 +145,16 @@ function ProductDetail() {
                   />
                   <p className="text-xs text-muted-foreground font-serif">بطری: {sel.bottle_name}</p>
                 </div>
+              )}
+
+              {bottlePart > 0 && (
+                <label className="mt-4 flex items-start gap-2 cursor-pointer rounded-sm border border-ink/15 p-3 hover:border-[var(--gold)] transition">
+                  <input type="checkbox" checked={noBottle} onChange={(e) => setNoBottle(e.target.checked)} className="w-4 h-4 mt-0.5 accent-[var(--gold-deep)] shrink-0" />
+                  <span className="text-sm font-serif text-ink">
+                    بدون شیشه (ظرف خودم را می‌آورم)
+                    <span className="block text-xs text-muted-foreground mt-0.5">هزینه‌ی شیشه ({formatToman(bottlePart)}) کم می‌شود و فقط پولِ عطر را می‌دهید.</span>
+                  </span>
+                </label>
               )}
             </div>
 
@@ -157,6 +172,7 @@ function ProductDetail() {
                     )
                   )}
                   <p className="font-serif text-2xl text-[var(--gold)]">{formatToman(price)}</p>
+                  {noBottle && <p className="text-[11px] text-[var(--gold-deep)] font-serif">بدون شیشه</p>}
                   <p className="text-xs text-muted-foreground mt-1">
                     {inStock ? `موجودی: ${available.toLocaleString("fa-IR")} میلی‌لیتر` : "ناموجود"}
                   </p>
@@ -173,7 +189,7 @@ function ProductDetail() {
               <Button
                 className="flex-1 h-12 font-serif text-base"
                 disabled={!sel || !inStock}
-                onClick={() => sel && addItem(product.id, sel.id, product.store_id, qty)}>
+                onClick={() => sel && addItem(product.id, sel.id, product.store_id, qty, noBottle)}>
                 <ShoppingBag className="w-5 h-5 ml-2" />
                 {inStock ? "افزودن به سبد" : "ناموجود"}
               </Button>

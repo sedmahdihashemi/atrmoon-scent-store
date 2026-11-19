@@ -45,7 +45,7 @@ function CartPage() {
                   <div className="flex-1 min-w-[40%]">
                     <Link to="/products/$slug" params={{ slug: it.product.slug }} className="font-serif text-ink hover:text-[var(--gold)] truncate block">{it.product.name}</Link>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {it.variant?.volume_ml.toLocaleString("fa-IR")} میلی‌لیتر · {it.variant?.bottle_name}
+                      {it.variant?.volume_ml.toLocaleString("fa-IR")} میلی‌لیتر · {it.no_bottle ? "بدون شیشه" : it.variant?.bottle_name}
                     </p>
                     <div className="mt-1 flex items-center gap-2 flex-wrap">
                       <p className="font-serif text-[var(--gold)] text-sm">{formatToman(price)}</p>
@@ -55,6 +55,7 @@ function CartPage() {
                           <span className="text-[10px] bg-[var(--gold)]/15 text-[var(--gold-deep)] rounded-sm px-1.5 py-0.5 font-serif">عمده</span>
                         </>
                       )}
+                      {it.no_bottle && <span className="text-[10px] bg-ink/5 text-ink/70 rounded-sm px-1.5 py-0.5 font-serif">بدون شیشه</span>}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 ms-auto">

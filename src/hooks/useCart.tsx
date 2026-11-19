@@ -12,6 +12,8 @@ export type CartItem = {
   product_id: string;
   product_variant_id: string;
   quantity: number;
+  // Customer brings their own bottle: the bottle's price is subtracted.
+  no_bottle?: boolean;
   product: {
     id: string;
     name: string;
@@ -25,6 +27,7 @@ export type CartItem = {
     volume_ml: number;
     price: number;
     discount_price: number | null;
+    price_without_bottle: number | null;
     bottle_name: string | null;
   };
   // Set only for approved wholesale buyers of this item's store; the effective
@@ -32,9 +35,18 @@ export type CartItem = {
   wholesalePrice?: number | null;
 };
 
-// The price actually used for this line: wholesale (if any) else discount else list.
+// The bottle's share of the price (public: list − oil-only). 0 if unknown.
+export function bottlePart(it: CartItem): number {
+  const p = Number(it.variant?.price ?? 0);
+  const noB = it.variant?.price_without_bottle;
+  return noB == null ? 0 : Math.max(0, p - Number(noB));
+}
+
+// The price actually charged for this line: wholesale (if any) else discount
+// else list — minus the bottle's share when the customer brings their own.
 export function effectiveUnitPrice(it: CartItem): number {
-  return Number(it.wholesalePrice ?? it.variant?.discount_price ?? it.variant?.price ?? 0);
+  const base = Number(it.wholesalePrice ?? it.variant?.discount_price ?? it.variant?.price ?? 0);
+  return it.no_bottle ? Math.max(0, base - bottlePart(it)) : base;
 }
 
 type Ctx = {
@@ -44,7 +56,7 @@ type Ctx = {
   loading: boolean;
   count: number;
   subtotal: number;
-  addItem: (productId: string, variantId: string, storeId: string, qty?: number) => Promise<void>;
+  addItem: (productId: string, variantId: string, storeId: string, qty?: number, noBottle?: boolean) => Promise<void>;
   updateQty: (itemId: string, qty: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   refresh: () => Promise<void>;
@@ -111,9 +123,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const loadItems = useCallback(async (id: string) => {
     const { data } = await supabase
       .from("cart_items")
-      .select(`id, product_id, product_variant_id, quantity,
+      .select(`id, product_id, product_variant_id, quantity, no_bottle,
         product:products(id, name, slug, main_image_url, store_id, brands(name)),
-        variant:product_variants(id, volume_ml, price, discount_price, bottle_name)`)
+        variant:product_variants(id, volume_ml, price, discount_price, price_without_bottle, bottle_name)`)
       .eq("cart_id", id);
     const rows = ((data as any) ?? []) as CartItem[];
 
@@ -176,7 +188,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     void refresh();                                            // logout / user switch
   }, [user, refresh, mergeThenLoad]);
 
-  const addItem = useCallback(async (productId: string, variantId: string, itemStoreId: string, qty = 1) => {
+  const addItem = useCallback(async (productId: string, variantId: string, itemStoreId: string, qty = 1, noBottle = false) => {
     const c = await ensureCart();
     if (!c) { toast.error("سبد در دسترس نیست"); return; }
     // single-store rule: if cart has a different store, ask to clear
@@ -186,14 +198,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
       await supabase.from("cart_items").delete().eq("cart_id", c.id);
     }
     await supabase.from("carts").update({ store_id: itemStoreId }).eq("id", c.id);
-    // upsert quantity
+    // Same variant with/without bottle are distinct lines (different price).
     const { data: existing } = await supabase.from("cart_items")
-      .select("id, quantity").eq("cart_id", c.id).eq("product_variant_id", variantId).maybeSingle();
+      .select("id, quantity").eq("cart_id", c.id).eq("product_variant_id", variantId).eq("no_bottle", noBottle).maybeSingle();
     if (existing) {
       await supabase.from("cart_items").update({ quantity: existing.quantity + qty }).eq("id", existing.id);
     } else {
       await supabase.from("cart_items").insert({
-        cart_id: c.id, product_id: productId, product_variant_id: variantId, quantity: qty,
+        cart_id: c.id, product_id: productId, product_variant_id: variantId, quantity: qty, no_bottle: noBottle,
       });
     }
     setStoreId(itemStoreId);

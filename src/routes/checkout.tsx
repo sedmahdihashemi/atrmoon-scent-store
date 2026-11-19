@@ -460,7 +460,7 @@ function CheckoutPage() {
             <div className="space-y-2 max-h-64 overflow-auto pr-1">
               {items.map((it) => (
                 <div key={it.id} className="flex justify-between text-sm text-ink/80">
-                  <span className="truncate">{it.product.name} × {it.quantity.toLocaleString("fa-IR")}</span>
+                  <span className="truncate">{it.product.name}{it.no_bottle ? " (بدون شیشه)" : ""} × {it.quantity.toLocaleString("fa-IR")}</span>
                   <span className="shrink-0">{formatToman(effectiveUnitPrice(it) * it.quantity)}</span>
                 </div>
               ))}

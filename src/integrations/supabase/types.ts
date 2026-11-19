@@ -328,6 +328,7 @@ export type Database = {
           id: string
           product_id: string
           product_variant_id: string
+          no_bottle: boolean
           quantity: number
           updated_at: string
         }
@@ -337,6 +338,7 @@ export type Database = {
           id?: string
           product_id: string
           product_variant_id: string
+          no_bottle?: boolean
           quantity?: number
           updated_at?: string
         }
@@ -346,6 +348,7 @@ export type Database = {
           id?: string
           product_id?: string
           product_variant_id?: string
+          no_bottle?: boolean
           quantity?: number
           updated_at?: string
         }
@@ -649,6 +652,7 @@ export type Database = {
           product_id: string | null
           product_name: string
           product_variant_id: string | null
+          no_bottle: boolean
           quantity: number
           total_price: number
           unit_price: number
@@ -663,6 +667,7 @@ export type Database = {
           product_id?: string | null
           product_name: string
           product_variant_id?: string | null
+          no_bottle?: boolean
           quantity: number
           total_price: number
           unit_price: number
@@ -677,6 +682,7 @@ export type Database = {
           product_id?: string | null
           product_name?: string
           product_variant_id?: string | null
+          no_bottle?: boolean
           quantity?: number
           total_price?: number
           unit_price?: number
@@ -970,6 +976,7 @@ export type Database = {
           discount_price: number | null
           id: string
           price: number
+          price_without_bottle: number | null
           product_id: string
           sku: string | null
           status: Database["public"]["Enums"]["variant_status"]
@@ -985,6 +992,7 @@ export type Database = {
           discount_price?: number | null
           id?: string
           price: number
+          price_without_bottle?: number | null
           product_id: string
           sku?: string | null
           status?: Database["public"]["Enums"]["variant_status"]
@@ -1000,6 +1008,7 @@ export type Database = {
           discount_price?: number | null
           id?: string
           price?: number
+          price_without_bottle?: number | null
           product_id?: string
           sku?: string | null
           status?: Database["public"]["Enums"]["variant_status"]
