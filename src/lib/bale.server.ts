@@ -103,15 +103,19 @@ export async function buildInvoiceText(orderId: string, opts: { includeStore?: b
   if (!order) return null;
 
   const items = (order as any).order_items as any[];
+  const fa = (n: number) => n.toLocaleString("fa-IR");
+  const sep = "➖➖➖➖➖➖➖➖➖➖";
   const lines: string[] = [];
-  lines.push(`🧾 <b>فاکتور سفارش</b>`);
-  lines.push(`شماره: <code>${order.order_number}</code>`);
+
+  lines.push(`🧾 فاکتور سفارش`);
+  lines.push(`شماره: ${order.order_number}`);
   lines.push(`وضعیت: ${statusFa(order.status)}`);
   if (opts.includeStore && (order as any).stores?.store_name) {
     lines.push(`فروشگاه: ${(order as any).stores.store_name}`);
   }
-  lines.push("");
-  lines.push(`👤 <b>مشتری</b>`);
+
+  lines.push(sep);
+  lines.push(`👤 مشتری`);
   lines.push(`نام: ${order.customer_name}`);
   lines.push(`تلفن: ${order.customer_phone}`);
   if (order.customer_email) lines.push(`ایمیل: ${order.customer_email}`);
@@ -119,15 +123,19 @@ export async function buildInvoiceText(orderId: string, opts: { includeStore?: b
   lines.push(`نشانی: ${order.shipping_address}`);
   if (order.postal_code) lines.push(`کد پستی: ${order.postal_code}`);
   if (order.customer_note) lines.push(`یادداشت: ${order.customer_note}`);
-  lines.push("");
-  lines.push(`🛒 <b>اقلام</b>`);
-  for (const it of items) {
-    lines.push(
-      `• ${it.product_name}${it.brand_name ? ` (${it.brand_name})` : ""} — ${it.bottle_name} ${it.volume_ml} میلی‌لیتر × ${it.quantity} = ${fmtMoney(it.total_price)}`
-    );
-  }
-  lines.push("");
-  lines.push(`💰 <b>مبلغ کل:</b> ${fmtMoney(order.total_amount)}`);
+
+  lines.push(sep);
+  lines.push(`🛒 اقلام (${fa(items.length)} قلم)`);
+  items.forEach((it, i) => {
+    const bottle = it.no_bottle ? "بدون شیشه" : it.bottle_name;
+    lines.push("");
+    lines.push(`${fa(i + 1)}. ${it.product_name}${it.brand_name ? ` — ${it.brand_name}` : ""}`);
+    lines.push(`   ${fa(it.volume_ml)} میلی‌لیتر · ${bottle} × ${fa(it.quantity)}`);
+    lines.push(`   💵 ${fmtMoney(it.total_price)}`);
+  });
+
+  lines.push(sep);
+  lines.push(`💰 مبلغ کل: ${fmtMoney(order.total_amount)}`);
   lines.push(`📅 ${fmtTehranDate(order.created_at)}`);
   return { text: lines.join("\n"), order };
 }
