@@ -48,6 +48,13 @@ export function InvoiceBuilder({ invoiceId }: { invoiceId?: string }) {
   const [saving, setSaving] = useState(false);
   const [pdfBusy, setPdfBusy] = useState<"download" | "share" | null>(null);
 
+  // The invoice paper is a fixed 720px wide so the PDF stays crisp; for display
+  // we scale it DOWN to fit the screen (phones), measuring the container and the
+  // paper's natural height so the layout reserves the right amount of space.
+  const previewOuterRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  const [paperH, setPaperH] = useState(0);
+
   // Load store identity/settings, recent orders, and (when editing) the invoice.
   useEffect(() => {
     if (!storeId) return;
@@ -97,6 +104,28 @@ export function InvoiceBuilder({ invoiceId }: { invoiceId?: string }) {
   }, [storeId, invoiceId]);
 
   const { subtotal, total } = useMemo(() => computeTotals(items, discount, shipping), [items, discount, shipping]);
+
+  // Keep the scaled preview fitting its column on any screen size.
+  useEffect(() => {
+    if (loading) return;
+    const outer = previewOuterRef.current;
+    const paper = paperRef.current;
+    if (!outer || !paper) return;
+    const recompute = () => {
+      const w = outer.clientWidth;
+      setScale(Math.min(1, w > 0 ? w / 720 : 1));
+      setPaperH(paper.offsetHeight);
+    };
+    recompute();
+    const ro = new ResizeObserver(recompute);
+    ro.observe(outer);
+    ro.observe(paper);
+    window.addEventListener("resize", recompute);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", recompute);
+    };
+  }, [loading]);
 
   const setItem = (i: number, patch: Partial<InvoiceItem>) =>
     setItems((arr) => arr.map((it, idx) => (idx === i ? { ...it, ...patch } : it)));
@@ -343,21 +372,35 @@ export function InvoiceBuilder({ invoiceId }: { invoiceId?: string }) {
         {/* ------------------------------ Preview ----------------------------- */}
         <div className="lg:sticky lg:top-24">
           <p className="text-xs text-muted-foreground mb-2 text-center">پیش‌نمایش فاکتور</p>
-          <div className="overflow-x-auto rounded-md bg-ink/5 p-3">
-            <div className="origin-top mx-auto" style={{ width: 720 }}>
-              <InvoicePaper
-                ref={paperRef}
-                settings={settings}
-                storeName={storeName}
-                invoiceNo={invoiceNo}
-                issuedAt={issuedAt}
-                customerName={customerName}
-                customerPhone={customerPhone}
-                customerNote={customerNote}
-                items={previewItems}
-                discount={discount}
-                shipping={shipping}
-              />
+          <div ref={previewOuterRef} className="rounded-md bg-ink/5 p-2 sm:p-3 overflow-hidden">
+            {/* Outer box reserves the SCALED height; the inner node stays 720px
+                wide (for a crisp PDF) and is visually scaled to fit. */}
+            <div style={{ position: "relative", width: "100%", height: paperH ? paperH * scale : undefined }}>
+              <div
+                style={{
+                  position: paperH ? "absolute" : "relative",
+                  top: 0,
+                  left: "50%",
+                  width: 720,
+                  marginLeft: -360,
+                  transform: `scale(${scale})`,
+                  transformOrigin: "top center",
+                }}
+              >
+                <InvoicePaper
+                  ref={paperRef}
+                  settings={settings}
+                  storeName={storeName}
+                  invoiceNo={invoiceNo}
+                  issuedAt={issuedAt}
+                  customerName={customerName}
+                  customerPhone={customerPhone}
+                  customerNote={customerNote}
+                  items={previewItems}
+                  discount={discount}
+                  shipping={shipping}
+                />
+              </div>
             </div>
           </div>
           <p className="text-[11px] text-muted-foreground mt-2 text-center">جمع جزء: {formatToman(subtotal)} تومان</p>
