@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
 import { Toaster } from "@/components/ui/sonner";
+import { InstallButton } from "@/components/InstallButton";
 
 function NotFoundComponent() {
   return (
@@ -136,6 +137,7 @@ function RootComponent() {
         <AuthProvider>
           <CartProvider>
             <Outlet />
+            <InstallButton />
             <Toaster position="top-center" richColors />
           </CartProvider>
         </AuthProvider>
