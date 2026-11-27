@@ -9,6 +9,8 @@
 // color utilities) — html2canvas 1.4 cannot parse modern CSS color functions.
 async function renderCanvas(node: HTMLElement): Promise<HTMLCanvasElement> {
   const html2canvas = (await import("html2canvas")).default;
+  // Wait for web fonts so Persian text renders instead of a fallback.
+  try { await (document as any).fonts?.ready; } catch { /* ignore */ }
   return html2canvas(node, {
     scale: Math.min(2, (window.devicePixelRatio || 1) + 1),
     backgroundColor: "#f4e8d0",

@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { LoadingState } from "@/components/ui/loading-state";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ChevronRight, Plus, Trash2, Download, Share2, Save, Settings2, FileText } from "lucide-react";
+import { ChevronRight, Plus, Trash2, Download, Share2, Save, Settings2, FileText, Eye, X } from "lucide-react";
 import { InvoicePaper } from "@/components/seller/InvoicePaper";
 import { downloadInvoicePdf, shareInvoicePdf } from "@/lib/invoice-pdf";
 import {
@@ -48,10 +48,12 @@ export function InvoiceBuilder({ invoiceId }: { invoiceId?: string }) {
   const [saving, setSaving] = useState(false);
   const [pdfBusy, setPdfBusy] = useState<"download" | "share" | null>(null);
 
-  // The invoice paper is a fixed 720px wide so the PDF stays crisp; for display
-  // we scale it DOWN to fit the screen (phones), measuring the container and the
-  // paper's natural height so the layout reserves the right amount of space.
-  const previewOuterRef = useRef<HTMLDivElement>(null);
+  // The invoice paper is ALWAYS rendered once at a fixed 720px, off-screen and
+  // un-transformed — that hidden node (paperRef) is what html2canvas captures,
+  // so the PDF is crisp and never affected by on-screen scaling/clipping.
+  // The on-screen preview is a separate, scaled copy shown inside a dialog.
+  const previewBoxRef = useRef<HTMLDivElement>(null);
+  const [showPreview, setShowPreview] = useState(false);
   const [scale, setScale] = useState(1);
   const [paperH, setPaperH] = useState(0);
 
@@ -105,27 +107,35 @@ export function InvoiceBuilder({ invoiceId }: { invoiceId?: string }) {
 
   const { subtotal, total } = useMemo(() => computeTotals(items, discount, shipping), [items, discount, shipping]);
 
-  // Keep the scaled preview fitting its column on any screen size.
+  // Track the hidden paper's natural height so the preview box can reserve the
+  // right (scaled) space. ResizeObserver catches content changes automatically.
   useEffect(() => {
     if (loading) return;
-    const outer = previewOuterRef.current;
     const paper = paperRef.current;
-    if (!outer || !paper) return;
-    const recompute = () => {
-      const w = outer.clientWidth;
-      setScale(Math.min(1, w > 0 ? w / 720 : 1));
-      setPaperH(paper.offsetHeight);
-    };
-    recompute();
-    const ro = new ResizeObserver(recompute);
-    ro.observe(outer);
+    if (!paper) return;
+    const update = () => setPaperH(paper.offsetHeight);
+    update();
+    const ro = new ResizeObserver(update);
     ro.observe(paper);
-    window.addEventListener("resize", recompute);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", recompute);
-    };
+    return () => ro.disconnect();
   }, [loading]);
+
+  // Fit the preview copy inside the dialog whenever it's open or resized.
+  useEffect(() => {
+    if (!showPreview) return;
+    const update = () => {
+      const w = previewBoxRef.current?.clientWidth ?? 720;
+      // account for the box padding (~24px)
+      setScale(Math.min(1, Math.max(0.2, (w - 8) / 720)));
+    };
+    update();
+    const t = setTimeout(update, 60); // after the dialog has laid out
+    window.addEventListener("resize", update);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("resize", update);
+    };
+  }, [showPreview, paperH]);
 
   const setItem = (i: number, patch: Partial<InvoiceItem>) =>
     setItems((arr) => arr.map((it, idx) => (idx === i ? { ...it, ...patch } : it)));
@@ -216,10 +226,9 @@ export function InvoiceBuilder({ invoiceId }: { invoiceId?: string }) {
   };
 
   const doPdf = async (mode: "download" | "share") => {
-    // Make sure the latest numbers are persisted before exporting.
-    await save();
     const node = paperRef.current;
-    if (!node) return;
+    if (!node) { toast.error("پیش‌نمایش آماده نیست؛ لحظه‌ای بعد دوباره تلاش کنید"); return; }
+    if (cleanItems().length === 0) { toast.error("حداقل یک قلم وارد کنید"); return; }
     setPdfBusy(mode);
     const filename = `factor-${invoiceNo}.pdf`;
     try {
@@ -228,11 +237,11 @@ export function InvoiceBuilder({ invoiceId }: { invoiceId?: string }) {
         toast.success("PDF دانلود شد");
       } else {
         const res = await shareInvoicePdf(node, filename, `فاکتور ${invoiceNo}`);
-        toast.success(res === "shared" ? "فاکتور به اشتراک گذاشته شد" : "اشتراک‌گذاری در دسترس نبود؛ PDF دانلود شد");
+        toast.success(res === "shared" ? "فاکتور به اشتراک گذاشته شد" : "اشتراک‌گذاری نشد؛ PDF دانلود شد");
       }
     } catch (e: any) {
       console.error("[invoice pdf]", e);
-      toast.error("ساخت PDF ناموفق بود");
+      toast.error(`ساخت PDF ناموفق بود: ${e?.message || "خطای ناشناخته"}`);
     } finally {
       setPdfBusy(null);
     }
@@ -250,9 +259,7 @@ export function InvoiceBuilder({ invoiceId }: { invoiceId?: string }) {
         <span className="text-ink">{id ? "ویرایش فاکتور" : "فاکتور جدید"}</span>
       </div>
 
-      <div className="grid lg:grid-cols-[1fr_minmax(320px,0.9fr)] gap-6 items-start">
-        {/* ------------------------------ Editor ------------------------------ */}
-        <div className="space-y-5 min-w-0">
+      <div className="space-y-5 max-w-3xl">
           {/* From order */}
           <div className="paper-card rounded-md p-5 space-y-3">
             <div className="flex items-center justify-between gap-2">
@@ -364,49 +371,69 @@ export function InvoiceBuilder({ invoiceId }: { invoiceId?: string }) {
           {/* Actions */}
           <div className="flex flex-wrap gap-2">
             <Button onClick={save} loading={saving} className="gap-1.5"><Save className="w-4 h-4" /> ذخیره</Button>
+            <Button variant="outline" onClick={() => setShowPreview(true)} className="gap-1.5"><Eye className="w-4 h-4" /> پیش‌نمایش</Button>
             <Button variant="outline" onClick={() => doPdf("download")} loading={pdfBusy === "download"} loadingText="در حال ساخت…" className="gap-1.5"><Download className="w-4 h-4" /> دانلود PDF</Button>
             <Button variant="outline" onClick={() => doPdf("share")} loading={pdfBusy === "share"} loadingText="آماده‌سازی…" className="gap-1.5"><Share2 className="w-4 h-4" /> اشتراک‌گذاری</Button>
           </div>
+
+          <p className="text-[11px] text-muted-foreground">جمع جزء: {formatToman(subtotal)} تومان · برای دیدن ظاهر نهایی «پیش‌نمایش» را بزنید.</p>
         </div>
 
-        {/* ------------------------------ Preview ----------------------------- */}
-        <div className="lg:sticky lg:top-24">
-          <p className="text-xs text-muted-foreground mb-2 text-center">پیش‌نمایش فاکتور</p>
-          <div ref={previewOuterRef} className="rounded-md bg-ink/5 p-2 sm:p-3 overflow-hidden">
-            {/* Outer box reserves the SCALED height; the inner node stays 720px
-                wide (for a crisp PDF) and is visually scaled to fit. */}
-            <div style={{ position: "relative", width: "100%", height: paperH ? paperH * scale : undefined }}>
-              <div
-                style={{
-                  position: paperH ? "absolute" : "relative",
-                  top: 0,
-                  left: "50%",
-                  width: 720,
-                  marginLeft: -360,
-                  transform: `scale(${scale})`,
-                  transformOrigin: "top center",
-                }}
-              >
-                <InvoicePaper
-                  ref={paperRef}
-                  settings={settings}
-                  storeName={storeName}
-                  invoiceNo={invoiceNo}
-                  issuedAt={issuedAt}
-                  customerName={customerName}
-                  customerPhone={customerPhone}
-                  customerNote={customerNote}
-                  items={previewItems}
-                  discount={discount}
-                  shipping={shipping}
-                />
+        {/* Hidden, full-size capture node — the ONLY element html2canvas reads.
+            It stays rendered (not display:none) but is pushed far off-screen via
+            translate, so it's never visible, never clipped, and never scaled. */}
+        <div aria-hidden style={{ position: "fixed", top: 0, left: 0, transform: "translateX(-200vw)", zIndex: -1, pointerEvents: "none" }}>
+          <div style={{ width: 720 }}>
+            <InvoicePaper
+              ref={paperRef}
+              settings={settings}
+              storeName={storeName}
+              invoiceNo={invoiceNo}
+              issuedAt={issuedAt}
+              customerName={customerName}
+              customerPhone={customerPhone}
+              customerNote={customerNote}
+              items={previewItems}
+              discount={discount}
+              shipping={shipping}
+            />
+          </div>
+        </div>
+
+        {/* Preview dialog (a scaled, display-only copy) */}
+        {showPreview && (
+          <div className="fixed inset-0 z-[70] bg-ink/50 flex items-stretch sm:items-center justify-center p-0 sm:p-6" onClick={() => setShowPreview(false)}>
+            <div className="bg-[var(--paper)] sm:rounded-md w-full sm:max-w-[780px] h-full sm:h-auto sm:max-h-[92vh] flex flex-col overflow-hidden shadow-xl animate-in fade-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between px-4 py-3 border-b border-ink/10 shrink-0">
+                <h3 className="font-serif text-ink flex items-center gap-2"><Eye className="w-4 h-4 text-[var(--gold)]" /> پیش‌نمایش فاکتور</h3>
+                <button onClick={() => setShowPreview(false)} aria-label="بستن" className="text-ink/50 hover:text-ink"><X className="w-5 h-5" /></button>
+              </div>
+              <div ref={previewBoxRef} className="overflow-auto p-3 bg-ink/5 flex-1">
+                <div style={{ position: "relative", width: "100%", height: paperH ? paperH * scale : undefined }}>
+                  <div style={{ position: paperH ? "absolute" : "relative", top: 0, left: "50%", width: 720, marginLeft: -360, transform: `scale(${scale})`, transformOrigin: "top center" }}>
+                    <InvoicePaper
+                      settings={settings}
+                      storeName={storeName}
+                      invoiceNo={invoiceNo}
+                      issuedAt={issuedAt}
+                      customerName={customerName}
+                      customerPhone={customerPhone}
+                      customerNote={customerNote}
+                      items={previewItems}
+                      discount={discount}
+                      shipping={shipping}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-2 p-3 border-t border-ink/10 shrink-0">
+                <Button className="flex-1 gap-1.5" onClick={() => doPdf("download")} loading={pdfBusy === "download"} loadingText="ساخت…"><Download className="w-4 h-4" /> دانلود PDF</Button>
+                <Button variant="outline" className="flex-1 gap-1.5" onClick={() => doPdf("share")} loading={pdfBusy === "share"} loadingText="…"><Share2 className="w-4 h-4" /> اشتراک‌گذاری</Button>
               </div>
             </div>
           </div>
-          <p className="text-[11px] text-muted-foreground mt-2 text-center">جمع جزء: {formatToman(subtotal)} تومان</p>
-        </div>
+        )}
       </div>
-    </div>
   );
 }
 

@@ -49,15 +49,27 @@ export function formatToman(n: number): string {
 }
 
 export function faDate(d: Date | string | number = new Date()): string {
-  return new Date(d).toLocaleDateString("fa-IR", { timeZone: "Asia/Tehran" });
+  const date = new Date(d);
+  try {
+    return date.toLocaleDateString("fa-IR", { timeZone: "Asia/Tehran" });
+  } catch {
+    // Fallback for browsers without the Persian calendar: Latin digits, plain.
+    try { return toFa(date.toLocaleDateString("en-GB")); } catch { return ""; }
+  }
 }
 
-// Human invoice number: عطرمون + yymmdd + 4 random digits, e.g. «۱۴۰۳۰۹۰۶-۴۸۳۱».
+// Human invoice number: yymmdd + 4 random digits, e.g. «۱۴۰۳۰۹۰۶-۴۸۳۱».
 export function newInvoiceNo(): string {
   const now = new Date();
-  const ymd = now
-    .toLocaleDateString("fa-IR-u-nu-latn", { timeZone: "Asia/Tehran", year: "numeric", month: "2-digit", day: "2-digit" })
-    .replace(/\D/g, "");
+  let ymd = "";
+  try {
+    ymd = now
+      .toLocaleDateString("fa-IR-u-nu-latn", { timeZone: "Asia/Tehran", year: "numeric", month: "2-digit", day: "2-digit" })
+      .replace(/\D/g, "");
+  } catch {
+    ymd = "";
+  }
+  if (!ymd) ymd = String(Date.now()).slice(-8); // safe fallback
   const rand = Math.floor(1000 + Math.random() * 9000);
   return `${ymd}-${rand}`;
 }
