@@ -261,7 +261,7 @@ export function InvoiceBuilder({ invoiceId }: { invoiceId?: string }) {
 
       <div className="space-y-5 max-w-3xl">
           {/* From order */}
-          <div className="paper-card rounded-md p-5 space-y-3">
+          <div className="paper-card rounded-md p-4 sm:p-5 space-y-3">
             <div className="flex items-center justify-between gap-2">
               <h2 className="font-serif text-lg text-ink flex items-center gap-2"><FileText className="w-4 h-4 text-[var(--gold)]" /> ساخت از روی سفارش</h2>
               <button onClick={() => setShowSettings((v) => !v)} className="text-xs text-[var(--gold-deep)] hover:underline flex items-center gap-1"><Settings2 className="w-3.5 h-3.5" /> شخصی‌سازی فاکتور</button>
@@ -285,7 +285,7 @@ export function InvoiceBuilder({ invoiceId }: { invoiceId?: string }) {
 
           {/* Settings panel */}
           {showSettings && (
-            <div className="paper-card rounded-md p-5 space-y-3 border border-[var(--gold)]/30">
+            <div className="paper-card rounded-md p-4 sm:p-5 space-y-3 border border-[var(--gold)]/30">
               <h3 className="font-serif text-base text-ink">شخصی‌سازی فاکتورِ عطاری</h3>
               <div className="grid sm:grid-cols-2 gap-3">
                 <Field label="نام روی فاکتور">
@@ -313,7 +313,7 @@ export function InvoiceBuilder({ invoiceId }: { invoiceId?: string }) {
           )}
 
           {/* Customer */}
-          <div className="paper-card rounded-md p-5 space-y-3">
+          <div className="paper-card rounded-md p-4 sm:p-5 space-y-3">
             <h2 className="font-serif text-lg text-ink">مشتری</h2>
             <div className="grid sm:grid-cols-2 gap-3">
               <Field label="نام مشتری"><Input value={customerName} onChange={(e) => setCustomerName(e.target.value)} /></Field>
@@ -325,7 +325,7 @@ export function InvoiceBuilder({ invoiceId }: { invoiceId?: string }) {
           </div>
 
           {/* Items */}
-          <div className="paper-card rounded-md p-5 space-y-3">
+          <div className="paper-card rounded-md p-4 sm:p-5 space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="font-serif text-lg text-ink">اقلام فاکتور</h2>
               <Button variant="outline" size="sm" onClick={addItem} className="gap-1"><Plus className="w-4 h-4" /> افزودن قلم</Button>
@@ -338,16 +338,17 @@ export function InvoiceBuilder({ invoiceId }: { invoiceId?: string }) {
                     <Input className="flex-1" value={it.title} onChange={(e) => setItem(i, { title: e.target.value })} placeholder="شرح کالا (مثلاً: ساواج دیور ۳۰ میل)" />
                     <button onClick={() => removeItem(i)} aria-label="حذف" className="mt-1.5 w-8 h-8 rounded-sm flex items-center justify-center text-ink/40 hover:text-red-600 hover:bg-red-50 transition shrink-0"><Trash2 className="w-4 h-4" /></button>
                   </div>
-                  <div className="flex gap-2 pr-7">
-                    <Field label="تعداد" className="w-20 shrink-0">
-                      <Input type="number" inputMode="numeric" min={0} value={it.qty} onChange={(e) => setItem(i, { qty: Number(e.target.value) })} />
+                  <div className="grid grid-cols-2 gap-2">
+                    <Field label="تعداد">
+                      <Input type="number" inputMode="numeric" min={0} value={it.qty} onChange={(e) => setItem(i, { qty: Number(e.target.value) })} className="text-center" />
                     </Field>
-                    <Field label="قیمت واحد (تومان)" className="flex-1">
+                    <Field label="قیمت واحد (تومان)">
                       <Input type="number" inputMode="numeric" min={0} value={it.unit_price} onChange={(e) => setItem(i, { unit_price: Number(e.target.value) })} dir="ltr" />
                     </Field>
-                    <Field label="جمع" className="w-28 shrink-0">
-                      <div className="h-9 flex items-center px-2 text-sm text-[var(--gold-deep)] font-serif">{formatToman((Number(it.qty) || 0) * (Number(it.unit_price) || 0))}</div>
-                    </Field>
+                  </div>
+                  <div className="flex items-center justify-between pt-0.5 text-sm">
+                    <span className="text-xs text-muted-foreground">جمع این قلم</span>
+                    <span className="text-[var(--gold-deep)] font-serif">{formatToman((Number(it.qty) || 0) * (Number(it.unit_price) || 0))} تومان</span>
                   </div>
                 </div>
               ))}
@@ -355,7 +356,7 @@ export function InvoiceBuilder({ invoiceId }: { invoiceId?: string }) {
           </div>
 
           {/* Adjustments */}
-          <div className="paper-card rounded-md p-5 space-y-3">
+          <div className="paper-card rounded-md p-4 sm:p-5 space-y-3">
             <h2 className="font-serif text-lg text-ink">مبالغ</h2>
             <div className="grid sm:grid-cols-2 gap-3">
               <Field label="تخفیف (تومان)"><Input type="number" inputMode="numeric" min={0} value={discount} onChange={(e) => setDiscount(Number(e.target.value) || 0)} dir="ltr" /></Field>
