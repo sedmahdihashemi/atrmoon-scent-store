@@ -88,7 +88,9 @@ export function InstallButton() {
 
   return (
     <>
-      <div className="fixed bottom-4 inset-x-0 z-50 flex justify-center px-4 pointer-events-none">
+      {/* Sit above the mobile bottom nav (md:hidden, ~60px + safe area); on
+          desktop there is no bottom bar so it drops back to the corner. */}
+      <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+4.75rem)] md:bottom-4 inset-x-0 z-50 flex justify-center px-4 pointer-events-none">
         <div className="pointer-events-auto flex items-center gap-2 rounded-full bg-ink text-[var(--paper)] shadow-lg shadow-ink/20 pr-2 pl-1 py-1 animate-in fade-in slide-in-from-bottom-2 duration-500">
           <button onClick={onInstall} className="flex items-center gap-2 rounded-full px-4 py-2 font-serif text-sm hover:bg-white/5 transition">
             <Download className="w-4 h-4 text-[var(--gold)]" />
