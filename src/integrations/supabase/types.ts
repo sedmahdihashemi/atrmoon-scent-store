@@ -153,6 +153,63 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_invoices: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          customer_name: string | null
+          customer_note: string | null
+          customer_phone: string | null
+          discount_toman: number
+          id: string
+          invoice_no: string
+          issued_at: string
+          items: Json
+          shipping_toman: number
+          source_order_id: string | null
+          store_id: string
+          subtotal_toman: number
+          total_toman: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          customer_name?: string | null
+          customer_note?: string | null
+          customer_phone?: string | null
+          discount_toman?: number
+          id?: string
+          invoice_no: string
+          issued_at?: string
+          items?: Json
+          shipping_toman?: number
+          source_order_id?: string | null
+          store_id: string
+          subtotal_toman?: number
+          total_toman?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          customer_name?: string | null
+          customer_note?: string | null
+          customer_phone?: string | null
+          discount_toman?: number
+          id?: string
+          invoice_no?: string
+          issued_at?: string
+          items?: Json
+          shipping_toman?: number
+          source_order_id?: string | null
+          store_id?: string
+          subtotal_toman?: number
+          total_toman?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       store_bottles: {
         Row: {
           cost_toman: number | null
@@ -1221,6 +1278,7 @@ export type Database = {
           description: string | null
           id: string
           instagram_url: string | null
+          invoice_settings: Json | null
           logo_url: string | null
           seller_id: string
           slug: string
@@ -1241,6 +1299,7 @@ export type Database = {
           description?: string | null
           id?: string
           instagram_url?: string | null
+          invoice_settings?: Json | null
           logo_url?: string | null
           seller_id: string
           slug: string
@@ -1261,6 +1320,7 @@ export type Database = {
           description?: string | null
           id?: string
           instagram_url?: string | null
+          invoice_settings?: Json | null
           logo_url?: string | null
           seller_id?: string
           slug?: string

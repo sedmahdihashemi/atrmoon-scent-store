@@ -38,6 +38,7 @@ import { Route as RegisterCustomerRouteImport } from './routes/register.customer
 import { Route as RegisterSellerRouteImport } from './routes/register.seller'
 import { Route as SellerIndexRouteImport } from './routes/seller.index'
 import { Route as SellerBottlesRouteImport } from './routes/seller.bottles'
+import { Route as SellerInvoicesRouteImport } from './routes/seller.invoices'
 import { Route as SellerOrdersRouteImport } from './routes/seller.orders'
 import { Route as SellerPendingRouteImport } from './routes/seller.pending'
 import { Route as SellerProductsRouteImport } from './routes/seller.products'
@@ -47,6 +48,8 @@ import { Route as SellerWholesaleRouteImport } from './routes/seller.wholesale'
 import { Route as StoresSlugRouteImport } from './routes/stores.$slug'
 import { Route as TrackOrderIdRouteImport } from './routes/track.$orderId'
 import { Route as ApiPublicCronCartSummaryRouteImport } from './routes/api/public/cron-cart-summary'
+import { Route as SellerInvoicesIdRouteImport } from './routes/seller.invoices.$id'
+import { Route as SellerInvoicesNewRouteImport } from './routes/seller.invoices.new'
 import { Route as SellerOrdersIdRouteImport } from './routes/seller.orders.$id'
 import { Route as SellerProductsIdRouteImport } from './routes/seller.products.$id'
 import { Route as SellerProductsNewRouteImport } from './routes/seller.products.new'
@@ -200,6 +203,11 @@ const SellerBottlesRoute = SellerBottlesRouteImport.update({
   path: '/bottles',
   getParentRoute: () => SellerRoute,
 } as any)
+const SellerInvoicesRoute = SellerInvoicesRouteImport.update({
+  id: '/invoices',
+  path: '/invoices',
+  getParentRoute: () => SellerRoute,
+} as any)
 const SellerOrdersRoute = SellerOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
@@ -246,6 +254,16 @@ const ApiPublicCronCartSummaryRoute =
     path: '/api/public/cron-cart-summary',
     getParentRoute: () => rootRouteImport,
   } as any)
+const SellerInvoicesIdRoute = SellerInvoicesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => SellerInvoicesRoute,
+} as any)
+const SellerInvoicesNewRoute = SellerInvoicesNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => SellerInvoicesRoute,
+} as any)
 const SellerOrdersIdRoute = SellerOrdersIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -312,6 +330,7 @@ export interface FileRoutesByFullPath {
   '/register/customer': typeof RegisterCustomerRoute
   '/register/seller': typeof RegisterSellerRoute
   '/seller/bottles': typeof SellerBottlesRoute
+  '/seller/invoices': typeof SellerInvoicesRouteWithChildren
   '/seller/orders': typeof SellerOrdersRouteWithChildren
   '/seller/pending': typeof SellerPendingRoute
   '/seller/products': typeof SellerProductsRouteWithChildren
@@ -323,6 +342,8 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/seller/': typeof SellerIndexRoute
   '/api/public/cron-cart-summary': typeof ApiPublicCronCartSummaryRoute
+  '/seller/invoices/$id': typeof SellerInvoicesIdRoute
+  '/seller/invoices/new': typeof SellerInvoicesNewRoute
   '/seller/orders/$id': typeof SellerOrdersIdRoute
   '/seller/products/$id': typeof SellerProductsIdRoute
   '/seller/products/new': typeof SellerProductsNewRoute
@@ -357,6 +378,7 @@ export interface FileRoutesByTo {
   '/register/customer': typeof RegisterCustomerRoute
   '/register/seller': typeof RegisterSellerRoute
   '/seller/bottles': typeof SellerBottlesRoute
+  '/seller/invoices': typeof SellerInvoicesRouteWithChildren
   '/seller/orders': typeof SellerOrdersRouteWithChildren
   '/seller/pending': typeof SellerPendingRoute
   '/seller/products': typeof SellerProductsRouteWithChildren
@@ -368,6 +390,8 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/seller': typeof SellerIndexRoute
   '/api/public/cron-cart-summary': typeof ApiPublicCronCartSummaryRoute
+  '/seller/invoices/$id': typeof SellerInvoicesIdRoute
+  '/seller/invoices/new': typeof SellerInvoicesNewRoute
   '/seller/orders/$id': typeof SellerOrdersIdRoute
   '/seller/products/$id': typeof SellerProductsIdRoute
   '/seller/products/new': typeof SellerProductsNewRoute
@@ -405,6 +429,7 @@ export interface FileRoutesById {
   '/register/customer': typeof RegisterCustomerRoute
   '/register/seller': typeof RegisterSellerRoute
   '/seller/bottles': typeof SellerBottlesRoute
+  '/seller/invoices': typeof SellerInvoicesRouteWithChildren
   '/seller/orders': typeof SellerOrdersRouteWithChildren
   '/seller/pending': typeof SellerPendingRoute
   '/seller/products': typeof SellerProductsRouteWithChildren
@@ -416,6 +441,8 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/seller/': typeof SellerIndexRoute
   '/api/public/cron-cart-summary': typeof ApiPublicCronCartSummaryRoute
+  '/seller/invoices/$id': typeof SellerInvoicesIdRoute
+  '/seller/invoices/new': typeof SellerInvoicesNewRoute
   '/seller/orders/$id': typeof SellerOrdersIdRoute
   '/seller/products/$id': typeof SellerProductsIdRoute
   '/seller/products/new': typeof SellerProductsNewRoute
@@ -454,6 +481,7 @@ export interface FileRouteTypes {
     | '/register/customer'
     | '/register/seller'
     | '/seller/bottles'
+    | '/seller/invoices'
     | '/seller/orders'
     | '/seller/pending'
     | '/seller/products'
@@ -465,6 +493,8 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/seller/'
     | '/api/public/cron-cart-summary'
+    | '/seller/invoices/$id'
+    | '/seller/invoices/new'
     | '/seller/orders/$id'
     | '/seller/products/$id'
     | '/seller/products/new'
@@ -499,6 +529,7 @@ export interface FileRouteTypes {
     | '/register/customer'
     | '/register/seller'
     | '/seller/bottles'
+    | '/seller/invoices'
     | '/seller/orders'
     | '/seller/pending'
     | '/seller/products'
@@ -510,6 +541,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/seller'
     | '/api/public/cron-cart-summary'
+    | '/seller/invoices/$id'
+    | '/seller/invoices/new'
     | '/seller/orders/$id'
     | '/seller/products/$id'
     | '/seller/products/new'
@@ -546,6 +579,7 @@ export interface FileRouteTypes {
     | '/register/customer'
     | '/register/seller'
     | '/seller/bottles'
+    | '/seller/invoices'
     | '/seller/orders'
     | '/seller/pending'
     | '/seller/products'
@@ -557,6 +591,8 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/seller/'
     | '/api/public/cron-cart-summary'
+    | '/seller/invoices/$id'
+    | '/seller/invoices/new'
     | '/seller/orders/$id'
     | '/seller/products/$id'
     | '/seller/products/new'
@@ -794,6 +830,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SellerBottlesRouteImport
       parentRoute: typeof SellerRoute
     }
+    '/seller/invoices': {
+      id: '/seller/invoices'
+      path: '/invoices'
+      fullPath: '/seller/invoices'
+      preLoaderRoute: typeof SellerInvoicesRouteImport
+      parentRoute: typeof SellerRoute
+    }
     '/seller/orders': {
       id: '/seller/orders'
       path: '/orders'
@@ -856,6 +899,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/public/cron-cart-summary'
       preLoaderRoute: typeof ApiPublicCronCartSummaryRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/seller/invoices/$id': {
+      id: '/seller/invoices/$id'
+      path: '/$id'
+      fullPath: '/seller/invoices/$id'
+      preLoaderRoute: typeof SellerInvoicesIdRouteImport
+      parentRoute: typeof SellerInvoicesRoute
+    }
+    '/seller/invoices/new': {
+      id: '/seller/invoices/new'
+      path: '/new'
+      fullPath: '/seller/invoices/new'
+      preLoaderRoute: typeof SellerInvoicesNewRouteImport
+      parentRoute: typeof SellerInvoicesRoute
     }
     '/seller/orders/$id': {
       id: '/seller/orders/$id'
@@ -963,6 +1020,20 @@ const RegisterRouteWithChildren = RegisterRoute._addFileChildren(
   RegisterRouteChildren,
 )
 
+interface SellerInvoicesRouteChildren {
+  SellerInvoicesIdRoute: typeof SellerInvoicesIdRoute
+  SellerInvoicesNewRoute: typeof SellerInvoicesNewRoute
+}
+
+const SellerInvoicesRouteChildren: SellerInvoicesRouteChildren = {
+  SellerInvoicesIdRoute: SellerInvoicesIdRoute,
+  SellerInvoicesNewRoute: SellerInvoicesNewRoute,
+}
+
+const SellerInvoicesRouteWithChildren = SellerInvoicesRoute._addFileChildren(
+  SellerInvoicesRouteChildren,
+)
+
 interface SellerOrdersRouteChildren {
   SellerOrdersIdRoute: typeof SellerOrdersIdRoute
 }
@@ -991,6 +1062,7 @@ const SellerProductsRouteWithChildren = SellerProductsRoute._addFileChildren(
 
 interface SellerRouteChildren {
   SellerBottlesRoute: typeof SellerBottlesRoute
+  SellerInvoicesRoute: typeof SellerInvoicesRouteWithChildren
   SellerOrdersRoute: typeof SellerOrdersRouteWithChildren
   SellerPendingRoute: typeof SellerPendingRoute
   SellerProductsRoute: typeof SellerProductsRouteWithChildren
@@ -1002,6 +1074,7 @@ interface SellerRouteChildren {
 
 const SellerRouteChildren: SellerRouteChildren = {
   SellerBottlesRoute: SellerBottlesRoute,
+  SellerInvoicesRoute: SellerInvoicesRouteWithChildren,
   SellerOrdersRoute: SellerOrdersRouteWithChildren,
   SellerPendingRoute: SellerPendingRoute,
   SellerProductsRoute: SellerProductsRouteWithChildren,
