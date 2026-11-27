@@ -115,7 +115,7 @@ export const InvoicePaper = forwardRef<HTMLDivElement, InvoicePaperProps>(functi
               flexShrink: 0,
             }}
           >
-            <div style={{ fontFamily: serif, fontSize: 16, fontWeight: 700, color: GOLD_DEEP, letterSpacing: 1 }}>فاکتور فروش</div>
+            <div style={{ fontFamily: serif, fontSize: 16, fontWeight: 700, color: GOLD_DEEP }}>فاکتور فروش</div>
             <div style={{ fontSize: 12, color: INK, marginTop: 5 }}>شماره: {toFa(invoiceNo)}</div>
             <div style={{ fontSize: 12, color: INK_SOFT, marginTop: 2 }}>تاریخ: {faDate(issuedAt || new Date())}</div>
           </div>
@@ -228,7 +228,7 @@ export const InvoicePaper = forwardRef<HTMLDivElement, InvoicePaperProps>(functi
           {settings.footer_note?.trim() || "از خرید شما سپاسگزاریم. سلامتی و خوشبختی همراهتان باد."}
         </div>
 
-        <div style={{ textAlign: "center", marginTop: 12, fontSize: 10, color: GOLD_DEEP, letterSpacing: 0.5 }}>
+        <div style={{ textAlign: "center", marginTop: 12, fontSize: 10, color: GOLD_DEEP }}>
           ساخته‌شده با عطرمون — atrmoon.top
         </div>
       </div>
@@ -274,9 +274,9 @@ function Stamp({ logoSrc }: { logoSrc: string }) {
           textAlign: "center",
         }}
       >
-        <div style={{ fontSize: 9, letterSpacing: 2, fontWeight: 700 }}>عطرمون</div>
+        <div style={{ fontSize: 10, fontWeight: 700 }}>عطرمون</div>
         <img src={logoSrc} width={44} height={44} alt="" style={{ width: 44, height: 44, margin: "3px 0", opacity: 0.85 }} />
-        <div style={{ fontSize: 8, letterSpacing: 1, fontWeight: 700 }}>تضمین اصالت</div>
+        <div style={{ fontSize: 8, fontWeight: 700 }}>تضمین اصالت</div>
         <div style={{ fontSize: 7, letterSpacing: 2, marginTop: 1 }}>ATRMOON</div>
       </div>
     </div>

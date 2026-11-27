@@ -77,25 +77,40 @@ function saveBlob(blob: Blob, filename: string) {
 }
 
 export async function downloadInvoicePdf(node: HTMLElement, filename: string) {
-  const blob = await renderInvoicePdf(node);
-  const file = new File([blob], filename, { type: "application/pdf" });
-  const nav = navigator as Navigator & {
-    canShare?: (data?: any) => boolean;
-    share?: (data?: any) => Promise<void>;
-  };
-  // Inside an installed PWA, a programmatic <a download> is often blocked.
-  // If the device can share a file, use the share sheet (the user can pick
-  // "Save to Files"/"Download"); otherwise fall back to the link download.
-  if (isStandalone() && nav.canShare && nav.share && nav.canShare({ files: [file] })) {
+  // Inside an installed PWA a programmatic <a download> is often blocked and
+  // there's no download-notification to open the file — so we open the PDF in
+  // a new browser tab (a real viewer) instead. The tab MUST be opened now,
+  // synchronously within the click, before any await, or it gets popup-blocked.
+  const standalone = isStandalone();
+  const viewer = standalone ? window.open("", "_blank") : null;
+
+  let blob: Blob;
+  try {
+    blob = await renderInvoicePdf(node);
+  } catch (e) {
+    viewer?.close();
+    throw e;
+  }
+  const url = URL.createObjectURL(blob);
+
+  if (viewer) {
     try {
-      await nav.share({ files: [file], title: filename });
+      viewer.location.href = url;
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
       return;
-    } catch (e: any) {
-      if (e?.name === "AbortError") return;
-      // fall through to link download
+    } catch {
+      /* fall through to a normal download */
     }
   }
-  saveBlob(blob, filename);
+  // Normal browser: a real file download (shows the system download notice).
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.rel = "noopener";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 15000);
 }
 
 // Share the PDF through the device's native share sheet (WhatsApp, Bale,

@@ -48,6 +48,7 @@ import { Route as SellerWholesaleRouteImport } from './routes/seller.wholesale'
 import { Route as StoresSlugRouteImport } from './routes/stores.$slug'
 import { Route as TrackOrderIdRouteImport } from './routes/track.$orderId'
 import { Route as ApiPublicCronCartSummaryRouteImport } from './routes/api/public/cron-cart-summary'
+import { Route as SellerInvoicesIndexRouteImport } from './routes/seller.invoices.index'
 import { Route as SellerInvoicesIdRouteImport } from './routes/seller.invoices.$id'
 import { Route as SellerInvoicesNewRouteImport } from './routes/seller.invoices.new'
 import { Route as SellerOrdersIdRouteImport } from './routes/seller.orders.$id'
@@ -254,6 +255,11 @@ const ApiPublicCronCartSummaryRoute =
     path: '/api/public/cron-cart-summary',
     getParentRoute: () => rootRouteImport,
   } as any)
+const SellerInvoicesIndexRoute = SellerInvoicesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SellerInvoicesRoute,
+} as any)
 const SellerInvoicesIdRoute = SellerInvoicesIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -347,6 +353,7 @@ export interface FileRoutesByFullPath {
   '/seller/orders/$id': typeof SellerOrdersIdRoute
   '/seller/products/$id': typeof SellerProductsIdRoute
   '/seller/products/new': typeof SellerProductsNewRoute
+  '/seller/invoices/': typeof SellerInvoicesIndexRoute
   '/api/public/bale/cron-expire': typeof ApiPublicBaleCronExpireRoute
   '/api/public/bale/webhook': typeof ApiPublicBaleWebhookRoute
   '/api/public/orders/submit-receipt': typeof ApiPublicOrdersSubmitReceiptRoute
@@ -378,7 +385,6 @@ export interface FileRoutesByTo {
   '/register/customer': typeof RegisterCustomerRoute
   '/register/seller': typeof RegisterSellerRoute
   '/seller/bottles': typeof SellerBottlesRoute
-  '/seller/invoices': typeof SellerInvoicesRouteWithChildren
   '/seller/orders': typeof SellerOrdersRouteWithChildren
   '/seller/pending': typeof SellerPendingRoute
   '/seller/products': typeof SellerProductsRouteWithChildren
@@ -395,6 +401,7 @@ export interface FileRoutesByTo {
   '/seller/orders/$id': typeof SellerOrdersIdRoute
   '/seller/products/$id': typeof SellerProductsIdRoute
   '/seller/products/new': typeof SellerProductsNewRoute
+  '/seller/invoices': typeof SellerInvoicesIndexRoute
   '/api/public/bale/cron-expire': typeof ApiPublicBaleCronExpireRoute
   '/api/public/bale/webhook': typeof ApiPublicBaleWebhookRoute
   '/api/public/orders/submit-receipt': typeof ApiPublicOrdersSubmitReceiptRoute
@@ -446,6 +453,7 @@ export interface FileRoutesById {
   '/seller/orders/$id': typeof SellerOrdersIdRoute
   '/seller/products/$id': typeof SellerProductsIdRoute
   '/seller/products/new': typeof SellerProductsNewRoute
+  '/seller/invoices/': typeof SellerInvoicesIndexRoute
   '/api/public/bale/cron-expire': typeof ApiPublicBaleCronExpireRoute
   '/api/public/bale/webhook': typeof ApiPublicBaleWebhookRoute
   '/api/public/orders/submit-receipt': typeof ApiPublicOrdersSubmitReceiptRoute
@@ -498,6 +506,7 @@ export interface FileRouteTypes {
     | '/seller/orders/$id'
     | '/seller/products/$id'
     | '/seller/products/new'
+    | '/seller/invoices/'
     | '/api/public/bale/cron-expire'
     | '/api/public/bale/webhook'
     | '/api/public/orders/submit-receipt'
@@ -529,7 +538,6 @@ export interface FileRouteTypes {
     | '/register/customer'
     | '/register/seller'
     | '/seller/bottles'
-    | '/seller/invoices'
     | '/seller/orders'
     | '/seller/pending'
     | '/seller/products'
@@ -546,6 +554,7 @@ export interface FileRouteTypes {
     | '/seller/orders/$id'
     | '/seller/products/$id'
     | '/seller/products/new'
+    | '/seller/invoices'
     | '/api/public/bale/cron-expire'
     | '/api/public/bale/webhook'
     | '/api/public/orders/submit-receipt'
@@ -596,6 +605,7 @@ export interface FileRouteTypes {
     | '/seller/orders/$id'
     | '/seller/products/$id'
     | '/seller/products/new'
+    | '/seller/invoices/'
     | '/api/public/bale/cron-expire'
     | '/api/public/bale/webhook'
     | '/api/public/orders/submit-receipt'
@@ -900,6 +910,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCronCartSummaryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/seller/invoices/': {
+      id: '/seller/invoices/'
+      path: '/'
+      fullPath: '/seller/invoices/'
+      preLoaderRoute: typeof SellerInvoicesIndexRouteImport
+      parentRoute: typeof SellerInvoicesRoute
+    }
     '/seller/invoices/$id': {
       id: '/seller/invoices/$id'
       path: '/$id'
@@ -1023,11 +1040,13 @@ const RegisterRouteWithChildren = RegisterRoute._addFileChildren(
 interface SellerInvoicesRouteChildren {
   SellerInvoicesIdRoute: typeof SellerInvoicesIdRoute
   SellerInvoicesNewRoute: typeof SellerInvoicesNewRoute
+  SellerInvoicesIndexRoute: typeof SellerInvoicesIndexRoute
 }
 
 const SellerInvoicesRouteChildren: SellerInvoicesRouteChildren = {
   SellerInvoicesIdRoute: SellerInvoicesIdRoute,
   SellerInvoicesNewRoute: SellerInvoicesNewRoute,
+  SellerInvoicesIndexRoute: SellerInvoicesIndexRoute,
 }
 
 const SellerInvoicesRouteWithChildren = SellerInvoicesRoute._addFileChildren(
