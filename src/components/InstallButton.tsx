@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Download, Share, X, Plus } from "lucide-react";
+import { Download, Share, X, Plus, MoreVertical, ExternalLink } from "lucide-react";
 
 type BIPEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
 
@@ -12,21 +12,39 @@ function isStandalone() {
     (navigator as any).standalone === true
   );
 }
+
+// --- Browser / platform sniffing (best-effort; only used to pick the right
+//     manual-install instructions when no native prompt is available) --------
+function ua() {
+  return typeof navigator === "undefined" ? "" : navigator.userAgent || "";
+}
 function isIOS() {
-  if (typeof navigator === "undefined") return false;
-  return /iphone|ipad|ipod/i.test(navigator.userAgent) && !(window as any).MSStream;
+  return /iphone|ipad|ipod/i.test(ua()) && !(typeof window !== "undefined" && (window as any).MSStream);
+}
+function isAndroid() {
+  return /android/i.test(ua());
+}
+// In-app webviews (Instagram, Facebook, Telegram, Bale, …) can't install a PWA;
+// the user must first open the page in the real browser.
+function isInApp() {
+  const s = ua();
+  return /\b(FBAN|FBAV|Instagram|Telegram|Line|Twitter|GSA|Snapchat)\b/i.test(s) ||
+    (/\bwv\b/i.test(s) && isAndroid()); // Android WebView flag
+}
+function isFirefox() {
+  return /firefox|fxios/i.test(ua());
 }
 
-// A single, unified "install the app" pill. Registers the service worker,
-// listens for the install prompt (Android/Chrome), and on iOS shows the
-// add-to-home-screen steps instead (iOS has no install prompt).
+// A single, unified "install the app" pill. On Chromium it triggers the real
+// install prompt; everywhere else it opens step-by-step instructions tailored
+// to the browser (iOS Safari, Android menu, Firefox, in-app browsers…), so the
+// button is useful on EVERY browser instead of only Chrome.
 export function InstallButton() {
   const [mounted, setMounted] = useState(false);
   const [deferred, setDeferred] = useState<BIPEvent | null>(null);
   const [installed, setInstalled] = useState(false);
   const [dismissed, setDismissed] = useState(false);
-  const [showIosHelp, setShowIosHelp] = useState(false);
-  const ios = mounted && isIOS();
+  const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -37,7 +55,7 @@ export function InstallButton() {
     try { setDismissed(localStorage.getItem(DISMISS_KEY) === "1"); } catch { /* ignore */ }
 
     const onBIP = (e: Event) => { e.preventDefault(); setDeferred(e as BIPEvent); };
-    const onInstalled = () => { setInstalled(true); setDeferred(null); };
+    const onInstalled = () => { setInstalled(true); setDeferred(null); setShowHelp(false); };
     window.addEventListener("beforeinstallprompt", onBIP);
     window.addEventListener("appinstalled", onInstalled);
     return () => {
@@ -53,19 +71,20 @@ export function InstallButton() {
 
   const onInstall = async () => {
     if (deferred) {
+      // Native install (Chrome / Edge / Samsung / Brave …)
       await deferred.prompt();
       const choice = await deferred.userChoice.catch(() => ({ outcome: "dismissed" }));
       if (choice.outcome === "accepted") setInstalled(true);
       setDeferred(null);
-    } else if (ios) {
-      setShowIosHelp(true);
+      return;
     }
+    // No native prompt → show manual steps for this browser.
+    setShowHelp(true);
   };
 
-  // Nothing to show when already installed, dismissed, or not installable.
-  if (installed || dismissed) return null;
-  const canShow = !!deferred || ios;
-  if (!canShow) return null;
+  // Hide only when already installed or the user dismissed it. Otherwise the
+  // pill shows on every browser (we always have *some* guidance to give).
+  if (!mounted || installed || dismissed) return null;
 
   return (
     <>
@@ -81,30 +100,75 @@ export function InstallButton() {
         </div>
       </div>
 
-      {showIosHelp && (
-        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-ink/40 p-4" onClick={() => setShowIosHelp(false)}>
-          <div className="paper-card rounded-md p-6 max-w-sm w-full space-y-4" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between">
-              <h3 className="font-serif text-lg text-ink">نصب روی آیفون</h3>
-              <button onClick={() => setShowIosHelp(false)} aria-label="بستن" className="text-ink/50 hover:text-ink"><X className="w-5 h-5" /></button>
-            </div>
-            <ol className="space-y-3 text-sm font-serif text-ink/80">
-              <li className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-[var(--gold)]/15 text-[var(--gold-deep)] flex items-center justify-center text-xs shrink-0">۱</span>
-                روی دکمه‌ی <Share className="w-4 h-4 inline text-[var(--gold-deep)]" /> «اشتراک‌گذاری» در نوار سافاری بزنید.
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-[var(--gold)]/15 text-[var(--gold-deep)] flex items-center justify-center text-xs shrink-0">۲</span>
-                گزینه‌ی <Plus className="w-4 h-4 inline text-[var(--gold-deep)]" /> «افزودن به صفحه‌ی اصلی» را انتخاب کنید.
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-[var(--gold)]/15 text-[var(--gold-deep)] flex items-center justify-center text-xs shrink-0">۳</span>
-                روی «افزودن» بزنید — عطرمون روی صفحه‌ی اصلی‌تان نصب می‌شود.
-              </li>
-            </ol>
-          </div>
-        </div>
-      )}
+      {showHelp && <InstallHelp onClose={() => setShowHelp(false)} />}
     </>
+  );
+}
+
+// Instructions sheet, chosen by platform. Covers: iOS Safari, in-app browsers,
+// Android (Chrome/Firefox menu), and desktop.
+function InstallHelp({ onClose }: { onClose: () => void }) {
+  const ios = isIOS();
+  const inApp = isInApp();
+  const android = isAndroid();
+  const firefox = isFirefox();
+
+  let title = "نصب اپ عطرمون";
+  let steps: React.ReactNode[] = [];
+
+  if (inApp) {
+    title = "ابتدا در مرورگر باز کنید";
+    steps = [
+      <>روی دکمه‌ی منو <MoreVertical className="w-4 h-4 inline text-[var(--gold-deep)]" /> بالای صفحه بزنید.</>,
+      <>گزینه‌ی <ExternalLink className="w-4 h-4 inline text-[var(--gold-deep)]" /> «باز کردن در مرورگر» (Chrome یا Safari) را انتخاب کنید.</>,
+      <>در آن مرورگر، دوباره روی «نصب اپ عطرمون» بزنید.</>,
+    ];
+  } else if (ios) {
+    title = "نصب روی آیفون";
+    steps = [
+      <>روی دکمه‌ی <Share className="w-4 h-4 inline text-[var(--gold-deep)]" /> «اشتراک‌گذاری» در نوار سافاری بزنید.</>,
+      <>گزینه‌ی <Plus className="w-4 h-4 inline text-[var(--gold-deep)]" /> «افزودن به صفحه‌ی اصلی» را انتخاب کنید.</>,
+      <>روی «افزودن» بزنید — عطرمون روی صفحه‌ی اصلی‌تان نصب می‌شود.</>,
+    ];
+  } else if (android) {
+    title = firefox ? "نصب روی اندروید (فایرفاکس)" : "نصب روی اندروید";
+    steps = [
+      <>روی دکمه‌ی منو <MoreVertical className="w-4 h-4 inline text-[var(--gold-deep)]" /> (سه‌نقطه) مرورگر بزنید.</>,
+      firefox
+        ? <>گزینه‌ی «Install» یا «نصب» را انتخاب کنید.</>
+        : <>گزینه‌ی <Plus className="w-4 h-4 inline text-[var(--gold-deep)]" /> «افزودن به صفحه اصلی» یا «نصب برنامه» را بزنید.</>,
+      <>تأیید کنید — آیکن عطرمون روی صفحه‌ی اصلی می‌آید.</>,
+    ];
+  } else {
+    title = "نصب روی کامپیوتر";
+    steps = [
+      <>روی آیکن نصب <Download className="w-4 h-4 inline text-[var(--gold-deep)]" /> در سمت چپِ نوار آدرس بزنید (یا منوی سه‌نقطه‌ی مرورگر).</>,
+      <>گزینه‌ی «Install» / «نصب عطرمون» را انتخاب کنید.</>,
+      <>روی «نصب» بزنید تا در یک پنجره‌ی مستقل باز شود.</>,
+    ];
+  }
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-ink/40 p-4" onClick={onClose}>
+      <div className="paper-card rounded-md p-6 max-w-sm w-full space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between">
+          <h3 className="font-serif text-lg text-ink">{title}</h3>
+          <button onClick={onClose} aria-label="بستن" className="text-ink/50 hover:text-ink"><X className="w-5 h-5" /></button>
+        </div>
+        <ol className="space-y-3 text-sm font-serif text-ink/80">
+          {steps.map((s, i) => (
+            <li key={i} className="flex items-start gap-2">
+              <span className="w-6 h-6 rounded-full bg-[var(--gold)]/15 text-[var(--gold-deep)] flex items-center justify-center text-xs shrink-0 mt-0.5">{["۱", "۲", "۳", "۴"][i]}</span>
+              <span className="leading-7">{s}</span>
+            </li>
+          ))}
+        </ol>
+        {inApp && (
+          <p className="text-[11px] text-muted-foreground leading-6">
+            نکته: در مرورگرهای داخل اینستاگرام/تلگرام امکان نصب نیست؛ حتماً باید در Chrome یا Safari باز شود.
+          </p>
+        )}
+      </div>
+    </div>
   );
 }
