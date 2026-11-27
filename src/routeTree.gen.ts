@@ -27,6 +27,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminBottleTypesRouteImport } from './routes/admin.bottle-types'
 import { Route as AdminBrandsRouteImport } from './routes/admin.brands'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
+import { Route as AdminMessageRouteImport } from './routes/admin.message'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminScentNotesRouteImport } from './routes/admin.scent-notes'
 import { Route as AdminSellersRouteImport } from './routes/admin.sellers'
@@ -142,6 +143,11 @@ const AdminBrandsRoute = AdminBrandsRouteImport.update({
 const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
   id: '/categories',
   path: '/categories',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMessageRoute = AdminMessageRouteImport.update({
+  id: '/message',
+  path: '/message',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminOrdersRoute = AdminOrdersRouteImport.update({
@@ -296,6 +302,7 @@ export interface FileRoutesByFullPath {
   '/admin/bottle-types': typeof AdminBottleTypesRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/message': typeof AdminMessageRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/scent-notes': typeof AdminScentNotesRoute
   '/admin/sellers': typeof AdminSellersRoute
@@ -340,6 +347,7 @@ export interface FileRoutesByTo {
   '/admin/bottle-types': typeof AdminBottleTypesRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/message': typeof AdminMessageRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/scent-notes': typeof AdminScentNotesRoute
   '/admin/sellers': typeof AdminSellersRoute
@@ -387,6 +395,7 @@ export interface FileRoutesById {
   '/admin/bottle-types': typeof AdminBottleTypesRoute
   '/admin/brands': typeof AdminBrandsRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/message': typeof AdminMessageRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/scent-notes': typeof AdminScentNotesRoute
   '/admin/sellers': typeof AdminSellersRoute
@@ -435,6 +444,7 @@ export interface FileRouteTypes {
     | '/admin/bottle-types'
     | '/admin/brands'
     | '/admin/categories'
+    | '/admin/message'
     | '/admin/orders'
     | '/admin/scent-notes'
     | '/admin/sellers'
@@ -479,6 +489,7 @@ export interface FileRouteTypes {
     | '/admin/bottle-types'
     | '/admin/brands'
     | '/admin/categories'
+    | '/admin/message'
     | '/admin/orders'
     | '/admin/scent-notes'
     | '/admin/sellers'
@@ -525,6 +536,7 @@ export interface FileRouteTypes {
     | '/admin/bottle-types'
     | '/admin/brands'
     | '/admin/categories'
+    | '/admin/message'
     | '/admin/orders'
     | '/admin/scent-notes'
     | '/admin/sellers'
@@ -703,6 +715,13 @@ declare module '@tanstack/react-router' {
       path: '/categories'
       fullPath: '/admin/categories'
       preLoaderRoute: typeof AdminCategoriesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/message': {
+      id: '/admin/message'
+      path: '/message'
+      fullPath: '/admin/message'
+      preLoaderRoute: typeof AdminMessageRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/orders': {
@@ -894,6 +913,7 @@ interface AdminRouteChildren {
   AdminBottleTypesRoute: typeof AdminBottleTypesRoute
   AdminBrandsRoute: typeof AdminBrandsRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
+  AdminMessageRoute: typeof AdminMessageRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
   AdminScentNotesRoute: typeof AdminScentNotesRoute
   AdminSellersRoute: typeof AdminSellersRoute
@@ -906,6 +926,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminBottleTypesRoute: AdminBottleTypesRoute,
   AdminBrandsRoute: AdminBrandsRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
+  AdminMessageRoute: AdminMessageRoute,
   AdminOrdersRoute: AdminOrdersRoute,
   AdminScentNotesRoute: AdminScentNotesRoute,
   AdminSellersRoute: AdminSellersRoute,

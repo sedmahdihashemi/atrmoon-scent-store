@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
-import { LayoutDashboard, Store, Users, ShoppingBag, Tag, Layers, Sparkles, Beaker, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, Store, Users, ShoppingBag, Tag, Layers, Sparkles, Beaker, ShieldCheck, Send } from "lucide-react";
 
 const nav: Array<{ to: string; label: string; Icon: any; exact?: boolean }> = [
   { to: "/admin", label: "نمای کلی", Icon: LayoutDashboard, exact: true },
@@ -12,6 +12,7 @@ const nav: Array<{ to: string; label: string; Icon: any; exact?: boolean }> = [
   { to: "/admin/categories", label: "دسته‌ها", Icon: Layers },
   { to: "/admin/scent-notes", label: "نُت‌ها", Icon: Sparkles },
   { to: "/admin/bottle-types", label: "بطری‌ها", Icon: Beaker },
+  { to: "/admin/message", label: "ارسال پیام", Icon: Send },
 ];
 
 export function AdminShell({ children }: { children: ReactNode }) {
